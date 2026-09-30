@@ -440,6 +440,18 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
 .sw { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; }
 .sw i { width: 16px; height: 16px; border-radius: 50%; box-shadow: 0 0 0 1px var(--stage-line); display: block; }
 
+/* ---------- Idle float: starts when scrolling stops, eases out when it resumes ---------- */
+@property --wave { syntax: '<number>'; inherits: false; initial-value: 0; }
+@property --amp { syntax: '<number>'; inherits: true; initial-value: 0; }
+body { --amp: 0; transition: --amp .5s var(--ease), background-color .5s var(--ease), color .5s var(--ease); }
+body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s var(--ease), color .5s var(--ease); }
+.fl { translate: 0 calc(var(--wave) * var(--amp) * var(--fa, 6px) * -1); }
+@media (prefers-reduced-motion: no-preference) {
+  .fl { animation: wave 2.8s ease-in-out infinite alternate; animation-delay: var(--fd, 0s); }
+}
+@keyframes wave { from { --wave: -1; } to { --wave: 1; } }
+@media (prefers-reduced-motion: reduce) { .fl { animation: none; translate: none; } }
+
 /* ---------- Toast ---------- */
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 60; transform: translate(-50%, 160%); opacity: 0; background: var(--ink); color: var(--bg); border-radius: 999px; padding: 10px 18px 10px 12px; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; transition: transform .5s var(--ease), opacity .5s var(--ease); box-shadow: var(--shadow); max-width: calc(100vw - 32px); }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
@@ -494,7 +506,7 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
 <a class="sr-only" href="#main">Skip to content</a>
 
 <!-- Giant wordmark: sits at the foot of the hero, shrinks into the header logo on scroll -->
-<a class="bigmark" id="bigmark" href="#top" aria-label="Oyster Therapeutics home"><svg class="lm" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(-1.5 1.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/><circle class="pearl" cx="62" cy="45.5" r="10"/></g></svg>Oyster</a>
+<a class="bigmark" id="bigmark" href="#top" aria-label="Oyster Therapeutics home"><svg class="lm" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(-1.5 1.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/><circle class="pearl fl" style="--fa:2.4px" cx="62" cy="45.5" r="10"/></g></svg>Oyster</a>
 
 <header class="head" id="head">
   <div class="wrap">
@@ -587,8 +599,6 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
           <g class="rbc" style="--y:78px;--x:420px;animation-delay:-7s"><ellipse class="rbc-o" rx="24" ry="10"/><ellipse class="rbc-i" rx="12" ry="4"/></g>
           <g class="rbc" style="--y:56px;--x:560px;animation-delay:-10s"><ellipse class="rbc-o" rx="22" ry="9"/><ellipse class="rbc-i" rx="11" ry="3.6"/></g>
           <g class="rbc" style="--y:92px;--x:40px;animation-delay:-4.5s"><ellipse class="rbc-o" rx="23" ry="9.5"/><ellipse class="rbc-i" rx="11.5" ry="3.8"/></g>
-          <text x="16" y="26" class="strong">Blood</text>
-          <text x="16" y="44" class="lbl-minor">Brain capillary</text>
 
           <!-- endothelial cells joined by tight junctions -->
           <rect class="endo" x="0" y="126" width="168" height="44" rx="12"/>
@@ -603,9 +613,6 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
             <circle cx="170" cy="137" r="2.6"/><circle cx="170" cy="148" r="2.6"/><circle cx="170" cy="159" r="2.6"/>
             <circle cx="330" cy="137" r="2.6"/><circle cx="330" cy="148" r="2.6"/><circle cx="330" cy="159" r="2.6"/>
             <circle cx="490" cy="137" r="2.6"/><circle cx="490" cy="148" r="2.6"/><circle cx="490" cy="159" r="2.6"/></g>
-          <text x="12" y="153" class="strong">Endothelial cell</text>
-          <path class="lead" d="M490 118 V128"/>
-          <text x="498" y="116" class="lbl-minor">Tight junction</text>
 
           <!-- basement membrane, pericyte, astrocyte end-feet -->
           <rect class="bm" x="0" y="172" width="640" height="3"/>
@@ -615,42 +622,36 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
           <rect class="astro" x="156" y="186" width="150" height="28" rx="14"/>
           <rect class="astro" x="320" y="186" width="148" height="28" rx="14"/>
           <rect class="astro" x="478" y="186" width="162" height="28" rx="14"/>
-          <text x="12" y="205" class="strong">Astrocyte end-feet</text>
 
           <!-- astrocyte -->
           <g class="astro-proc"><path d="M84 300 C70 262 50 236 44 214"/><path d="M84 300 C100 262 120 236 128 214"/><path d="M84 300 C130 280 180 240 210 214"/><path d="M84 300 C60 320 36 334 16 344"/><path d="M84 300 C110 330 130 350 150 372"/></g>
-          <circle class="astro-body" cx="84" cy="300" r="20"/>
-          <text x="112" y="322" class="lbl-minor">Astrocyte</text>
-          <text x="530" y="248" class="lbl-minor">Brain tissue</text>
+          <circle class="astro-body fl" style="--fa:2px;--fd:-1.8s" cx="84" cy="300" r="20"/>
 
           <!-- neuron -->
           <g class="dend"><path d="M318 350 C292 322 262 300 238 262"/><path d="M400 324 C398 292 392 264 380 238"/><path d="M392 268 C410 254 428 244 452 240"/><path d="M494 352 C532 322 566 302 608 292"/><path d="M468 520 C500 548 540 566 604 592"/></g>
           <path class="soma" d="M280 432 C280 358 336 324 400 324 C470 326 520 364 518 434 C516 504 460 536 400 534 C334 532 280 502 280 432 Z"/>
-          <circle class="nuc" cx="470" cy="392" r="32"/>
+          <circle class="nuc fl" style="--fa:1.5px;--fd:-2.7s" cx="470" cy="392" r="32"/>
           <circle class="nucl" cx="478" cy="400" r="8"/>
-          <text x="470" y="384" text-anchor="middle" class="lbl-minor">Nucleus</text>
-          <text x="530" y="470" class="strong">Neuron</text>
 
           <!-- proteasome -->
-          <g class="prot"><rect x="334" y="476" width="10" height="26" rx="4"/><rect x="347" y="471" width="11" height="36" rx="3"/><rect x="360" y="471" width="11" height="36" rx="3"/><rect x="373" y="471" width="11" height="36" rx="3"/><rect x="386" y="471" width="11" height="36" rx="3"/><rect x="399" y="476" width="10" height="26" rx="4"/></g>
+          <g class="prot fl" style="--fa:1.5px;--fd:-4s"><rect x="334" y="476" width="10" height="26" rx="4"/><rect x="347" y="471" width="11" height="36" rx="3"/><rect x="360" y="471" width="11" height="36" rx="3"/><rect x="373" y="471" width="11" height="36" rx="3"/><rect x="386" y="471" width="11" height="36" rx="3"/><rect x="399" y="476" width="10" height="26" rx="4"/></g>
           <text x="372" y="524" text-anchor="middle">Proteasome</text>
 
           <!-- E3 ligase -->
-          <path class="e3" d="M390 414 C398 402 416 402 422 414 C428 428 420 444 406 446 C392 448 384 436 390 414 Z"/>
+          <path class="e3 fl" style="--fa:2px;--fd:-.6s" d="M390 414 C398 402 416 402 422 414 C428 428 420 444 406 446 C392 448 384 436 390 414 Z"/>
           <text x="410" y="396" text-anchor="middle">E3 ligase</text>
 
           <!-- target protein with ubiquitin chain -->
-          <g id="tgtG">
+          <g id="tgtG" class="fl" style="--fa:2.5px;--fd:-2.2s">
             <path class="coil" d="M300 432 c2 -14 16 -18 22 -8 s-10 16 -2 20 s16 -4 12 -16 s-14 -10 -8 -18 s12 0 10 10"/>
             <g id="ubq"><circle cx="308" cy="452" r="5"/><circle cx="300" cy="461" r="5"/><circle cx="294" cy="472" r="5"/><circle cx="302" cy="482" r="5"/></g>
           </g>
           <text x="314" y="396" text-anchor="middle" id="tgtLbl">Target protein</text>
-          <text x="286" y="490" text-anchor="end" id="ubqLbl" opacity="0">Ubiquitin</text>
           <g id="frags" opacity="0"><circle cx="418" cy="486" r="3"/><circle cx="430" cy="496" r="2.5"/><circle cx="424" cy="478" r="2"/><circle cx="440" cy="488" r="2.8"/><circle cx="434" cy="504" r="2"/></g>
 
           <!-- the two SELFTAC halves -->
-          <g id="halfA"><line class="lk" x1="16" y1="0" x2="34" y2="0"/><circle class="ha" r="20"/><circle class="ink" r="5"/></g>
-          <g id="halfB"><line class="lk" x1="-34" y1="0" x2="-16" y2="0"/><rect class="hb" x="-18" y="-18" width="36" height="36" rx="9"/><rect class="ink" x="-5" y="-5" width="10" height="10" rx="2"/></g>
+          <g id="halfA" class="fl" style="--fa:3px;--fd:-1.2s"><line class="lk" x1="16" y1="0" x2="34" y2="0"/><circle class="ha" r="20"/><circle class="ink" r="5"/></g>
+          <g id="halfB" class="fl" style="--fa:3px;--fd:-3.1s"><line class="lk" x1="-34" y1="0" x2="-16" y2="0"/><rect class="hb" x="-18" y="-18" width="36" height="36" rx="9"/><rect class="ink" x="-5" y="-5" width="10" height="10" rx="2"/></g>
           <g id="lkMark" opacity="0"><circle r="9" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3"/></g>
           <text x="632" y="592" text-anchor="end" class="lbl-minor">Not to scale</text>
         </svg>
@@ -705,17 +706,17 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
       <div class="team-group" style="margin-top:56px">
         <span class="mono">Leadership</span>
         <div class="people">
-          <article class="person up"><div class="avatar"><span>RJ</span></div><div><h3>Robert Johnson</h3><span class="role">Chief Executive Officer</span></div><p>Previously CEO of Adrestia Therapeutics, acquired by Insmed in 2023.</p></article>
-          <article class="person up" style="--d:1"><div class="avatar"><span>HF</span></div><div><h3>Harry Finch, PhD</h3><span class="role">Founder &amp; Chief Scientific Officer</span></div><p>Medicinal chemist whose research founded the SELFTAC&reg; platform.</p></article>
+          <article class="person up"><div class="avatar fl" style="--fa:5px;--fd:-0.0s"><span>RJ</span></div><div><h3>Robert Johnson</h3><span class="role">Chief Executive Officer</span></div><p>Previously CEO of Adrestia Therapeutics, acquired by Insmed in 2023.</p></article>
+          <article class="person up" style="--d:1"><div class="avatar fl" style="--fa:5px;--fd:-0.9s"><span>HF</span></div><div><h3>Harry Finch, PhD</h3><span class="role">Founder &amp; Chief Scientific Officer</span></div><p>Medicinal chemist whose research founded the SELFTAC&reg; platform.</p></article>
         </div>
       </div>
       <div class="team-group">
         <span class="mono">Board of Directors</span>
         <div class="people">
-          <article class="person up"><div class="avatar"><span>CD</span></div><div><h3>Clive Dix</h3><span class="role">Chair</span></div></article>
-          <article class="person up" style="--d:1"><div class="avatar"><span>TC</span></div><div><h3>Tim Clackson</h3><span class="role">Board Director</span></div><p>More than three decades building oncology companies, including leading the R&amp;D behind three approved drugs.</p></article>
-          <article class="person up" style="--d:2"><div class="avatar"><span>MJ</span></div><div><h3>Magdalena Jonikas</h3><span class="role">Board Director</span></div></article>
-          <article class="person up" style="--d:3"><div class="avatar"><span>CF</span></div><div><h3>Craig Fox</h3><span class="role">Board Director</span></div></article>
+          <article class="person up"><div class="avatar fl" style="--fa:5px;--fd:-1.8s"><span>CD</span></div><div><h3>Clive Dix</h3><span class="role">Chair</span></div></article>
+          <article class="person up" style="--d:1"><div class="avatar fl" style="--fa:5px;--fd:-2.7s"><span>TC</span></div><div><h3>Tim Clackson</h3><span class="role">Board Director</span></div><p>More than three decades building oncology companies, including leading the R&amp;D behind three approved drugs.</p></article>
+          <article class="person up" style="--d:2"><div class="avatar fl" style="--fa:5px;--fd:-3.6s"><span>MJ</span></div><div><h3>Magdalena Jonikas</h3><span class="role">Board Director</span></div></article>
+          <article class="person up" style="--d:3"><div class="avatar fl" style="--fa:5px;--fd:-4.5s"><span>CF</span></div><div><h3>Craig Fox</h3><span class="role">Board Director</span></div></article>
         </div>
       </div>
     </div>
@@ -727,7 +728,7 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
       <div class="tag up">Investors</div>
       <div class="inv-grid">
         <div class="up">
-          <div class="num" id="count" data-to="25">&pound;25m</div>
+          <div class="num fl" style="--fa:6px;--fd:-1s" id="count" data-to="25">&pound;25m</div>
           <p class="body-l" style="margin-top:20px">Series A financing in 2022, led by Syncona alongside Oxford Science Enterprises.</p>
         </div>
         <ul class="inv-list up" style="--d:1">
@@ -752,17 +753,17 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
         </div>
       </div>
       <div class="track-x" id="trackX">
-        <article class="story">
+        <article class="story fl" style="--fa:6px;--fd:-0.0s">
           <span class="mono">13 May 2025</span>
           <h3>Industry veteran Tim Clackson joins the Board of Directors</h3>
           <a class="go" href="https://www.businesswire.com/news/home/20250513045918/en/Kesmalea-Therapeutics-Appoints-Industry-Veteran-Tim-Clackson-to-Board-of-Directors" target="_blank" rel="noopener"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring" cx="22" cy="22" r="20"/><circle class="draw" cx="22" cy="22" r="20"/><path class="chev" d="M19 15l7 7-7 7"/></svg><span>Read</span></a>
         </article>
-        <article class="story">
+        <article class="story fl" style="--fa:6px;--fd:-1.7s">
           <span class="mono">6 November 2024</span>
           <h3>Robert Johnson appointed CEO to lead a new class of oral, CNS-penetrant protein degraders</h3>
           <a class="go" href="https://kesmalea.com/kesmalea-therapeutics-appoints-robert-johnson-as-ceo-to-lead-development-of-new-class-of-orally-dosed-cns-penetrant-protein-degraders/" target="_blank" rel="noopener"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring" cx="22" cy="22" r="20"/><circle class="draw" cx="22" cy="22" r="20"/><path class="chev" d="M19 15l7 7-7 7"/></svg><span>Read</span></a>
         </article>
-        <article class="story">
+        <article class="story fl" style="--fa:6px;--fd:-3.4s">
           <span class="mono">2022</span>
           <h3>&pound;25m Series A, led by Syncona with Oxford Science Enterprises, to advance the SELFTAC&reg; platform</h3>
           <a class="go" href="#investors"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring" cx="22" cy="22" r="20"/><circle class="draw" cx="22" cy="22" r="20"/><path class="chev" d="M19 15l7 7-7 7"/></svg><span>Investors</span></a>
@@ -801,7 +802,7 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
       <p class="msg" id="signupMsg" role="status"></p>
     </form>
 
-    <div class="giant fit" aria-hidden="true"><svg class="lm" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(-1.5 1.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/><circle class="pearl" cx="62" cy="45.5" r="10"/></g></svg>Oyster</div>
+    <div class="giant fit" aria-hidden="true"><svg class="lm" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(-1.5 1.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/><circle class="pearl fl" style="--fa:2.4px" cx="62" cy="45.5" r="10"/></g></svg>Oyster</div>
     <div class="foot-base">
       <div class="swatches" id="swatches" aria-label="Current brand palette"></div>
       <span>&copy; 2026 Oyster Therapeutics. Formerly Kesmalea Therapeutics.</span>
@@ -929,7 +930,7 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
   var steps = document.querySelectorAll('.st-step'), progI = document.querySelectorAll('.st-prog i');
   var A = document.getElementById('halfA'), B = document.getElementById('halfB'), LK = document.getElementById('lkMark');
   var tgtG = document.getElementById('tgtG'), ubq = document.querySelectorAll('#ubq circle'), frags = document.getElementById('frags');
-  var tgtLbl = document.getElementById('tgtLbl'), ubqLbl = document.getElementById('ubqLbl');
+  var tgtLbl = document.getElementById('tgtLbl');
   var capT = document.getElementById('capT'), capS = document.getElementById('capS');
   var LABELS = [
     ['Conventional degrader', 'Too large to cross the endothelium'],
@@ -949,7 +950,7 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
     for (i = 0; i < L.length; i++) { if (goal <= L[i] || i === L.length - 1) { var k = L[i] ? Math.min(1, goal / L[i]) : 0; return [lerp(pts[i][0], pts[i + 1][0], k), lerp(pts[i][1], pts[i + 1][1], k)]; } goal -= L[i]; }
     return pts[pts.length - 1];
   }
-  var lastY = -1, lastW = 0, lastStep = -1;
+  var lastY = -1, lastW = 0, lastStep = -1, lastMove = 0, idle = false;
 
   function lerp(a, b, t) { return a + (b - a) * t; }
   function updateMark(y, vw, vh) {
@@ -989,7 +990,6 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
     LK.setAttribute('opacity', (s1 > 0 && s2 < .15 ? s1 * (1 - s2 / .15) : 0).toFixed(2));
     // ubiquitin chain grows one unit at a time, then the tagged target is fed into the proteasome
     ubq.forEach(function (c, i) { c.setAttribute('opacity', clamp(u * 4 - i, 0, 1).toFixed(2)); });
-    ubqLbl.setAttribute('opacity', (clamp(u * 2, 0, 1) * (1 - s4)).toFixed(2));
     var k = 1 - .8 * s4;
     tgtG.setAttribute('transform', 'translate(' + (lerp(0, 32, s4) + 312 * (1 - k)).toFixed(1) + ' ' + (lerp(0, 56, s4) + 440 * (1 - k)).toFixed(1) + ') scale(' + k.toFixed(3) + ')');
     tgtG.setAttribute('opacity', (1 - seg(p, .9, .95)).toFixed(2));
@@ -1011,7 +1011,9 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
     xpanel.style.setProperty('--e', ease(e).toFixed(3));
   }
   function frame() {
-    var y = window.scrollY, vw = window.innerWidth, vh = window.innerHeight;
+    var y = window.scrollY, vw = window.innerWidth, vh = window.innerHeight, now = performance.now();
+    if (y !== lastY) { lastMove = now; if (idle) { idle = false; body.classList.remove('idle'); } }
+    else if (!idle && now - lastMove > 350) { idle = true; body.classList.add('idle'); }
     if (y !== lastY || vw !== lastW) {
       if (vw !== lastW) { fitAll(); lastW = vw; }
       body.classList.toggle('on-hero', hero.getBoundingClientRect().bottom > 76);
