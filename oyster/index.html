@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%232B2230%27/%3E%3Cg transform=%27translate(9.5 10) scale(.82)%27 fill=%27%23EFE6E1%27%3E%3Cpath d=%27M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z%27/%3E%3Cpath transform=%27rotate(-24 12 53)%27 d=%27M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z%27/%3E%3Ccircle cx=%2762%27 cy=%2746%27 r=%2712%27 fill=%27%23C99BB0%27/%3E%3C/g%3E%3C/svg%3E">
 <!-- artifact:start -->
 <title>Oyster Therapeutics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,6 +51,8 @@
   --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
+  --rbc: #C4828B;
+  --pearl-mark: #C99BB0;
   --gutter: clamp(16px, 4vw, 48px);
   --maxw: 1320px;
   --ease: cubic-bezier(.16, 1, .3, 1);
@@ -57,6 +60,7 @@
 }
 /* ---------- Tidepool (Option H): light ---------- */
 :root[data-palette="tidepool"] {
+  --pearl-mark: #F2B84B;
   --bg: #EAF3EF;
   --surface: #F5FAF8;
   --surface-2: #D9EAE4;
@@ -238,6 +242,8 @@ body.menu-open .menu-sq i:nth-child(2) { transform: rotate(-45deg); }
   padding-top: env(safe-area-inset-top, 0px);
 }
 body.on-hero .bigmark, body.menu-open .bigmark { color: var(--stage-fg); }
+.lm { display: inline-block; width: .9em; height: .9em; vertical-align: -.06em; margin-right: .1em; fill: currentColor; overflow: visible; }
+.lm .pearl { fill: var(--pearl-mark); transition: fill .5s var(--ease); }
 .bigmark.hide { opacity: 0; pointer-events: none; }
 .bigmark { transition: color .5s var(--ease), opacity .4s var(--ease); }
 
@@ -292,7 +298,7 @@ body.menu-open .menu a.big { transform: translateY(0); transition-delay: calc(.2
 @keyframes wIn { to { opacity: 1; } }
 
 /* ---------- SELFTAC (pinned + scrubbed) ---------- */
-.selftac { position: relative; height: 420vh; }
+.selftac { position: relative; height: 520vh; }
 .pin { position: sticky; top: 0; height: 100svh; display: grid; grid-template-columns: 1fr 1.15fr; align-items: center; gap: clamp(24px, 5vw, 80px); overflow: hidden; }
 .st-copy { position: relative; min-height: 360px; }
 .st-copy h2 { font-size: clamp(32px, 3.6vw, 54px); max-width: 14ch; }
@@ -306,17 +312,40 @@ body.menu-open .menu a.big { transform: translateY(0); transition-delay: calc(.2
 .st-prog span i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(var(--f, 0)); }
 .st-art { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: clamp(12px, 2vw, 28px); box-shadow: var(--shadow); transition: background-color .5s var(--ease); }
 .st-art svg { width: 100%; height: auto; }
+.st-cap { display: flex; flex-direction: column; gap: 2px; margin: 4px 6px 12px; min-height: 44px; }
+.st-cap strong { font-size: 15px; }
+.st-cap span { font-size: 14px; color: var(--muted); }
 .dg text { font-family: var(--font-body); fill: var(--muted); font-size: 13px; font-weight: 500; }
 .dg .strong { fill: var(--ink); font-weight: 600; }
-.dg .cell { fill: var(--surface-2); stroke: var(--line); }
-.dg .cellzone { fill: color-mix(in srgb, var(--accent-2) 16%, transparent); stroke: var(--accent-2); stroke-width: 1.2; stroke-dasharray: 4 5; }
-.dg .ha { fill: var(--accent); }
-.dg .hb { fill: var(--accent-2); }
+.dg .lumen { fill: color-mix(in srgb, var(--rbc) 14%, var(--surface)); }
+.dg .rbc-o { fill: var(--rbc); }
+.dg .rbc-i { fill: color-mix(in srgb, var(--rbc) 70%, #3a0f16); opacity: .45; }
+.dg .rbc { transform: translate(var(--x), var(--y)); }
+@media (prefers-reduced-motion: no-preference) { .dg .rbc { animation: flow 12s linear infinite; } }
+@keyframes flow { from { transform: translate(-60px, var(--y)); } to { transform: translate(700px, var(--y)); } }
+.dg .endo { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 1; }
+.dg .endo-n { fill: color-mix(in srgb, var(--ink) 22%, var(--surface-2)); }
+.dg .tj rect, .dg .tj circle { fill: var(--ink); }
+.dg .tj rect { opacity: .55; }
+.dg .lead { stroke: var(--muted); stroke-width: 1; fill: none; stroke-dasharray: 2 3; }
+.dg .bm { fill: var(--accent-2); }
+.dg .peri { fill: color-mix(in srgb, var(--accent-2) 45%, var(--surface)); stroke: var(--accent-2); }
+.dg .astro { fill: color-mix(in srgb, var(--accent-2) 22%, var(--surface)); stroke: color-mix(in srgb, var(--accent-2) 70%, transparent); }
+.dg .astro-proc path { fill: none; stroke: color-mix(in srgb, var(--accent-2) 55%, var(--surface)); stroke-width: 6; stroke-linecap: round; }
+.dg .astro-body { fill: color-mix(in srgb, var(--accent-2) 40%, var(--surface)); stroke: var(--accent-2); stroke-width: 1.5; }
+.dg .dend path { fill: none; stroke: color-mix(in srgb, var(--accent) 38%, var(--surface)); stroke-width: 9; stroke-linecap: round; }
+.dg .soma { fill: color-mix(in srgb, var(--accent) 14%, var(--surface)); stroke: color-mix(in srgb, var(--accent) 70%, var(--ink)); stroke-width: 1.5; }
+.dg .nuc { fill: color-mix(in srgb, var(--ink) 8%, var(--surface)); stroke: color-mix(in srgb, var(--ink) 35%, transparent); }
+.dg .nucl { fill: color-mix(in srgb, var(--ink) 22%, var(--surface)); }
+.dg .prot rect { fill: color-mix(in srgb, var(--ink) 55%, var(--surface)); }
+.dg .e3 { fill: color-mix(in srgb, var(--accent-2) 55%, var(--surface)); stroke: var(--accent-2); stroke-width: 1.5; }
+.dg .coil { fill: none; stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.dg #ubq circle { fill: var(--accent-ink); stroke: var(--surface); stroke-width: 1.2; }
+.dg #frags circle { fill: var(--ink); }
+.dg .ha { fill: var(--accent); stroke: color-mix(in srgb, var(--accent) 60%, var(--ink)); stroke-width: 1.5; }
+.dg .hb { fill: var(--accent-2); stroke: color-mix(in srgb, var(--accent-2) 60%, var(--ink)); stroke-width: 1.5; }
 .dg .lk { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; fill: none; }
 .dg .ink { fill: var(--ink); }
-.dg .tgt { fill: color-mix(in srgb, var(--accent) 45%, var(--surface)); stroke: var(--accent); stroke-width: 1.5; }
-.dg .e3 { fill: color-mix(in srgb, var(--accent-2) 45%, var(--surface)); stroke: var(--accent-2); stroke-width: 1.5; }
-.dg .frag { fill: var(--accent); }
 
 /* ---------- Expanding "Why Oyster" panel ---------- */
 .expand { padding-block: clamp(40px, 6vw, 80px); }
@@ -431,7 +460,7 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
-  .selftac { height: 440vh; }
+  .selftac { height: 540vh; }
   .pin { grid-template-columns: 1fr; align-content: center; gap: 12px; padding-top: 76px; }
   .st-copy { min-height: 0; order: 2; }
   .st-copy h2 { display: none; }
@@ -439,7 +468,9 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
   .st-steps { margin-top: 8px; min-height: 170px; }
   .st-art { order: 1; padding: 10px; border-radius: 20px; }
   .st-art svg { max-height: 42svh; margin-inline: auto; width: auto; }
-  .dg text { font-size: 19px; }
+  .dg text { font-size: 17px; }
+  .dg .lbl-minor { display: none; }
+  .st-cap { display: none; }
   .pipe .head-row { display: none; }
   .pipe-row { grid-template-columns: 1fr; gap: 10px; }
   .stage-m { display: block; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
@@ -463,7 +494,7 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
 <a class="sr-only" href="#main">Skip to content</a>
 
 <!-- Giant wordmark: sits at the foot of the hero, shrinks into the header logo on scroll -->
-<a class="bigmark" id="bigmark" href="#top" aria-label="Oyster Therapeutics home">Oyster</a>
+<a class="bigmark" id="bigmark" href="#top" aria-label="Oyster Therapeutics home"><svg class="lm" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(-1.5 1.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/><circle class="pearl" cx="62" cy="45.5" r="10"/></g></svg>Oyster</a>
 
 <header class="head" id="head">
   <div class="wrap">
@@ -537,57 +568,91 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
         <div class="tag">Approach</div>
         <h2>Two small molecules. One degrader, assembled where it is needed.</h2>
         <div class="st-steps" aria-live="polite">
-          <div class="st-step on" data-s="0"><h3>The size problem</h3><p>Bifunctional degraders are versatile and can be designed rationally, but their large size gives poor drug-like properties.</p></div>
-          <div class="st-step" data-s="1"><h3>A reversible linker</h3><p>SELFTAC&reg; places a reversible linker between the two halves, turning one large degrader into two small molecules.</p></div>
-          <div class="st-step" data-s="2"><h3>Small enough to travel</h3><p>Small molecules are far easier to give orally, and can cross the blood-brain barrier that protects the central nervous system.</p></div>
-          <div class="st-step" data-s="3"><h3>Self-assembly at the target</h3><p>Inside the cell the two halves recombine into the full degrader, which tags the disease-causing protein for removal.</p></div>
+          <div class="st-step on"><h3>The size problem</h3><p>Bifunctional degraders are large molecules. Most cannot be absorbed from the gut or pass into the brain.</p></div>
+          <div class="st-step"><h3>A reversible linker</h3><p>SELFTAC&reg; places a reversible linker between the two halves, turning one large degrader into two small molecules.</p></div>
+          <div class="st-step"><h3>Through the blood-brain barrier</h3><p>Tight junctions seal the gaps between the endothelial cells of brain capillaries, so a drug has to pass through the cells themselves. Small molecules can.</p></div>
+          <div class="st-step"><h3>Self-assembly in the neuron</h3><p>Inside the cell the two halves recombine into the full degrader. One end holds the target protein, the other an E3 ligase.</p></div>
+          <div class="st-step"><h3>Tagged and cleared</h3><p>The E3 ligase tags the target with ubiquitin and the proteasome breaks it down. The degrader is released to act again.</p></div>
         </div>
-        <div class="st-prog" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>
+        <div class="st-prog" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>
       </div>
       <div class="st-art">
-        <svg class="dg" id="dg" viewBox="0 0 600 440" role="img" aria-labelledby="dgT">
-          <title id="dgT">A large degrader splits into two small molecules, crosses the blood-brain barrier, and reassembles inside the cell to remove its target protein</title>
-          <text x="24" y="34" class="strong" id="dgLabel">Conventional bifunctional degrader</text>
-          <text x="24" y="54" id="dgSub">Too large for oral dosing or brain entry</text>
+        <div class="st-cap"><strong id="capT">Conventional degrader</strong><span id="capS">Too large to cross the endothelium</span></div>
+        <svg class="dg" id="dg" viewBox="0 0 640 600" role="img" aria-labelledby="dgT">
+          <title id="dgT">A SELFTAC degrader splits into two small molecules in the blood, passes through the endothelial cells of the blood-brain barrier, and reassembles inside a neuron, where the target protein is tagged with ubiquitin and broken down by the proteasome. Not to scale.</title>
 
-          <!-- barrier -->
-          <rect class="cell" x="24" y="196" width="196" height="40" rx="20"/>
-          <rect class="cell" x="250" y="196" width="100" height="40" rx="20"/>
-          <rect class="cell" x="380" y="196" width="196" height="40" rx="20"/>
-          <text x="24" y="258" class="strong">Blood-brain barrier</text>
+          <!-- capillary lumen with flowing red blood cells -->
+          <rect class="lumen" x="0" y="0" width="640" height="124"/>
+          <g class="rbc" style="--y:40px;--x:120px;animation-delay:-2s"><ellipse class="rbc-o" rx="24" ry="10"/><ellipse class="rbc-i" rx="12" ry="4"/></g>
+          <g class="rbc" style="--y:78px;--x:420px;animation-delay:-7s"><ellipse class="rbc-o" rx="24" ry="10"/><ellipse class="rbc-i" rx="12" ry="4"/></g>
+          <g class="rbc" style="--y:56px;--x:560px;animation-delay:-10s"><ellipse class="rbc-o" rx="22" ry="9"/><ellipse class="rbc-i" rx="11" ry="3.6"/></g>
+          <g class="rbc" style="--y:92px;--x:40px;animation-delay:-4.5s"><ellipse class="rbc-o" rx="23" ry="9.5"/><ellipse class="rbc-i" rx="11.5" ry="3.8"/></g>
+          <text x="16" y="26" class="strong">Blood</text>
+          <text x="16" y="44" class="lbl-minor">Brain capillary</text>
 
-          <!-- cell interior -->
-          <rect class="cellzone" x="120" y="290" width="360" height="130" rx="65"/>
-          <text x="404" y="316" id="cellLbl">Target cell</text>
+          <!-- endothelial cells joined by tight junctions -->
+          <rect class="endo" x="0" y="126" width="168" height="44" rx="12"/>
+          <rect class="endo" x="172" y="126" width="156" height="44" rx="12"/>
+          <rect class="endo" x="332" y="126" width="156" height="44" rx="12"/>
+          <rect class="endo" x="492" y="126" width="148" height="44" rx="12"/>
+          <ellipse class="endo-n" cx="130" cy="148" rx="24" ry="7"/>
+          <ellipse class="endo-n" cx="280" cy="150" rx="24" ry="7"/>
+          <ellipse class="endo-n" cx="448" cy="146" rx="22" ry="7"/>
+          <ellipse class="endo-n" cx="580" cy="150" rx="22" ry="7"/>
+          <g class="tj"><rect x="168" y="130" width="4" height="36" rx="2"/><rect x="328" y="130" width="4" height="36" rx="2"/><rect x="488" y="130" width="4" height="36" rx="2"/>
+            <circle cx="170" cy="137" r="2.6"/><circle cx="170" cy="148" r="2.6"/><circle cx="170" cy="159" r="2.6"/>
+            <circle cx="330" cy="137" r="2.6"/><circle cx="330" cy="148" r="2.6"/><circle cx="330" cy="159" r="2.6"/>
+            <circle cx="490" cy="137" r="2.6"/><circle cx="490" cy="148" r="2.6"/><circle cx="490" cy="159" r="2.6"/></g>
+          <text x="12" y="153" class="strong">Endothelial cell</text>
+          <path class="lead" d="M490 118 V128"/>
+          <text x="498" y="116" class="lbl-minor">Tight junction</text>
 
-          <!-- target protein + E3 ligase (appear at the end) -->
-          <g id="tgtG" opacity="0">
-            <path class="tgt" id="tgt" d="M188 344c0-18 16-30 32-26 12 3 20 14 18 27-2 15-16 24-30 21-12-2-20-11-20-22z"/>
-            <text x="164" y="392">Target protein</text>
-          </g>
-          <g id="e3G" opacity="0">
-            <rect class="e3" x="336" y="322" width="54" height="44" rx="14"/>
-            <text x="332" y="392">E3 ligase</text>
-          </g>
-          <g id="frags" opacity="0">
-            <circle class="frag" cx="202" cy="330" r="4"/><circle class="frag" cx="222" cy="352" r="3"/><circle class="frag" cx="190" cy="356" r="3.5"/><circle class="frag" cx="214" cy="326" r="2.5"/>
-          </g>
+          <!-- basement membrane, pericyte, astrocyte end-feet -->
+          <rect class="bm" x="0" y="172" width="640" height="3"/>
+          <ellipse class="peri" cx="236" cy="181" rx="48" ry="6"/>
+          <ellipse class="endo-n" cx="236" cy="181" rx="12" ry="3.5"/>
+          <rect class="astro" x="0" y="186" width="148" height="28" rx="14"/>
+          <rect class="astro" x="156" y="186" width="150" height="28" rx="14"/>
+          <rect class="astro" x="320" y="186" width="148" height="28" rx="14"/>
+          <rect class="astro" x="478" y="186" width="162" height="28" rx="14"/>
+          <text x="12" y="205" class="strong">Astrocyte end-feet</text>
 
-          <!-- the two halves -->
-          <g id="halfA">
-            <line class="lk" x1="16" y1="0" x2="34" y2="0"/>
-            <circle class="ha" r="20"/>
-            <circle class="ink" r="5"/>
+          <!-- astrocyte -->
+          <g class="astro-proc"><path d="M84 300 C70 262 50 236 44 214"/><path d="M84 300 C100 262 120 236 128 214"/><path d="M84 300 C130 280 180 240 210 214"/><path d="M84 300 C60 320 36 334 16 344"/><path d="M84 300 C110 330 130 350 150 372"/></g>
+          <circle class="astro-body" cx="84" cy="300" r="20"/>
+          <text x="112" y="322" class="lbl-minor">Astrocyte</text>
+          <text x="530" y="248" class="lbl-minor">Brain tissue</text>
+
+          <!-- neuron -->
+          <g class="dend"><path d="M318 350 C292 322 262 300 238 262"/><path d="M400 324 C398 292 392 264 380 238"/><path d="M392 268 C410 254 428 244 452 240"/><path d="M494 352 C532 322 566 302 608 292"/><path d="M468 520 C500 548 540 566 604 592"/></g>
+          <path class="soma" d="M280 432 C280 358 336 324 400 324 C470 326 520 364 518 434 C516 504 460 536 400 534 C334 532 280 502 280 432 Z"/>
+          <circle class="nuc" cx="470" cy="392" r="32"/>
+          <circle class="nucl" cx="478" cy="400" r="8"/>
+          <text x="470" y="384" text-anchor="middle" class="lbl-minor">Nucleus</text>
+          <text x="530" y="470" class="strong">Neuron</text>
+
+          <!-- proteasome -->
+          <g class="prot"><rect x="334" y="476" width="10" height="26" rx="4"/><rect x="347" y="471" width="11" height="36" rx="3"/><rect x="360" y="471" width="11" height="36" rx="3"/><rect x="373" y="471" width="11" height="36" rx="3"/><rect x="386" y="471" width="11" height="36" rx="3"/><rect x="399" y="476" width="10" height="26" rx="4"/></g>
+          <text x="372" y="524" text-anchor="middle">Proteasome</text>
+
+          <!-- E3 ligase -->
+          <path class="e3" d="M390 414 C398 402 416 402 422 414 C428 428 420 444 406 446 C392 448 384 436 390 414 Z"/>
+          <text x="410" y="396" text-anchor="middle">E3 ligase</text>
+
+          <!-- target protein with ubiquitin chain -->
+          <g id="tgtG">
+            <path class="coil" d="M300 432 c2 -14 16 -18 22 -8 s-10 16 -2 20 s16 -4 12 -16 s-14 -10 -8 -18 s12 0 10 10"/>
+            <g id="ubq"><circle cx="308" cy="452" r="5"/><circle cx="300" cy="461" r="5"/><circle cx="294" cy="472" r="5"/><circle cx="302" cy="482" r="5"/></g>
           </g>
-          <g id="halfB">
-            <line class="lk" x1="-34" y1="0" x2="-16" y2="0"/>
-            <rect class="hb" x="-18" y="-18" width="36" height="36" rx="9"/>
-            <rect class="ink" x="-5" y="-5" width="10" height="10" rx="2"/>
-          </g>
-          <!-- reversible linker marker -->
-          <g id="lkMark" opacity="0">
-            <circle cx="0" cy="0" r="9" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3"/>
-          </g>
+          <text x="314" y="396" text-anchor="middle" id="tgtLbl">Target protein</text>
+          <text x="286" y="490" text-anchor="end" id="ubqLbl" opacity="0">Ubiquitin</text>
+          <g id="frags" opacity="0"><circle cx="418" cy="486" r="3"/><circle cx="430" cy="496" r="2.5"/><circle cx="424" cy="478" r="2"/><circle cx="440" cy="488" r="2.8"/><circle cx="434" cy="504" r="2"/></g>
+
+          <!-- the two SELFTAC halves -->
+          <g id="halfA"><line class="lk" x1="16" y1="0" x2="34" y2="0"/><circle class="ha" r="20"/><circle class="ink" r="5"/></g>
+          <g id="halfB"><line class="lk" x1="-34" y1="0" x2="-16" y2="0"/><rect class="hb" x="-18" y="-18" width="36" height="36" rx="9"/><rect class="ink" x="-5" y="-5" width="10" height="10" rx="2"/></g>
+          <g id="lkMark" opacity="0"><circle r="9" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3"/></g>
+          <text x="632" y="592" text-anchor="end" class="lbl-minor">Not to scale</text>
         </svg>
       </div>
     </div>
@@ -736,7 +801,7 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
       <p class="msg" id="signupMsg" role="status"></p>
     </form>
 
-    <div class="giant fit" aria-hidden="true">Oyster</div>
+    <div class="giant fit" aria-hidden="true"><svg class="lm" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(-1.5 1.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/><circle class="pearl" cx="62" cy="45.5" r="10"/></g></svg>Oyster</div>
     <div class="foot-base">
       <div class="swatches" id="swatches" aria-label="Current brand palette"></div>
       <span>&copy; 2026 Oyster Therapeutics. Formerly Kesmalea Therapeutics.</span>
@@ -863,14 +928,27 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
   var xpanel = document.getElementById('xpanel');
   var steps = document.querySelectorAll('.st-step'), progI = document.querySelectorAll('.st-prog i');
   var A = document.getElementById('halfA'), B = document.getElementById('halfB'), LK = document.getElementById('lkMark');
-  var tgtG = document.getElementById('tgtG'), e3G = document.getElementById('e3G'), frags = document.getElementById('frags'), tgt = document.getElementById('tgt');
-  var dgLabel = document.getElementById('dgLabel'), dgSub = document.getElementById('dgSub');
+  var tgtG = document.getElementById('tgtG'), ubq = document.querySelectorAll('#ubq circle'), frags = document.getElementById('frags');
+  var tgtLbl = document.getElementById('tgtLbl'), ubqLbl = document.getElementById('ubqLbl');
+  var capT = document.getElementById('capT'), capS = document.getElementById('capS');
   var LABELS = [
-    ['Conventional bifunctional degrader', 'Too large for oral dosing or brain entry'],
-    ['SELFTAC®: split by a reversible linker', 'Two small molecules instead of one large one'],
-    ['Crossing the barrier', 'Each half is small enough to pass'],
-    ['Self-assembled degrader', 'Brings the target to the E3 ligase for removal']
+    ['Conventional degrader', 'Too large to cross the endothelium'],
+    ['SELFTAC\u00AE molecule', 'Split into two halves by a reversible linker'],
+    ['Crossing the blood-brain barrier', 'Through the endothelial cells, not between them'],
+    ['Degrader assembled', 'Target protein and E3 ligase brought together'],
+    ['Ubiquitin tagging and degradation', 'The proteasome breaks the target down']
   ];
+  var BOUNDS = [[0, .2], [.2, .36], [.36, .62], [.62, .76], [.76, 1]];
+  // routes through the barrier (viewBox units): lumen -> endothelial cell interior -> end-foot cleft -> neuron
+  var PATH_A = [[262, 64], [250, 148], [250, 176], [313, 196], [313, 240], [322, 300], [334, 392]];
+  var PATH_B = [[366, 64], [410, 148], [410, 176], [473, 196], [470, 252], [440, 318], [396, 380]];
+  function along(pts, t) {
+    var L = [], tot = 0, i;
+    for (i = 1; i < pts.length; i++) { var d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); L.push(d); tot += d; }
+    var goal = t * tot;
+    for (i = 0; i < L.length; i++) { if (goal <= L[i] || i === L.length - 1) { var k = L[i] ? Math.min(1, goal / L[i]) : 0; return [lerp(pts[i][0], pts[i + 1][0], k), lerp(pts[i][1], pts[i + 1][1], k)]; } goal -= L[i]; }
+    return pts[pts.length - 1];
+  }
   var lastY = -1, lastW = 0, lastStep = -1;
 
   function lerp(a, b, t) { return a + (b - a) * t; }
@@ -894,31 +972,37 @@ footer { background: var(--stage-bg); color: var(--stage-fg); padding-block: cla
     var r = selftac.getBoundingClientRect();
     if (r.bottom < 0 || r.top > vh) return;
     var p = clamp(-r.top / (r.height - vh), 0, 1);
-    var s1 = seg(p, .12, .3), s2 = seg(p, .38, .6), s3 = seg(p, .68, .86), s4 = seg(p, .86, .98);
-    // positions: joined above the barrier -> split -> through gaps -> rejoined in the cell
-    var ax = lerp(lerp(lerp(266, 206, s1), 235, s2), 262, s3), ay = lerp(lerp(118, 118, s1), 262, s2);
-    ay = lerp(ay, 344, s3);
-    var bx = lerp(lerp(lerp(334, 394, s1), 365, s2), 316, s3), by = lerp(lerp(118, 118, s1), 262, s2);
-    by = lerp(by, 344, s3);
-    var sc = lerp(1.25, .9, s1);
-    A.setAttribute('transform', 'translate(' + ax + ' ' + ay + ') scale(' + sc + ')');
-    B.setAttribute('transform', 'translate(' + bx + ' ' + by + ') scale(' + sc + ')');
-    LK.setAttribute('transform', 'translate(' + ((ax + bx) / 2) + ' ' + ((ay + by) / 2) + ')');
-    LK.setAttribute('opacity', (s1 > 0 && s3 < 1 ? Math.min(s1, 1 - s2) : 0).toFixed(2));
-    tgtG.setAttribute('opacity', seg(p, .7, .85).toFixed(2));
-    e3G.setAttribute('opacity', seg(p, .7, .85).toFixed(2));
-    tgt.setAttribute('transform', 'translate(' + (214 * s4 * .9) + ' ' + (344 * s4 * .9) + ') scale(' + (1 - s4 * .9) + ')');
-    tgt.style.opacity = String(1 - s4);
-    frags.setAttribute('opacity', (s4 > .3 ? Math.min(1, (s4 - .3) * 2) : 0).toFixed(2));
-    frags.setAttribute('transform', 'translate(' + (-26 * s4) + ' 0)');
-    var step = p < .3 ? 0 : p < .62 ? 1 : p < .86 ? 2 : 3;
+    var s0 = clamp((p - .03) / .14, 0, 1), s1 = seg(p, .22, .33), s2 = seg(p, .39, .6), s3 = seg(p, .64, .74);
+    var u = clamp((p - .78) / .08, 0, 1), s4 = seg(p, .87, .95), s5 = seg(p, .92, 1);
+    var ax, ay, bx, by, sc;
+    if (s2 <= 0) {
+      // joined degrader bumps against the endothelium, then splits in the blood
+      var bump = Math.sin(Math.PI * s0) * 34 * (1 - s1);
+      ax = lerp(292, 262, s1); bx = lerp(326, 366, s1); ay = by = 64 + bump; sc = lerp(1.15, .8, s1);
+    } else {
+      var pa = along(PATH_A, s2), pb = along(PATH_B, s2);
+      ax = lerp(pa[0], 344, s3); ay = lerp(pa[1], 428, s3); bx = lerp(pb[0], 374, s3); by = lerp(pb[1], 428, s3); sc = .8;
+    }
+    A.setAttribute('transform', 'translate(' + ax.toFixed(1) + ' ' + ay.toFixed(1) + ') scale(' + sc.toFixed(3) + ')');
+    B.setAttribute('transform', 'translate(' + bx.toFixed(1) + ' ' + by.toFixed(1) + ') scale(' + sc.toFixed(3) + ')');
+    LK.setAttribute('transform', 'translate(' + ((ax + bx) / 2).toFixed(1) + ' ' + ((ay + by) / 2).toFixed(1) + ')');
+    LK.setAttribute('opacity', (s1 > 0 && s2 < .15 ? s1 * (1 - s2 / .15) : 0).toFixed(2));
+    // ubiquitin chain grows one unit at a time, then the tagged target is fed into the proteasome
+    ubq.forEach(function (c, i) { c.setAttribute('opacity', clamp(u * 4 - i, 0, 1).toFixed(2)); });
+    ubqLbl.setAttribute('opacity', (clamp(u * 2, 0, 1) * (1 - s4)).toFixed(2));
+    var k = 1 - .8 * s4;
+    tgtG.setAttribute('transform', 'translate(' + (lerp(0, 32, s4) + 312 * (1 - k)).toFixed(1) + ' ' + (lerp(0, 56, s4) + 440 * (1 - k)).toFixed(1) + ') scale(' + k.toFixed(3) + ')');
+    tgtG.setAttribute('opacity', (1 - seg(p, .9, .95)).toFixed(2));
+    tgtLbl.setAttribute('opacity', (1 - s4).toFixed(2));
+    frags.setAttribute('opacity', s5.toFixed(2));
+    frags.setAttribute('transform', 'translate(' + (s5 * 18).toFixed(1) + ' 0)');
+    var step = 0; BOUNDS.forEach(function (bd, i) { if (p >= bd[0]) step = i; });
     if (step !== lastStep) {
       steps.forEach(function (el, i) { el.classList.toggle('on', i === step); });
-      dgLabel.textContent = LABELS[step][0]; dgSub.textContent = LABELS[step][1];
+      capT.textContent = LABELS[step][0]; capS.textContent = LABELS[step][1];
       lastStep = step;
     }
-    var bounds = [[0, .3], [.3, .62], [.62, .86], [.86, 1]];
-    progI.forEach(function (el, i) { el.style.setProperty('--f', clamp((p - bounds[i][0]) / (bounds[i][1] - bounds[i][0]), 0, 1).toFixed(3)); });
+    progI.forEach(function (el, i) { el.style.setProperty('--f', clamp((p - BOUNDS[i][0]) / (BOUNDS[i][1] - BOUNDS[i][0]), 0, 1).toFixed(3)); });
   }
   function updateExpand(vh) {
     var r = xpanel.getBoundingClientRect();

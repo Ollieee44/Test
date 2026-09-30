@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- artifact:start -->
+<title>Oyster Brand Mark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: a brand-guidelines sheet. Page chrome follows the viewer's theme; the specimen
+   panels use the literal palette colours from the brand audit, since they are the subject. */
+:root {
+  --bg: #F3EEEB; --surface: #FBF8F6; --ink: #241D28; --muted: #6A5E6C; --line: rgba(36, 29, 40, .13);
+  --accent: #8C5572;
+  --nacre-bg: #EFE6E1; --nacre-ink: #2B2230; --nacre-rose: #C99BB0; --nacre-lilac: #B8A7C9;
+  --tide-bg: #0F4C4A; --tide-light: #EAF3EF; --tide-mint: #7FC4B0; --tide-sun: #F2B84B;
+  --serif: "Newsreader", Georgia, serif; --sans: "Archivo", "Helvetica Neue", Arial, sans-serif; --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #17131A; --surface: #211C25; --ink: #EFE6E1; --muted: #B3A6B4; --line: rgba(239, 230, 225, .13); --accent: #D9AFC2; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #17131A; --surface: #211C25; --ink: #EFE6E1; --muted: #B3A6B4; --line: rgba(239, 230, 225, .13); --accent: #D9AFC2; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 48px); }
+h1, h2 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.015em; line-height: 1.05; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.mono { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+section { padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
+section h2 { font-size: clamp(30px, 3.4vw, 46px); margin-bottom: 14px; }
+section > .wrap > p.lead { color: var(--muted); max-width: 60ch; margin-bottom: 40px; }
+svg.m { display: block; }
+
+header.top { padding-block: clamp(48px, 7vw, 88px) clamp(40px, 5vw, 64px); }
+header.top h1 { font-size: clamp(44px, 6vw, 84px); margin-top: 14px; }
+header.top p { margin-top: 20px; font-size: clamp(18px, 1.6vw, 21px); color: var(--muted); max-width: 52ch; }
+
+.hero { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.panel { border-radius: 24px; padding: clamp(28px, 4vw, 56px); display: flex; flex-direction: column; justify-content: space-between; gap: 40px; min-height: 460px; min-width: 0; }
+.panel .mono { color: inherit; opacity: .7; }
+.panel.nacre { background: var(--nacre-bg); color: var(--nacre-ink); }
+.panel.tide { background: var(--tide-bg); color: var(--tide-light); }
+.panel .big { width: min(300px, 70%); margin-inline: auto; }
+.lock { display: flex; align-items: center; gap: .28em; line-height: 1; white-space: nowrap; }
+.lock svg { width: 1.02em; height: 1.02em; flex: none; }
+.lock .word { display: flex; flex-direction: column; }
+.lock .word small { font-family: var(--mono); font-size: .17em; letter-spacing: .32em; text-transform: uppercase; margin-top: .45em; opacity: .75; font-weight: 500; }
+.lock.serif { font-family: var(--serif); font-weight: 500; letter-spacing: -0.01em; }
+.lock.sans { font-family: var(--sans); font-weight: 700; letter-spacing: -0.035em; }
+.panel .lock { font-size: clamp(40px, 5vw, 64px); }
+
+.idea { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+.idea svg { width: 100%; height: auto; }
+.idea text { font-family: var(--sans); font-size: 5px; fill: var(--ink); font-weight: 600; }
+.idea text.sub { fill: var(--muted); font-weight: 400; font-size: 4.2px; }
+.points { display: grid; gap: 28px; }
+.points > div { display: grid; grid-template-columns: 44px 1fr; gap: 16px; align-items: start; }
+.points .dot { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); font-family: var(--mono); font-size: 13px; }
+.points h3 { margin: 0 0 4px; font-size: 18px; }
+.points p { color: var(--muted); }
+
+.lockups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.tile { border-radius: 20px; padding: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; min-height: 240px; min-width: 0; overflow: hidden; }
+.tile .cap { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: .7; align-self: flex-start; }
+.stack { display: flex; flex-direction: column; align-items: center; gap: .18em; line-height: 1; }
+.stack svg { width: 1.1em; height: 1.1em; }
+.stack small { font-family: var(--mono); font-size: .16em; letter-spacing: .34em; text-transform: uppercase; opacity: .75; margin-top: .35em; font-weight: 500; }
+
+.colours { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.colours .tile { min-height: 220px; }
+.colours svg { width: 96px; height: 96px; }
+
+.scale { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.scale .tile { flex-direction: row; flex-wrap: wrap; align-items: flex-end; justify-content: flex-start; gap: 28px; }
+.scale .cap { width: 100%; }
+.sz { display: flex; flex-direction: column; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; }
+.app { border-radius: 22%; }
+
+.rules { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rules .tile { background: var(--surface); border: 1px solid var(--line); align-items: flex-start; justify-content: flex-start; }
+.rules h3 { margin: 0; font-size: 18px; }
+.rules p { color: var(--muted); }
+.clear { width: 100%; display: grid; place-items: center; padding: 12px 0; }
+
+.alts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.alts .tile { background: var(--surface); border: 1px solid var(--line); align-items: flex-start; }
+.alts svg { width: 120px; height: 120px; align-self: center; }
+.alts h3 { margin: 0; font-size: 18px; }
+.alts p { color: var(--muted); font-size: 15px; }
+.chosen { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); }
+
+.files { font-family: var(--mono); font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 24px; overflow-x: auto; line-height: 1.9; }
+footer { padding-block: 40px 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel .big .pearl { animation: rise 3.2s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+}
+@keyframes rise { to { transform: translateY(-3px); } }
+@media (max-width: 900px) {
+  .hero, .idea, .lockups, .scale, .rules { grid-template-columns: 1fr; }
+  .colours, .alts { grid-template-columns: 1fr 1fr; }
+  .panel { min-height: 360px; }
+}
+@media (max-width: 520px) { .colours, .alts { grid-template-columns: 1fr; } .tile { padding: 24px; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="shell" viewBox="0 0 100 100">
+    <g transform="translate(-1.5 1.5)">
+      <path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/>
+      <path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/>
+      <circle class="pearl" cx="62" cy="45.5" r="10" style="fill: var(--pearl, currentColor)"/>
+    </g>
+  </symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <span class="mono">Oyster Therapeutics &middot; Brand mark</span>
+    <h1>The Open Shell</h1>
+    <p>Two valves hold a pearl. It is the company name drawn as simply as possible, and it describes the science: two small molecules that come together to form something valuable inside the cell.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="hero">
+      <div class="panel nacre">
+        <span class="mono">Option D &middot; Nacre</span>
+        <svg class="m big" viewBox="0 0 100 100" role="img" aria-label="Oyster mark in Nacre colours" style="fill: var(--nacre-ink); --pearl: var(--nacre-rose)"><use href="#shell"/></svg>
+        <div class="lock serif" style="--pearl: var(--nacre-rose)"><svg viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg><span class="word">Oyster<small>Therapeutics</small></span></div>
+      </div>
+      <div class="panel tide">
+        <span class="mono">Option H &middot; Tidepool</span>
+        <svg class="m big" viewBox="0 0 100 100" role="img" aria-label="Oyster mark in Tidepool colours" style="fill: var(--tide-light); --pearl: var(--tide-sun)"><use href="#shell"/></svg>
+        <div class="lock sans" style="--pearl: var(--tide-sun)"><svg viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg><span class="word">Oyster<small>Therapeutics</small></span></div>
+      </div>
+    </div>
+  </div>
+
+  <section style="margin-top: clamp(56px, 8vw, 104px)">
+    <div class="wrap idea">
+      <svg viewBox="-4 -6 150 106" role="img" aria-label="Construction of the mark: two valves, a hinge gap and a pearl">
+        <g transform="translate(22 6) scale(.9)" style="fill: var(--ink); --pearl: var(--accent)"><use href="#shell" width="100" height="100"/></g>
+        <!-- guides (mark space: translate(22 6) scale(.9), inner translate(-1.5 1.5)) -->
+        <g fill="none" stroke="var(--accent)" stroke-width=".5" stroke-dasharray="1.4 1.2">
+          <circle cx="76.5" cy="48.3" r="13.2"/>
+          <circle cx="31.5" cy="55.5" r="5"/>
+          <path d="M31.8 55 L108 55"/>
+          <path d="M31.8 55 L101 24.2"/>
+          <path d="M58 55 A26 26 0 0 0 55.6 44.4"/>
+        </g>
+        <text x="60" y="44" class="sub">24&deg;</text>
+        <path d="M89 44 L112 30" stroke="var(--muted)" stroke-width=".3" fill="none"/>
+        <text x="113" y="29">Pearl</text><text x="113" y="34" class="sub">the degrader</text>
+        <path d="M27 60 L8 76" stroke="var(--muted)" stroke-width=".3" fill="none"/>
+        <text x="-2" y="82">Hinge</text><text x="-2" y="87" class="sub">reversible linker</text>
+        <path d="M70 84 L100 94" stroke="var(--muted)" stroke-width=".3" fill="none"/>
+        <text x="102" y="94">Two valves</text><text x="102" y="99" class="sub">two small molecules</text>
+      </svg>
+      <div>
+        <h2>The idea</h2>
+        <div class="points" style="margin-top: 28px">
+          <div><span class="dot">01</span><div><h3>Two valves</h3><p>An oyster is two shells joined at a hinge. SELFTAC&reg; is two small molecules. The lower valve is cupped and the upper one is flatter, as in a real oyster.</p></div></div>
+          <div><span class="dot">02</span><div><h3>An open hinge</h3><p>The valves do not quite touch at the hinge. The small gap stands for the reversible linker that lets the two halves separate and rejoin.</p></div></div>
+          <div><span class="dot">03</span><div><h3>A pearl inside</h3><p>A pearl forms inside the shell from something small. The degrader assembles inside the cell. The pearl carries the accent colour in every palette.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Lockups</h2>
+      <p class="lead">Each palette pairs the mark with its own typeface from the brand audit: Newsreader Medium for Nacre and Archivo Bold for Tidepool. The mark sits just above the cap height, and the descriptor is set in mono.</p>
+      <div class="lockups">
+        <div class="tile" style="background: var(--nacre-bg); color: var(--nacre-ink)"><span class="cap">Horizontal &middot; Nacre</span><div class="lock serif" style="font-size: clamp(36px, 4.4vw, 56px); --pearl: var(--nacre-rose)"><svg viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg><span class="word">Oyster<small>Therapeutics</small></span></div></div>
+        <div class="tile" style="background: var(--tide-bg); color: var(--tide-light)"><span class="cap">Horizontal &middot; Tidepool</span><div class="lock sans" style="font-size: clamp(36px, 4.4vw, 56px); --pearl: var(--tide-sun)"><svg viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg><span class="word">Oyster<small>Therapeutics</small></span></div></div>
+        <div class="tile" style="background: var(--nacre-ink); color: var(--nacre-bg)"><span class="cap">Stacked &middot; Nacre reversed</span><div class="stack lock serif" style="font-size: clamp(40px, 5vw, 64px); --pearl: var(--nacre-rose)"><svg viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>Oyster<small>Therapeutics</small></div></div>
+        <div class="tile" style="background: var(--tide-light); color: var(--tide-bg)"><span class="cap">Stacked &middot; Tidepool light</span><div class="stack lock sans" style="font-size: clamp(40px, 5vw, 64px); --pearl: var(--tide-sun)"><svg viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>Oyster<small>Therapeutics</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Colour versions</h2>
+      <p class="lead">Use the full-colour mark wherever possible. The one-colour versions are for print, embossing and places where colour is not available. In those, the pearl is slightly smaller so it stays separate from the lower valve.</p>
+      <div class="colours">
+        <div class="tile" style="background: var(--nacre-bg); color: var(--nacre-ink)"><span class="cap">Full colour</span><svg viewBox="0 0 100 100" style="fill: currentColor; --pearl: var(--nacre-rose)" aria-hidden="true"><use href="#shell"/></svg></div>
+        <div class="tile" style="background: var(--tide-bg); color: var(--tide-light)"><span class="cap">Reversed</span><svg viewBox="0 0 100 100" style="fill: currentColor; --pearl: var(--tide-sun)" aria-hidden="true"><use href="#shell"/></svg></div>
+        <div class="tile" style="background: #FFFFFF; color: #111111"><span class="cap">One colour</span><svg viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><g transform="translate(-1.5 1.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/><circle cx="62" cy="45" r="9.5"/></g></svg></div>
+        <div class="tile" style="background: #1A1A1A; color: #FFFFFF"><span class="cap">One colour reversed</span><svg viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><g transform="translate(-1.5 1.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/><circle cx="62" cy="45" r="9.5"/></g></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Small sizes</h2>
+      <p class="lead">The shapes are bold enough to hold up at favicon size. Below 24px, use the app icon, which sets the mark on a solid tile.</p>
+      <div class="scale">
+        <div class="tile" style="background: var(--nacre-bg); color: var(--nacre-ink); --pearl: var(--nacre-rose)"><span class="cap">Nacre</span>
+          <div class="sz"><svg width="128" height="128" viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>128</div>
+          <div class="sz"><svg width="64" height="64" viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>64</div>
+          <div class="sz"><svg width="32" height="32" viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>32</div>
+          <div class="sz"><svg width="24" height="24" viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>24</div>
+          <div class="sz"><svg class="app" width="64" height="64" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="var(--nacre-ink)"/><g transform="translate(9 9) scale(.82)" style="fill: var(--nacre-bg); --pearl: var(--nacre-rose)"><use href="#shell" width="100" height="100"/></g></svg>App icon</div>
+          <div class="sz"><svg class="app" width="16" height="16" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="var(--nacre-ink)"/><g transform="translate(9 9) scale(.82)" style="fill: var(--nacre-bg); --pearl: var(--nacre-rose)"><use href="#shell" width="100" height="100"/></g></svg>16</div>
+        </div>
+        <div class="tile" style="background: var(--tide-bg); color: var(--tide-light); --pearl: var(--tide-sun)"><span class="cap">Tidepool</span>
+          <div class="sz"><svg width="128" height="128" viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>128</div>
+          <div class="sz"><svg width="64" height="64" viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>64</div>
+          <div class="sz"><svg width="32" height="32" viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>32</div>
+          <div class="sz"><svg width="24" height="24" viewBox="0 0 100 100" style="fill: currentColor" aria-hidden="true"><use href="#shell"/></svg>24</div>
+          <div class="sz"><svg class="app" width="64" height="64" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="var(--tide-light)"/><g transform="translate(9 9) scale(.82)" style="fill: var(--tide-bg); --pearl: var(--tide-sun)"><use href="#shell" width="100" height="100"/></g></svg>App icon</div>
+          <div class="sz"><svg class="app" width="16" height="16" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="var(--tide-light)"/><g transform="translate(9 9) scale(.82)" style="fill: var(--tide-bg); --pearl: var(--tide-sun)"><use href="#shell" width="100" height="100"/></g></svg>16</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Using the mark</h2>
+      <div class="rules" style="margin-top: 28px">
+        <div class="tile"><h3>Clear space</h3><p>Keep a margin of at least one pearl width on every side. Nothing else should enter that area.</p>
+          <div class="clear"><svg width="180" height="160" viewBox="-24 -24 148 136" aria-hidden="true"><rect x="-20" y="-16" width="140" height="120" fill="none" stroke="var(--accent)" stroke-dasharray="3 3"/><g style="fill: var(--ink); --pearl: var(--accent)"><use href="#shell" width="100" height="100"/></g><circle cx="-10" cy="44" r="10" fill="none" stroke="var(--muted)" stroke-dasharray="2 2"/></svg></div></div>
+        <div class="tile"><h3>Do not</h3><p>Rotate, stretch or outline the mark, close the hinge gap, move the pearl, or recolour the pearl to match the shell in a full-colour setting. Do not place the full-colour mark on busy imagery. Use the reversed or one-colour version instead.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Directions explored</h2>
+      <p class="lead">Three routes were drawn. The Open Shell was chosen because it names the company and explains the science in a single image.</p>
+      <div class="alts">
+        <div class="tile"><span class="chosen">Chosen</span><svg viewBox="0 0 100 100" style="fill: var(--ink); --pearl: var(--accent)" aria-hidden="true"><use href="#shell"/></svg><h3>The Open Shell</h3><p>An oyster, a pearl and a two-part story. It is still recognisable at 16px.</p></div>
+        <div class="tile"><span class="mono">Alternative</span><svg viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="var(--ink)"><circle cx="50" cy="50" r="41" stroke-width="7"/><circle cx="55" cy="46" r="27" stroke-width="3"/><circle cx="58" cy="44" r="16" stroke-width="1.6"/></g><circle cx="60" cy="43" r="7" fill="var(--accent)"/></svg><h3>Nacre rings</h3><p>Growth lines forming an O. It is elegant, but at small sizes it looks like a target symbol.</p></div>
+        <div class="tile"><span class="mono">Alternative</span><svg viewBox="0 0 100 100" aria-hidden="true"><path fill="var(--accent)" d="M43 8 A38 38 0 0 0 43 84 Z"/><path fill="var(--muted)" d="M57 16 A38 38 0 0 1 57 92 Z"/></svg><h3>Pearl halves</h3><p>A sphere made from two halves. The story is clear, but it sits close to a generic pill icon.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Files</h2>
+      <p class="lead">Vector files are in the repository under <code>oyster/brand/</code>.</p>
+      <div class="files">oyster-mark-nacre.svg &nbsp; oyster-mark-nacre-reversed.svg<br>oyster-mark-tidepool.svg &nbsp; oyster-mark-tidepool-reversed.svg<br>oyster-mark-black.svg &nbsp; oyster-mark-white.svg<br>oyster-icon-nacre.svg &nbsp; oyster-icon-tidepool.svg</div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">Oyster Therapeutics brand mark, concept for review. The wordmarks use Newsreader and Archivo from Google Fonts. Convert the text to outlines before sending lockups to print.</div></footer>
+<!-- artifact:end -->
+</body>
+</html>

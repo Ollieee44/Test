@@ -27,4 +27,9 @@ The Playwright CLI is installed automatically at the start of each Claude Code o
 - Content comes from Kesmalea's public materials: the SELFTAC® platform, oncology and CNS discovery, leadership and board, Syncona and Oxford Science Enterprises, and news.
 - Layout and motion follow bicycletherapeutics.com. A giant wordmark shrinks into the header as you scroll, the full-screen menu opens from a square button, and sections start with a "▸ label" and use circle-arrow links. The SELFTAC diagram is pinned and scrubbed by scroll, a panel expands as it comes into view, and the news carousel, cursor ring and large sign-up footer also come from Bicycle.
 - Two palettes from the brand audit switch live from the header (or press `P`): **Option D, Nacre** (Newsreader display) and **Option H, Tidepool** (Archivo display). Each has light and dark variants.
+- The SELFTAC section shows the blood-brain barrier and a neuron: capillary, endothelial cells sealed by tight junctions, basement membrane, pericyte, astrocyte end-feet, and ubiquitin-proteasome degradation. It is scrubbed by scroll and not to scale.
 - The general enquiries email is a placeholder.
+
+### Brand mark
+
+`oyster/brand/index.html` is the brand sheet for the mark, "The Open Shell": two valves holding a pearl. It covers construction, lockups, colour versions, small sizes, usage and the alternatives explored. SVG files are in `oyster/brand/`.
