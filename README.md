@@ -19,3 +19,11 @@ Claude Code skills live in `.claude/skills/`. Claude uses them automatically whe
 | playwright-cli | Open a real browser to test and screenshot pages | [@playwright/cli](https://playwright.dev/agent-cli/skills) |
 
 The Playwright CLI is installed automatically at the start of each Claude Code on the web session by `.claude/hooks/session-start.sh`, and `.playwright/cli.config.json` points it at the environment's pre-installed Chromium.
+
+## Oyster Therapeutics site
+
+`oyster/index.html` is a single-page, self-contained concept site for the Oyster Therapeutics rebrand. Open it directly in a browser.
+
+- Two palettes from the brand audit, switchable live from the nav (or press `P`): **Option D, Nacre** (Newsreader display) and **Option H, Tidepool** (Archivo display).
+- Each palette has light and dark variants (follows the system setting; the round button toggles).
+- The pipeline programs and contact emails are placeholders until the real content is added.

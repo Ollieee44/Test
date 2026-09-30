@@ -1,0 +1,1104 @@
+<!doctype html>
+<html lang="en" data-palette="nacre">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- artifact:start -->
+<title>Oyster Therapeutics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&family=IBM+Plex+Mono:wght@500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,500&display=swap">
+<style>
+/* Layout: a rounded "shell" stage for the hero and closing panel, open page between them.
+   Two palettes from the Oyster brand audit, switched live with data-palette:
+   Option D "Nacre" (light-led, Newsreader display) and Option H "Tidepool" (sea-green, Archivo display).
+   Radius rule: stage panels 28px, cards 20px, every interactive control is a full pill. */
+
+/* ---------- Nacre (Option D): light ---------- */
+:root {
+  --bg: #EFE6E1;
+  --surface: #F7F1EE;
+  --surface-2: #E6DADA;
+  --ink: #2B2230;
+  --muted: #65586A;
+  --line: rgba(43, 34, 48, .14);
+  --accent: #C99BB0;
+  --accent-2: #B8A7C9;
+  --accent-ink: #8C5572;
+  --btn-bg: #2B2230;
+  --btn-fg: #EFE6E1;
+  --stage-bg: radial-gradient(120% 110% at 82% 18%, #F6EFEE 0%, #E8DBDD 42%, #D9CCDD 100%);
+  --stage-fg: #2B2230;
+  --stage-muted: #5E5163;
+  --stage-em: #8C5572;
+  --stage-line: rgba(43, 34, 48, .16);
+  --stage-btn-fg: #EFE6E1;
+  --on-accent: #2B2230;
+  --ring-a: #C99BB0;
+  --ring-b: #9D8BB4;
+  --ring-alpha: .55;
+  --pearl-hi: #FFFFFF;
+  --pearl-lo: #D8C6D6;
+  --sheen: conic-gradient(from 210deg at 70% 30%, #EFE6E1, #D9B8C8, #C6B9DA, #E9E1EC, #D7B3C4, #EFE6E1);
+  --shadow: 0 30px 60px -30px rgba(76, 48, 70, .35);
+
+  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --display-weight: 500;
+  --display-track: -0.015em;
+  --em-style: italic;
+  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --gutter: clamp(16px, 4vw, 48px);
+  --maxw: 1320px;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  color-scheme: light;
+}
+/* ---------- Tidepool (Option H): light ---------- */
+:root[data-palette="tidepool"] {
+  --bg: #EAF3EF;
+  --surface: #F5FAF8;
+  --surface-2: #D9EAE4;
+  --ink: #0F4C4A;
+  --muted: #3D6663;
+  --line: rgba(15, 76, 74, .15);
+  --accent: #F2B84B;
+  --accent-2: #7FC4B0;
+  --accent-ink: #0F4C4A;
+  --btn-bg: #0F4C4A;
+  --btn-fg: #EAF3EF;
+  --stage-bg: radial-gradient(120% 110% at 82% 18%, #17625E 0%, #0F4C4A 48%, #0B3D3B 100%);
+  --stage-fg: #EAF3EF;
+  --stage-muted: #B4D6CC;
+  --stage-em: #F2B84B;
+  --stage-line: rgba(234, 243, 239, .18);
+  --stage-btn-fg: #0F4C4A;
+  --on-accent: #0F4C4A;
+  --ring-a: #7FC4B0;
+  --ring-b: #F2B84B;
+  --ring-alpha: .6;
+  --pearl-hi: #FFF6DE;
+  --pearl-lo: #F2B84B;
+  --sheen: conic-gradient(from 200deg at 70% 30%, #0F4C4A, #2F8579, #7FC4B0, #F2B84B, #3E9A88, #0F4C4A);
+  --shadow: 0 30px 60px -30px rgba(9, 50, 48, .45);
+
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --display-weight: 700;
+  --display-track: -0.035em;
+  --em-style: normal;
+}
+
+/* ---------- Dark variants (system preference) ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1C1720; --surface: #262029; --surface-2: #2E2633;
+    --ink: #EFE6E1; --muted: #B7AAB7; --line: rgba(239, 230, 225, .13);
+    --accent: #C99BB0; --accent-2: #B8A7C9; --accent-ink: #D9AFC2;
+    --btn-bg: #C99BB0; --btn-fg: #1C1720;
+    --stage-bg: radial-gradient(120% 110% at 82% 18%, #3D3143 0%, #2B2230 48%, #221B26 100%);
+    --stage-fg: #EFE6E1; --stage-muted: #BCAEBB; --stage-em: #D9AFC2; --stage-line: rgba(239, 230, 225, .15); --stage-btn-fg: #2B2230;
+    --ring-a: #C99BB0; --ring-b: #B8A7C9; --ring-alpha: .6;
+    --pearl-hi: #FFFFFF; --pearl-lo: #B8A7C9;
+    --sheen: conic-gradient(from 210deg at 70% 30%, #2B2230, #6E4F66, #6B5F86, #3A3042, #7A5570, #2B2230);
+    --shadow: 0 30px 60px -30px rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+  :root[data-palette="tidepool"]:not([data-theme="light"]) {
+    --bg: #082F2E; --surface: #0C3B39; --surface-2: #0F4644;
+    --ink: #EAF3EF; --muted: #A6CBC1; --line: rgba(234, 243, 239, .14);
+    --accent: #F2B84B; --accent-2: #7FC4B0; --accent-ink: #F2B84B;
+    --btn-bg: #F2B84B; --btn-fg: #082F2E;
+    --stage-bg: radial-gradient(120% 110% at 82% 18%, #17625E 0%, #0F4C4A 48%, #0B3D3B 100%);
+    --stage-fg: #EAF3EF; --stage-muted: #B4D6CC; --stage-em: #F2B84B; --stage-line: rgba(234, 243, 239, .18);  --stage-btn-fg: #0F4C4A;
+    --ring-a: #7FC4B0; --ring-b: #F2B84B; --ring-alpha: .6;
+    --pearl-hi: #FFF6DE; --pearl-lo: #F2B84B;
+    --sheen: conic-gradient(from 200deg at 70% 30%, #0F4C4A, #2F8579, #7FC4B0, #F2B84B, #3E9A88, #0F4C4A);
+    --shadow: 0 30px 60px -30px rgba(0, 0, 0, .6);
+  }
+}
+/* ---------- Dark variants (explicit toggle) ---------- */
+:root[data-theme="dark"] {
+  --bg: #1C1720; --surface: #262029; --surface-2: #2E2633;
+  --ink: #EFE6E1; --muted: #B7AAB7; --line: rgba(239, 230, 225, .13);
+  --accent: #C99BB0; --accent-2: #B8A7C9; --accent-ink: #D9AFC2;
+  --btn-bg: #C99BB0; --btn-fg: #1C1720;
+  --stage-bg: radial-gradient(120% 110% at 82% 18%, #3D3143 0%, #2B2230 48%, #221B26 100%);
+  --stage-fg: #EFE6E1; --stage-muted: #BCAEBB; --stage-em: #D9AFC2; --stage-line: rgba(239, 230, 225, .15); --stage-btn-fg: #2B2230;
+  --ring-a: #C99BB0; --ring-b: #B8A7C9; --ring-alpha: .6;
+  --pearl-hi: #FFFFFF; --pearl-lo: #B8A7C9;
+  --sheen: conic-gradient(from 210deg at 70% 30%, #2B2230, #6E4F66, #6B5F86, #3A3042, #7A5570, #2B2230);
+  --shadow: 0 30px 60px -30px rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+:root[data-palette="tidepool"][data-theme="dark"] {
+  --bg: #082F2E; --surface: #0C3B39; --surface-2: #0F4644;
+  --ink: #EAF3EF; --muted: #A6CBC1; --line: rgba(234, 243, 239, .14);
+  --accent: #F2B84B; --accent-2: #7FC4B0; --accent-ink: #F2B84B;
+  --btn-bg: #F2B84B; --btn-fg: #082F2E;
+  --stage-bg: radial-gradient(120% 110% at 82% 18%, #17625E 0%, #0F4C4A 48%, #0B3D3B 100%);
+  --stage-fg: #EAF3EF; --stage-muted: #B4D6CC; --stage-em: #F2B84B; --stage-line: rgba(234, 243, 239, .18);  --stage-btn-fg: #0F4C4A;
+  --ring-a: #7FC4B0; --ring-b: #F2B84B; --ring-alpha: .6;
+  --pearl-hi: #FFF6DE; --pearl-lo: #F2B84B;
+  --sheen: conic-gradient(from 200deg at 70% 30%, #0F4C4A, #2F8579, #7FC4B0, #F2B84B, #3E9A88, #0F4C4A);
+  --shadow: 0 30px 60px -30px rgba(0, 0, 0, .6);
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .5s var(--ease), color .5s var(--ease);
+  overflow-x: clip;
+}
+img, svg, canvas { max-width: 100%; display: block; }
+a { color: inherit; }
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-track);
+  line-height: 1.04;
+  margin: 0;
+  text-wrap: balance;
+}
+p { margin: 0; }
+em { font-style: var(--em-style); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
+.label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  --b: var(--btn-bg); --f: var(--btn-fg);
+  display: inline-flex; align-items: center; gap: .6em;
+  height: 52px; padding: 0 26px;
+  border-radius: 999px; border: 1px solid var(--b);
+  background: var(--b); color: var(--f);
+  font: 600 15px/1 var(--font-body);
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  position: relative; overflow: hidden; isolation: isolate;
+  transition: transform .35s var(--ease), color .35s var(--ease);
+}
+.btn::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--accent);
+  transform: translateY(101%); border-radius: 999px;
+  transition: transform .45s var(--ease);
+}
+.btn:hover::before { transform: translateY(0); }
+.btn:hover { color: var(--on-accent); }
+.btn:active { transform: scale(.98); }
+.btn .arr { display: inline-block; transition: transform .35s var(--ease); }
+.btn:hover .arr { transform: translateX(4px); }
+.btn.ghost { background: transparent; color: var(--f); }
+.stage .btn { --b: var(--stage-fg); --f: var(--stage-btn-fg); }
+.stage .btn.ghost { --f: var(--stage-fg); border-color: var(--stage-line); }
+
+/* ---------- Nav ---------- */
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid transparent;
+  transition: border-color .3s, background-color .5s var(--ease);
+}
+.nav.scrolled { border-bottom-color: var(--line); }
+.nav .wrap { height: 72px; display: flex; align-items: center; gap: 24px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
+.brand-word {
+  font-family: var(--font-display); font-weight: var(--display-weight);
+  letter-spacing: var(--display-track); font-size: 26px; line-height: 1;
+}
+.brand-word small {
+  font-family: var(--font-body); font-weight: 500; font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); margin-left: 8px; vertical-align: 3px;
+}
+.mark { width: 30px; height: 22px; flex: none; }
+.mark-nacre, .mark-tide { display: none; }
+:root[data-palette="nacre"] .mark-nacre, :root:not([data-palette="tidepool"]) .mark-nacre { display: block; }
+:root[data-palette="tidepool"] .mark-tide { display: block; }
+.nav-links { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+.nav-links a {
+  display: block; padding: 8px 14px; border-radius: 999px;
+  text-decoration: none; font-size: 15px; font-weight: 500;
+  transition: background-color .25s;
+}
+.nav-links a:hover { background: var(--surface-2); }
+.nav-tools { display: flex; align-items: center; gap: 8px; }
+
+.switch {
+  display: inline-flex; padding: 4px; gap: 2px; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--line);
+}
+.switch button {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 34px; padding: 0 12px 0 8px; border: 0; border-radius: 999px;
+  background: transparent; color: var(--muted); cursor: pointer;
+  font: 600 13px/1 var(--font-body);
+  transition: background-color .3s var(--ease), color .3s var(--ease);
+}
+.switch button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.chip { display: inline-flex; }
+.chip i { width: 12px; height: 12px; border-radius: 50%; display: block; border: 1px solid rgba(0,0,0,.08); }
+.chip i + i { margin-left: -4px; }
+.theme-btn {
+  width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; cursor: pointer; display: grid; place-items: center; color: var(--ink);
+}
+.theme-btn span {
+  width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid currentColor;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+  transition: transform .5s var(--ease);
+}
+.theme-btn:hover span { transform: rotate(180deg); }
+.menu-btn {
+  display: none; height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--ink); font: 600 14px/1 var(--font-body); cursor: pointer;
+}
+
+/* ---------- Stage panels (hero + closing) ---------- */
+.stage {
+  background: var(--stage-bg);
+  color: var(--stage-fg);
+  border-radius: 28px;
+  position: relative; overflow: hidden; isolation: isolate;
+}
+.hero-shell { padding: 8px clamp(8px, 1.2vw, 16px) 0; }
+.hero {
+  display: grid; grid-template-columns: 1.25fr 1fr; align-items: center;
+  min-height: min(700px, calc(100dvh - 90px));
+}
+.hero-copy { padding: clamp(40px, 6vw, 88px) 0 clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px); position: relative; z-index: 2; }
+.hero h1 { font-size: clamp(40px, 5vw, 76px); line-height: 1.06; }
+.hero h1 .line-mask > span { white-space: nowrap; }
+.hero h1 em { color: var(--stage-em); padding-bottom: .06em; }
+.hero .sub { margin-top: 28px; max-width: 30ch; font-size: clamp(18px, 1.5vw, 21px); line-height: 1.5; color: var(--stage-muted); }
+.hero .ctas { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 12px; }
+.hero-art { position: relative; height: 100%; min-height: 420px; }
+.hero-art canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.line-mask { display: block; overflow: hidden; padding-bottom: .08em; margin-bottom: -.08em; }
+.line-mask > span { display: block; }
+
+/* ---------- Statement ---------- */
+.statement { padding-block: clamp(96px, 14vw, 180px); view-timeline-name: --stmt; }
+.statement p {
+  font-family: var(--font-display); font-weight: var(--display-weight);
+  letter-spacing: var(--display-track);
+  font-size: clamp(30px, 4.2vw, 60px); line-height: 1.14; max-width: 22ch;
+  text-wrap: pretty;
+}
+.statement .w { transition: opacity .2s; }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .statement .w {
+      opacity: .2;
+      animation: wordIn linear both;
+      animation-timeline: --stmt;
+      animation-range: cover calc(18% + var(--i) * 0.9%) cover calc(22% + var(--i) * 0.9%);
+    }
+  }
+}
+@keyframes wordIn { to { opacity: 1; } }
+.statement .w.hl { color: var(--accent-ink); }
+
+/* ---------- Science (sticky) ---------- */
+.science { padding-block: 40px clamp(80px, 10vw, 140px); }
+.science-head { max-width: 760px; margin-bottom: clamp(40px, 6vw, 72px); }
+.science-head h2 { font-size: clamp(36px, 4.6vw, 64px); }
+.science-head p { margin-top: 20px; color: var(--muted); max-width: 56ch; font-size: 18px; }
+.sci-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); }
+.sci-visual { position: sticky; top: 104px; align-self: start; }
+.sci-card {
+  background: var(--surface); border-radius: 28px; border: 1px solid var(--line);
+  padding: clamp(16px, 2.4vw, 32px); box-shadow: var(--shadow);
+  transition: background-color .5s var(--ease);
+}
+.sci-card svg { width: 100%; height: auto; }
+.sci-steps { display: flex; flex-direction: column; }
+.step {
+  min-height: 70vh; display: flex; flex-direction: column; justify-content: center;
+  padding-block: 40px; opacity: .35; transition: opacity .5s var(--ease);
+}
+.step.active { opacity: 1; }
+.step:first-child { min-height: 52vh; justify-content: flex-start; padding-top: 24px; }
+.step-no {
+  font-family: var(--font-mono); font-size: 13px; color: var(--muted);
+  display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+}
+.step-no::after { content: ""; height: 1px; width: 48px; background: var(--line); }
+.step h3 { font-size: clamp(28px, 3vw, 42px); }
+.step p { margin-top: 16px; color: var(--muted); max-width: 44ch; font-size: 18px; }
+
+/* diagram states */
+.dg text { font-family: var(--font-body); fill: var(--muted); font-size: 13px; font-weight: 500; }
+.dg .t-strong { fill: var(--ink); font-weight: 600; }
+.dg .stroke { stroke: var(--line); fill: none; }
+.dg .path { stroke: var(--accent-2); stroke-width: 2; fill: none; stroke-dasharray: 3 7; stroke-linecap: round; }
+.dg .cell { fill: var(--surface-2); stroke: var(--line); }
+.dg .neuron { fill: color-mix(in srgb, var(--accent-2) 22%, transparent); stroke: var(--accent-2); stroke-width: 1.5; }
+.dg .capsule-a { fill: var(--accent); }
+.dg .capsule-b { fill: var(--accent-2); }
+.dg .mol { fill: var(--ink); }
+.dg .mol-ring { fill: none; stroke: var(--accent); stroke-width: 2; }
+.dg .target { fill: var(--accent); transform-box: fill-box; transform-origin: center; transition: transform .8s var(--ease), opacity .8s var(--ease); }
+.dg .frag { fill: var(--accent); opacity: 0; transform-box: fill-box; transition: transform 1s var(--ease), opacity .8s var(--ease); }
+.dg .mover {
+  offset-path: path("M96 92 C 150 170, 250 150, 250 238 S 300 330, 318 420");
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+  transition: offset-distance 1.1s var(--ease);
+}
+.dg .hl-zone { opacity: 0; transition: opacity .6s var(--ease); }
+.dg[data-step="1"] .mover { offset-distance: 0%; }
+.dg[data-step="1"] .hz1 { opacity: 1; }
+.dg[data-step="2"] .mover { offset-distance: 52%; }
+.dg[data-step="2"] .hz2 { opacity: 1; }
+.dg[data-step="3"] .mover { offset-distance: 100%; }
+.dg[data-step="3"] .hz3 { opacity: 1; }
+.dg[data-step="3"] .target { transform: scale(.2); opacity: 0; transition-delay: .7s; }
+.dg[data-step="3"] .frag { opacity: 1; transition-delay: .9s; }
+.dg[data-step="3"] .f1 { transform: translate(-26px, -18px); }
+.dg[data-step="3"] .f2 { transform: translate(24px, -22px); }
+.dg[data-step="3"] .f3 { transform: translate(-20px, 22px); }
+.dg[data-step="3"] .f4 { transform: translate(28px, 16px); }
+.dg-caption { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+.dg-caption span {
+  font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--muted);
+  transition: background-color .4s var(--ease), color .4s var(--ease), border-color .4s;
+}
+.dg-caption span.on { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
+
+/* ---------- Pipeline ---------- */
+.pipeline { padding-block: clamp(80px, 10vw, 140px); background: var(--surface); transition: background-color .5s var(--ease); }
+.pipe-head { display: flex; flex-direction: column; gap: 16px; margin-bottom: 48px; }
+.pipe-head h2 { font-size: clamp(36px, 4.6vw, 64px); }
+.pipe-head p { color: var(--muted); max-width: 56ch; font-size: 18px; }
+.pipe { --cols: minmax(150px, 1fr) minmax(160px, 1.1fr) 3fr; }
+.pipe-row { display: grid; grid-template-columns: var(--cols); gap: 24px; align-items: center; padding: 26px 0; }
+.pipe-row + .pipe-row { border-top: 1px solid var(--line); }
+.pipe-labels { padding: 0 0 14px; }
+.pipe-labels .phases { display: grid; grid-template-columns: repeat(4, 1fr); }
+.pipe-labels .phases span { font-size: 13px; color: var(--muted); font-weight: 600; }
+.prog { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--display-track); font-size: 26px; line-height: 1.1; }
+.prog small { display: block; font-family: var(--font-body); font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--muted); margin-top: 6px; }
+.ind { font-weight: 600; }
+.ind small { display: block; font-weight: 400; color: var(--muted); font-size: 14px; }
+.track {
+  position: relative; height: 44px;
+  background:
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 25% 100% repeat-x;
+}
+.bar {
+  position: absolute; left: 0; top: 50%; height: 12px; margin-top: -6px;
+  width: var(--p); border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  transform-origin: left center; transform: scaleX(1);
+}
+.bar::after {
+  content: ""; position: absolute; right: -2px; top: 50%; width: 22px; height: 22px; margin-top: -11px;
+  border-radius: 50%; background: var(--surface); border: 3px solid var(--accent);
+}
+.js .pipe:not(.in) .bar { transform: scaleX(0); }
+.pipe.in .bar { transition: transform 1.4s var(--ease); transition-delay: calc(var(--d, 0) * 120ms + 150ms); }
+.pipe-note { margin-top: 28px; font-size: 14px; color: var(--muted); }
+.phase-mobile { display: none; }
+
+/* ---------- Why Oyster bento ---------- */
+.why { padding-block: clamp(80px, 10vw, 140px); }
+.bento { display: grid; grid-template-columns: 1.4fr 1fr; grid-template-rows: auto auto; gap: 16px; }
+.tile {
+  border-radius: 20px; padding: clamp(24px, 3vw, 40px);
+  display: flex; flex-direction: column; gap: 14px; min-width: 0;
+  position: relative; overflow: hidden; isolation: isolate;
+}
+.tile h3 { font-size: clamp(26px, 2.6vw, 36px); }
+.tile p { color: var(--muted); max-width: 46ch; }
+.tile-name {
+  grid-row: span 2; justify-content: flex-end; min-height: 520px;
+  background: var(--surface-2); color: var(--ink);
+}
+.tile-name::before {
+  content: ""; position: absolute; inset: -40%; z-index: -1;
+  background: var(--sheen); filter: blur(40px); opacity: .85;
+  animation: sheen 22s linear infinite;
+}
+.tile-name::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(to top, var(--surface-2) 18%, transparent 70%);
+}
+.tile-name h2 { font-size: clamp(40px, 5vw, 72px); }
+.tile-name p { color: var(--ink); opacity: .82; font-size: 19px; }
+@keyframes sheen { to { transform: rotate(360deg); } }
+.tile-a { background: var(--btn-bg); }
+.tile-a h3, .tile-a p { color: var(--btn-fg); }
+.tile-a p { opacity: .8; }
+.tile-b { background: transparent; border: 1px solid var(--line); }
+.tile .k { font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; opacity: .7; }
+.tile-a .k { color: var(--btn-fg); }
+
+/* ---------- Closing panel ---------- */
+.closing-shell { padding: 0 clamp(8px, 1.2vw, 16px); }
+.closing { padding: clamp(56px, 8vw, 112px) clamp(20px, 5vw, 72px); }
+.closing h2 { font-size: clamp(40px, 5.4vw, 80px); max-width: 16ch; }
+.closing-grid { margin-top: clamp(40px, 6vw, 72px); display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.contact {
+  border: 1px solid var(--stage-line); border-radius: 20px; padding: 28px;
+  display: flex; flex-direction: column; gap: 12px;
+  background: color-mix(in srgb, var(--stage-fg) 4%, transparent);
+  transition: background-color .4s var(--ease);
+}
+.contact:hover { background: color-mix(in srgb, var(--stage-fg) 8%, transparent); }
+.contact h3 { font-size: 28px; }
+.contact p { color: var(--stage-muted); max-width: 40ch; }
+.email-row { margin-top: auto; padding-top: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.email { font-size: 18px; font-weight: 600; user-select: all; word-break: break-all; }
+.copy {
+  height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--stage-line);
+  background: transparent; color: var(--stage-fg); font: 600 13px/1 var(--font-body); cursor: pointer;
+}
+.copy:hover { background: var(--stage-fg); color: var(--stage-btn-fg); }
+.closing canvas { position: absolute; right: -10%; top: -30%; width: 60%; height: 160%; z-index: -1; opacity: .5; pointer-events: none; }
+
+/* ---------- Footer ---------- */
+footer { padding-block: 64px 40px; }
+.foot { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 32px; }
+.foot h4 { margin: 0 0 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.foot ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.foot a { text-decoration: none; }
+.foot a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.foot .tag { color: var(--muted); margin-top: 12px; max-width: 34ch; }
+.palette-strip { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.sw { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.sw i { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); display: block; }
+.legal { color: var(--muted); font-size: 14px; }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+  transform: translate(-50%, 140%); opacity: 0;
+  background: var(--ink); color: var(--bg);
+  border-radius: 999px; padding: 10px 18px 10px 12px;
+  display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500;
+  transition: transform .5s var(--ease), opacity .5s var(--ease);
+  box-shadow: var(--shadow); max-width: calc(100vw - 32px);
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+.toast .chip i { width: 18px; height: 18px; border-color: rgba(255,255,255,.2); }
+.toast .chip i + i { margin-left: -6px; }
+
+/* ---------- Reveal ---------- */
+.js .rv.pre { opacity: 0; transform: translateY(28px); }
+.rv { transition: opacity 1s var(--ease), transform 1s var(--ease); transition-delay: calc(var(--d, 0) * 90ms); }
+
+/* ---------- Hero entrance ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .hero .line-mask > span { animation: lineUp 1.1s var(--ease) both; }
+  .hero .line-mask:nth-child(2) > span { animation-delay: .08s; }
+  .hero .line-mask:nth-child(3) > span { animation-delay: .16s; }
+  .hero .sub { animation: fadeUp 1s var(--ease) .35s both; }
+  .hero .ctas { animation: fadeUp 1s var(--ease) .45s both; }
+  .hero-art { animation: fadeIn 1.6s var(--ease) .1s both; }
+}
+@keyframes lineUp { from { transform: translateY(105%); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } }
+@keyframes fadeIn { from { opacity: 0; transform: scale(.96); } }
+
+/* ---------- Palette switch transition ---------- */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: circleIn .9s cubic-bezier(.7, 0, .2, 1); }
+@keyframes circleIn {
+  from { clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 0)); }
+  to { clip-path: circle(150vmax at var(--vt-x, 50%) var(--vt-y, 0)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .js .rv.pre { opacity: 1; transform: none; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .nav-links { display: none; }
+  .menu-btn { display: inline-flex; align-items: center; }
+  .nav.open .nav-links {
+    display: flex; flex-direction: column; position: absolute; top: 72px; left: 0; right: 0;
+    padding: 12px var(--gutter) 20px; background: var(--bg); border-bottom: 1px solid var(--line);
+  }
+  .nav.open .nav-links a { padding: 12px 0; font-size: 20px; }
+}
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; min-height: 0; }
+  .hero-copy { padding: 48px 20px 8px; }
+  .hero-art { min-height: 340px; order: 2; }
+  .sci-grid { grid-template-columns: 1fr; gap: 0; }
+  .sci-visual { top: 80px; z-index: 2; background: var(--bg); padding-bottom: 12px; }
+  .sci-card { padding: 12px; border-radius: 20px; }
+  .sci-card svg { max-height: 36vh; margin-inline: auto; width: auto; }
+  .step, .step:first-child { min-height: 58vh; padding-block: 32px; justify-content: flex-start; }
+  .pipe-labels { display: none; }
+  .pipe-row { grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+  .track { grid-column: 1 / -1; }
+  .phase-mobile { display: block; grid-column: 1 / -1; margin-top: -6px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .bento { grid-template-columns: 1fr; }
+  .tile-name { grid-row: auto; min-height: 420px; }
+  .closing-grid { grid-template-columns: 1fr; }
+  .foot { grid-template-columns: 1fr 1fr; }
+  .foot > div:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  .brand-word small { display: none; }
+  .switch button { padding: 0 10px 0 6px; }
+  .switch .nm { display: none; }
+  .switch button { gap: 0; }
+  .nav .wrap { gap: 10px; }
+  .theme-btn, .menu-btn { height: 40px; }
+  .theme-btn { width: 40px; }
+  .hero h1 { font-size: 40px; } .hero h1 .line-mask > span { white-space: normal; }
+  .pipe-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<a class="sr-only" href="#main">Skip to content</a>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Oyster Therapeutics home">
+      <svg class="mark mark-nacre" viewBox="0 0 30 22" aria-hidden="true">
+        <circle cx="11" cy="11" r="9.5" fill="#C99BB0" />
+        <circle cx="19" cy="11" r="9.5" fill="#B8A7C9" fill-opacity=".85" />
+      </svg>
+      <svg class="mark mark-tide" viewBox="0 0 30 22" aria-hidden="true">
+        <clipPath id="tideClip"><circle cx="15" cy="11" r="10" /></clipPath>
+        <g clip-path="url(#tideClip)">
+          <rect x="0" y="0" width="30" height="12" fill="#F2B84B" />
+          <rect x="0" y="12" width="30" height="10" fill="#7FC4B0" />
+        </g>
+      </svg>
+      <span class="brand-word">Oyster<small>Therapeutics</small></span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#science">Science</a></li>
+      <li><a href="#pipeline">Pipeline</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-tools">
+      <div class="switch" role="group" aria-label="Brand palette">
+        <button type="button" data-set-palette="nacre" aria-pressed="true" title="Option D: Nacre">
+          <span class="chip" aria-hidden="true"><i style="background:#C99BB0"></i><i style="background:#B8A7C9"></i></span>
+          <span class="nm">Nacre</span>
+        </button>
+        <button type="button" data-set-palette="tidepool" aria-pressed="false" title="Option H: Tidepool">
+          <span class="chip" aria-hidden="true"><i style="background:#0F4C4A"></i><i style="background:#F2B84B"></i></span>
+          <span class="nm">Tidepool</span>
+        </button>
+      </div>
+      <button type="button" class="theme-btn" id="themeBtn" aria-label="Switch light or dark mode"><span></span></button>
+      <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navLinks">Menu</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <!-- HERO -->
+  <div class="hero-shell" id="top">
+    <section class="stage">
+      <div class="hero">
+        <div class="hero-copy">
+          <h1>
+            <span class="line-mask"><span>Protein degraders</span></span>
+            <span class="line-mask"><span>that reach <em>the brain.</em></span></span>
+          </h1>
+          <p class="sub">We design oral, brain-penetrant medicines that remove the proteins driving neurodegenerative disease.</p>
+          <div class="ctas">
+            <a class="btn" href="#science">Our science <span class="arr" aria-hidden="true">&rarr;</span></a>
+            <a class="btn ghost" href="#pipeline">Pipeline</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <canvas id="pearl"></canvas>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- STATEMENT -->
+  <section class="statement" aria-label="Our focus">
+    <div class="wrap">
+      <p id="statementText">Most degrader companies compete on mechanism. We compete on reach: a medicine you take as a daily pill, that crosses the blood-brain barrier, and clears the protein at the root of the disease.</p>
+    </div>
+  </section>
+
+  <!-- SCIENCE -->
+  <section class="science" id="science">
+    <div class="wrap">
+      <div class="science-head rv">
+        <span class="label">Our science</span>
+        <h2 style="margin-top:14px">Getting protein degradation into the brain</h2>
+        <p>Targeted protein degradation removes a disease-causing protein instead of blocking it. The hard part in neurology is delivery. We design for it from the first molecule.</p>
+      </div>
+
+      <div class="sci-grid">
+        <div class="sci-visual">
+          <div class="sci-card">
+            <svg class="dg" id="diagram" data-step="1" viewBox="0 0 480 500" role="img" aria-labelledby="dgTitle">
+              <title id="dgTitle">A degrader taken orally crosses the blood-brain barrier and clears its target protein inside a neuron</title>
+              <!-- highlight zones -->
+              <circle class="hl-zone hz1" cx="96" cy="92" r="58" fill="var(--accent-2)" fill-opacity=".14" />
+              <rect class="hl-zone hz2" x="30" y="206" width="420" height="72" rx="36" fill="var(--accent-2)" fill-opacity=".14" />
+              <circle class="hl-zone hz3" cx="318" cy="420" r="84" fill="var(--accent-2)" fill-opacity=".14" />
+
+              <!-- capsule -->
+              <g transform="translate(58 70) rotate(-28 38 22)">
+                <rect class="capsule-b" x="0" y="8" width="76" height="30" rx="15" />
+                <rect class="capsule-a" x="0" y="8" width="38" height="30" rx="15" />
+                <rect class="capsule-a" x="20" y="8" width="18" height="30" />
+              </g>
+              <text x="160" y="72" class="t-strong">Oral dose</text>
+              <text x="160" y="92">absorbed from the gut</text>
+
+              <!-- travel path -->
+              <path class="path" d="M96 92 C 150 170, 250 150, 250 238 S 300 330, 318 420" />
+
+              <!-- blood-brain barrier -->
+              <g>
+                <rect class="cell" x="40" y="220" width="96" height="40" rx="20" />
+                <rect class="cell" x="142" y="220" width="96" height="40" rx="20" />
+                <rect class="cell" x="262" y="220" width="96" height="40" rx="20" />
+                <rect class="cell" x="364" y="220" width="76" height="40" rx="20" />
+              </g>
+              <text x="40" y="186" class="t-strong">Blood-brain barrier</text>
+              <text x="40" y="206">keeps most drugs out</text>
+
+              <!-- neuron -->
+              <g>
+                <path class="stroke" d="M318 336 L318 300 M250 420 L210 440 M386 420 L440 400 M318 504 L318 490" stroke-width="1.5" />
+                <circle class="neuron" cx="318" cy="420" r="66" />
+                <circle class="target" cx="340" cy="402" r="16" />
+                <circle class="frag f1" cx="340" cy="402" r="4" />
+                <circle class="frag f2" cx="340" cy="402" r="3" />
+                <circle class="frag f3" cx="340" cy="402" r="3.5" />
+                <circle class="frag f4" cx="340" cy="402" r="2.5" />
+              </g>
+              <text x="40" y="410" class="t-strong">Neuron</text>
+              <text x="40" y="430">target protein cleared</text>
+
+              <!-- the molecule -->
+              <g class="mover">
+                <circle class="mol-ring" r="11" />
+                <circle class="mol" r="6" />
+              </g>
+            </svg>
+            <div class="dg-caption" aria-hidden="true">
+              <span data-cap="1" class="on">Oral</span>
+              <span data-cap="2">Brain-penetrant</span>
+              <span data-cap="3">Degrader</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sci-steps">
+          <article class="step active" data-step="1">
+            <div class="step-no">01</div>
+            <h3>Taken as a pill</h3>
+            <p>Our molecules are optimised for oral absorption, so treatment can be a daily tablet at home rather than an infusion in a clinic.</p>
+          </article>
+          <article class="step" data-step="2">
+            <div class="step-no">02</div>
+            <h3>Crosses into the brain</h3>
+            <p>Degraders are usually large molecules that the blood-brain barrier keeps out. We tune size, shape and polarity so ours reach meaningful levels in brain tissue.</p>
+          </article>
+          <article class="step" data-step="3">
+            <div class="step-no">03</div>
+            <h3>Removes the target protein</h3>
+            <p>Once inside the neuron, the degrader tags the disease-causing protein for the cell's own disposal system, which breaks it down and clears it.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIPELINE -->
+  <!-- TODO: replace illustrative programs with the real pipeline from kesmalea.com once the site can be fetched. -->
+  <section class="pipeline" id="pipeline">
+    <div class="wrap">
+      <div class="pipe-head rv">
+        <h2>Pipeline</h2>
+        <p>Brain-penetrant degrader programs aimed at the proteins behind neurodegenerative disease.</p>
+      </div>
+
+      <div class="pipe" id="pipe" role="table" aria-label="Development pipeline">
+        <div class="pipe-row pipe-labels" role="row">
+          <span role="columnheader" class="label">Program</span>
+          <span role="columnheader" class="label">Indication</span>
+          <div class="phases" role="columnheader">
+            <span>Discovery</span><span>Lead optimisation</span><span>IND-enabling</span><span>Phase 1</span>
+          </div>
+        </div>
+        <div class="pipe-row" role="row">
+          <div class="prog" role="cell">OYS-101<small>Oral degrader</small></div>
+          <div class="ind" role="cell">Parkinson's disease<small>Neurodegeneration</small></div>
+          <div class="track" role="cell" aria-label="Stage: IND-enabling"><span class="bar" style="--p:62%;--d:0"></span></div>
+          <div class="phase-mobile">Stage: IND-enabling</div>
+        </div>
+        <div class="pipe-row" role="row">
+          <div class="prog" role="cell">OYS-204<small>Oral degrader</small></div>
+          <div class="ind" role="cell">Alzheimer's disease<small>Neurodegeneration</small></div>
+          <div class="track" role="cell" aria-label="Stage: Lead optimisation"><span class="bar" style="--p:41%;--d:1"></span></div>
+          <div class="phase-mobile">Stage: Lead optimisation</div>
+        </div>
+        <div class="pipe-row" role="row">
+          <div class="prog" role="cell">OYS-3xx<small>Undisclosed</small></div>
+          <div class="ind" role="cell">ALS and FTD<small>Neurodegeneration</small></div>
+          <div class="track" role="cell" aria-label="Stage: Discovery"><span class="bar" style="--p:17%;--d:2"></span></div>
+          <div class="phase-mobile">Stage: Discovery</div>
+        </div>
+      </div>
+      <p class="pipe-note">Programs shown are illustrative placeholders for layout review.</p>
+    </div>
+  </section>
+
+  <!-- WHY OYSTER -->
+  <section class="why" id="about">
+    <div class="wrap">
+      <div class="bento">
+        <div class="tile tile-name rv">
+          <h2>Why Oyster</h2>
+          <p>An oyster keeps what matters behind a hard shell and works on problems from the inside. The brain is protected in much the same way. Our medicines are built to get inside and act where the disease is.</p>
+        </div>
+        <div class="tile tile-a rv" style="--d:1">
+          <span class="k">Modalities</span>
+          <h3>Bifunctional degraders and molecular glues</h3>
+          <p>Chosen for each target, then optimised for oral exposure and brain penetration.</p>
+        </div>
+        <div class="tile tile-b rv" style="--d:2">
+          <span class="k">Focus</span>
+          <h3>Neurodegeneration</h3>
+          <p>Diseases driven by proteins that sit inside brain cells, where antibodies and most small molecules struggle to reach.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSING / CONTACT -->
+  <div class="closing-shell" id="contact">
+    <section class="stage closing">
+      <canvas id="pearl2" aria-hidden="true"></canvas>
+      <h2 class="rv">Work with us on medicines for the brain.</h2>
+      <div class="closing-grid">
+        <div class="contact rv" style="--d:1">
+          <h3>Partnerships</h3>
+          <p>For collaboration, licensing and investor enquiries.</p>
+          <div class="email-row">
+            <span class="email" id="em1">partners@oystertx.com</span>
+            <button class="copy" type="button" data-copy="em1">Copy email</button>
+          </div>
+        </div>
+        <div class="contact rv" style="--d:2">
+          <h3>Careers</h3>
+          <p>We are building a small team of chemists and neuroscientists. Tell us what you work on.</p>
+          <div class="email-row">
+            <span class="email" id="em2">careers@oystertx.com</span>
+            <button class="copy" type="button" data-copy="em2">Copy email</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <span class="brand-word">Oyster<small>Therapeutics</small></span>
+        <p class="tag">Oral, brain-penetrant protein degraders for neurodegenerative disease.</p>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#science">Science</a></li>
+          <li><a href="#pipeline">Pipeline</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get in touch</h4>
+        <ul>
+          <li><a href="#contact">Partnerships</a></li>
+          <li><a href="#contact">Careers</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="palette-strip">
+      <div class="swatches" id="swatches" aria-label="Current brand palette"></div>
+      <span class="legal">&copy; 2026 Oyster Therapeutics</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  root.classList.add('js');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var PALETTES = {
+    nacre: { option: 'Option D', name: 'Nacre', type: 'Newsreader Medium', hex: ['EFE6E1', '2B2230', 'C99BB0', 'B8A7C9'] },
+    tidepool: { option: 'Option H', name: 'Tidepool', type: 'Archivo Bold', hex: ['0F4C4A', '7FC4B0', 'F2B84B', 'EAF3EF'] }
+  };
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  /* ---------- palette + theme ---------- */
+  var paletteBtns = document.querySelectorAll('[data-set-palette]');
+  function applyPalette(name) {
+    root.setAttribute('data-palette', name);
+    paletteBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.setPalette === name)); });
+    var p = PALETTES[name];
+    document.getElementById('swatches').innerHTML =
+      '<span class="sw" style="color:var(--ink);font-weight:500">' + p.option + ' &middot; ' + p.name + '</span>' +
+      p.hex.map(function (h) { return '<span class="sw"><i style="background:#' + h + '"></i>' + h + '</span>'; }).join('');
+    refreshArt();
+  }
+  function transition(fn, x, y) {
+    if (!document.startViewTransition || reduce) { fn(); return; }
+    root.style.setProperty('--vt-x', x + 'px');
+    root.style.setProperty('--vt-y', y + 'px');
+    document.startViewTransition(fn);
+  }
+  var toastEl = document.getElementById('toast'), toastT;
+  function toast(name) {
+    var p = PALETTES[name];
+    toastEl.innerHTML = '<span class="chip">' + p.hex.map(function (h) { return '<i style="background:#' + h + '"></i>'; }).join('') +
+      '</span><span>' + p.option + ': ' + p.name + ', set in ' + p.type + '</span>';
+    toastEl.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.classList.remove('show'); }, 2800);
+  }
+  paletteBtns.forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      var name = b.dataset.setPalette;
+      if (root.getAttribute('data-palette') === name) return;
+      var r = b.getBoundingClientRect();
+      transition(function () { applyPalette(name); }, e.clientX || r.left + r.width / 2, e.clientY || r.top + r.height / 2);
+      store('oyster-palette', name);
+      toast(name);
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'p' && e.key !== 'P') return;
+    if (/input|textarea/i.test(e.target.tagName)) return;
+    var next = root.getAttribute('data-palette') === 'nacre' ? 'tidepool' : 'nacre';
+    document.querySelector('[data-set-palette="' + next + '"]').click();
+  });
+
+  var themeBtn = document.getElementById('themeBtn');
+  function isDark() {
+    var t = root.getAttribute('data-theme');
+    if (t) return t === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  themeBtn.addEventListener('click', function (e) {
+    var next = isDark() ? 'light' : 'dark';
+    transition(function () { root.setAttribute('data-theme', next); refreshArt(); }, e.clientX, e.clientY);
+    store('oyster-theme', next);
+  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', refreshArt);
+
+  /* ---------- nav ---------- */
+  var nav = document.getElementById('nav');
+  var menuBtn = document.getElementById('menuBtn');
+  menuBtn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.textContent = open ? 'Close' : 'Menu';
+  });
+  document.querySelectorAll('.nav-links a').forEach(function (a) {
+    a.addEventListener('click', function () { nav.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false'); menuBtn.textContent = 'Menu'; });
+  });
+  var sentinel = document.createElement('div');
+  sentinel.style.cssText = 'position:absolute;top:0;height:8px;width:1px';
+  document.body.prepend(sentinel);
+  new IntersectionObserver(function (en) { nav.classList.toggle('scrolled', !en[0].isIntersecting); }).observe(sentinel);
+
+  /* ---------- statement words ---------- */
+  var st = document.getElementById('statementText');
+  var hl = ['daily', 'pill,', 'blood-brain', 'barrier,', 'clears'];
+  st.innerHTML = st.textContent.trim().split(/\s+/).map(function (w, i) {
+    return '<span class="w' + (hl.indexOf(w) > -1 ? ' hl' : '') + '" style="--i:' + i + '">' + w + '</span>';
+  }).join(' ');
+
+  /* ---------- reveal (only for content below the first screen) ---------- */
+  var rvs = document.querySelectorAll('.rv');
+  if (!reduce && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.remove('pre'); io.unobserve(en.target); } });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    rvs.forEach(function (el) {
+      if (el.getBoundingClientRect().top > window.innerHeight) { el.classList.add('pre'); io.observe(el); }
+    });
+  }
+
+  /* ---------- science steps ---------- */
+  var dg = document.getElementById('diagram');
+  var caps = document.querySelectorAll('[data-cap]');
+  var steps = document.querySelectorAll('.step');
+  var stepObs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      var s = en.target.dataset.step;
+      steps.forEach(function (x) { x.classList.toggle('active', x === en.target); });
+      dg.setAttribute('data-step', s);
+      caps.forEach(function (c) { c.classList.toggle('on', c.dataset.cap === s); });
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  steps.forEach(function (x) { stepObs.observe(x); });
+
+  /* ---------- pipeline bars ---------- */
+  var pipe = document.getElementById('pipe');
+  if (reduce) pipe.classList.add('in');
+  else new IntersectionObserver(function (en, o) {
+    if (en[0].isIntersecting) { pipe.classList.add('in'); o.disconnect(); }
+  }, { threshold: .35 }).observe(pipe);
+
+  /* ---------- copy email ---------- */
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var el = document.getElementById(b.dataset.copy);
+      var done = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy email'; }, 1800); };
+      var fallback = function () {
+        var r = document.createRange(); r.selectNodeContents(el);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        b.textContent = 'Selected';
+        setTimeout(function () { b.textContent = 'Copy email'; }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(el.textContent).then(done, fallback);
+      else fallback();
+    });
+  });
+
+  /* ---------- nacre rings + pearl (canvas) ---------- */
+  var arts = [];
+  function hexToRgb(h) {
+    h = h.trim().replace('#', '');
+    if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+    var n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function readColors() {
+    var cs = getComputedStyle(root);
+    return {
+      a: hexToRgb(cs.getPropertyValue('--ring-a')),
+      b: hexToRgb(cs.getPropertyValue('--ring-b')),
+      alpha: parseFloat(cs.getPropertyValue('--ring-alpha')) || .55,
+      hi: cs.getPropertyValue('--pearl-hi').trim(),
+      lo: cs.getPropertyValue('--pearl-lo').trim()
+    };
+  }
+  function makeArt(canvas, opts) {
+    var ctx = canvas.getContext('2d');
+    var w = 0, h = 0, dpr = 1, t = 0, visible = true, colors = readColors();
+    var mx = 0, my = 0, tx = 0, ty = 0;
+    function size() {
+      var r = canvas.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = r.width; h = r.height;
+      canvas.width = Math.max(1, w * dpr); canvas.height = Math.max(1, h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      if (!w || !h) return;
+      var cx = w * (opts.cx || .5), cy = h * (opts.cy || .5);
+      var R = Math.min(w, h) * (opts.scale || .44);
+      var N = opts.rings || 26, P = 150;
+      mx += (tx - mx) * .05; my += (ty - my) * .05;
+      for (var i = 0; i < N; i++) {
+        var k = i / (N - 1);
+        var rr = R * (0.22 + k * 0.84);
+        var ox = mx * (1 - k) * 26, oy = my * (1 - k) * 26;
+        var c = [0, 1, 2].map(function (j) { return Math.round(colors.a[j] + (colors.b[j] - colors.a[j]) * k); });
+        ctx.strokeStyle = 'rgba(' + c.join(',') + ',' + (colors.alpha * (1 - k * .65)).toFixed(3) + ')';
+        ctx.lineWidth = 1.3 - k * .5;
+        ctx.beginPath();
+        for (var p = 0; p <= P; p++) {
+          var a = p / P * Math.PI * 2;
+          var d = 1
+            + .07 * Math.sin(3 * a + t * .35 + i * .42)
+            + .045 * Math.sin(5 * a - t * .22 + i * .71)
+            + .02 * Math.sin(9 * a + t * .5 + i * .2);
+          var x = cx + ox + Math.cos(a) * rr * d * 1.08;
+          var y = cy + oy + Math.sin(a) * rr * d * .92;
+          if (p === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      if (opts.pearl) {
+        var pr = R * .2;
+        var px = cx + mx * 30, py = cy + my * 30 + Math.sin(t * .8) * 4;
+        var glow = ctx.createRadialGradient(px, py, pr * .6, px, py, pr * 2.4);
+        glow.addColorStop(0, 'rgba(' + colors.a.join(',') + ',.35)');
+        glow.addColorStop(1, 'rgba(' + colors.a.join(',') + ',0)');
+        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(px, py, pr * 2.4, 0, Math.PI * 2); ctx.fill();
+        var g = ctx.createRadialGradient(px - pr * .35, py - pr * .4, pr * .05, px, py, pr);
+        g.addColorStop(0, colors.hi);
+        g.addColorStop(.55, colors.hi);
+        g.addColorStop(1, colors.lo);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, pr, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    function loop() {
+      if (visible && !reduce) { t += .016; draw(); }
+      requestAnimationFrame(loop);
+    }
+    new ResizeObserver(size).observe(canvas);
+    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }).observe(canvas);
+    if (opts.track) {
+      canvas.parentElement.parentElement.addEventListener('pointermove', function (e) {
+        var r = canvas.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width - .5) * 2;
+        ty = ((e.clientY - r.top) / r.height - .5) * 2;
+      });
+      canvas.parentElement.parentElement.addEventListener('pointerleave', function () { tx = 0; ty = 0; });
+    }
+    size();
+    if (!reduce) requestAnimationFrame(loop);
+    return { refresh: function () { colors = readColors(); draw(); } };
+  }
+  function refreshArt() { arts.forEach(function (a) { a.refresh(); }); }
+
+  /* ---------- init ---------- */
+  var savedTheme = store('oyster-theme');
+  if (savedTheme === 'light' || savedTheme === 'dark') root.setAttribute('data-theme', savedTheme);
+  var savedPalette = store('oyster-palette');
+  arts.push(makeArt(document.getElementById('pearl'), { pearl: true, track: true, cx: .5, cy: .5, scale: .42, rings: 28 }));
+  arts.push(makeArt(document.getElementById('pearl2'), { pearl: false, cx: .5, cy: .5, scale: .46, rings: 18 }));
+  applyPalette(PALETTES[savedPalette] ? savedPalette : 'nacre');
+})();
+</script>
+<!-- artifact:end -->
+</body>
+</html>
