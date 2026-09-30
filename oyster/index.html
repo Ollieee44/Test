@@ -246,18 +246,19 @@ body.on-hero .bigmark, body.menu-open .bigmark { color: var(--stage-fg); }
 .lm .pearl { fill: var(--pearl-mark); transition: fill .5s var(--ease); }
 .bigmark.hide { opacity: 0; pointer-events: none; }
 .bigmark { transition: color .5s var(--ease), opacity .4s var(--ease); }
+body.mark-ease .bigmark { transition: transform .8s cubic-bezier(.7, 0, .2, 1), color .5s var(--ease), opacity .4s var(--ease); }
 
 /* ---------- Menu overlay ---------- */
 .menu {
   position: fixed; inset: 0; z-index: 45; background: var(--stage-bg); color: var(--stage-fg);
-  display: flex; flex-direction: column; justify-content: flex-end;
-  padding: 120px var(--gutter) calc(40px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain;
+  padding: 112px var(--gutter) calc(40px + env(safe-area-inset-bottom, 0px));
   clip-path: inset(0 0 100% 0); transition: clip-path .8s cubic-bezier(.7, 0, .2, 1); visibility: hidden;
 }
 body.menu-open .menu { clip-path: inset(0 0 0 0); visibility: visible; }
-.menu ul { list-style: none; margin: 0; padding: 0; }
+.menu ul { list-style: none; margin: auto 0 0; padding: 0; }
 .menu li { overflow: hidden; }
-.menu a.big { display: inline-block; text-decoration: none; font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--display-track); font-size: clamp(44px, 8vw, 116px); line-height: 1.02; transform: translateY(110%); transition: transform .8s var(--ease), color .3s; }
+.menu a.big { display: inline-block; text-decoration: none; font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--display-track); font-size: clamp(40px, min(8vw, 9vh), 116px); line-height: 1.02; transform: translateY(110%); transition: transform .8s var(--ease), color .3s; }
 body.menu-open .menu a.big { transform: translateY(0); transition-delay: calc(.25s + var(--i) * 60ms); }
 .menu a.big:hover { color: var(--stage-em); }
 .menu-foot { margin-top: 48px; display: flex; flex-wrap: wrap; gap: 32px 64px; color: var(--stage-muted); }
@@ -893,8 +894,14 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
 
   /* ---------- menu ---------- */
   var menuBtn = document.getElementById('menuBtn');
+  var easeT;
   function toggleMenu(open) {
     body.classList.toggle('menu-open', open);
+    // glide the wordmark into (or back out of) its small header position so it never covers the menu
+    head.classList.remove('hide'); mark.classList.remove('hide');
+    body.classList.add('mark-ease'); clearTimeout(easeT);
+    easeT = setTimeout(function () { body.classList.remove('mark-ease'); }, 850);
+    updateMark(window.scrollY, window.innerWidth, window.innerHeight);
     menuBtn.setAttribute('aria-expanded', String(open));
     menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   }
@@ -959,7 +966,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
     var s = small / markW;
     var startY = vh - markH - Math.max(20, g * .6);
     var endY = (76 - small * markH / markW) / 2 + 2;
-    var q = reduce ? 1 : seg(y / (vh * .7), 0, 1);
+    var q = reduce || body.classList.contains('menu-open') ? 1 : seg(y / (vh * .7), 0, 1);
     mark.style.transform = 'translate3d(' + left + 'px,' + lerp(startY, endY, q) + 'px,0) scale(' + lerp(1, s, q) + ')';
   }
   function updateHeader(y, dy, vh) {
