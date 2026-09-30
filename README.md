@@ -22,8 +22,9 @@ The Playwright CLI is installed automatically at the start of each Claude Code o
 
 ## Oyster Therapeutics site
 
-`oyster/index.html` is a single-page, self-contained concept site for the Oyster Therapeutics rebrand. Open it directly in a browser.
+`oyster/index.html` is a single-page, self-contained concept site for rebranding Kesmalea Therapeutics as Oyster Therapeutics. Open it directly in a browser.
 
-- Two palettes from the brand audit, switchable live from the nav (or press `P`): **Option D, Nacre** (Newsreader display) and **Option H, Tidepool** (Archivo display).
-- Each palette has light and dark variants (follows the system setting; the round button toggles).
-- The pipeline programs and contact emails are placeholders until the real content is added.
+- Content comes from Kesmalea's public materials: the SELFTAC® platform, oncology and CNS discovery, leadership and board, Syncona and Oxford Science Enterprises, and news.
+- Layout and motion follow bicycletherapeutics.com. A giant wordmark shrinks into the header as you scroll, the full-screen menu opens from a square button, and sections start with a "▸ label" and use circle-arrow links. The SELFTAC diagram is pinned and scrubbed by scroll, a panel expands as it comes into view, and the news carousel, cursor ring and large sign-up footer also come from Bicycle.
+- Two palettes from the brand audit switch live from the header (or press `P`): **Option D, Nacre** (Newsreader display) and **Option H, Tidepool** (Archivo display). Each has light and dark variants.
+- The general enquiries email is a placeholder.
