@@ -294,6 +294,9 @@ footer .base .legal { grid-column: 7 / 13; display: flex; justify-content: space
 .sw { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-label); font-size: 11px; }
 .sw i { width: 14px; height: 14px; border-radius: 50%; display: block; box-shadow: 0 0 0 1px var(--foot-line); }
 
+/* ---------- Floating science background: stylised ternary complexes behind the page ---------- */
+#bgArt { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+
 /* ---------- Toast ---------- */
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 60; transform: translate(-50%, 160%); opacity: 0; background: var(--ink); color: var(--bg); padding: 10px 16px 10px 12px; display: flex; align-items: center; gap: 12px; font-family: var(--font-label); font-size: 12.5px; text-transform: uppercase; letter-spacing: .03em; transition: transform .5s var(--ease), opacity .5s var(--ease); max-width: calc(100vw - 32px); }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
@@ -371,6 +374,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
   <symbol id="mark" viewBox="0 0 100 100"><g transform="translate(-1.5 1.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/><circle class="pearl" cx="62" cy="45.5" r="10" style="fill: var(--pearl-mark)"/></g></symbol>
 </svg>
 
+<canvas id="bgArt" aria-hidden="true"></canvas>
 <a class="sr-only" href="#main">Skip to content</a>
 
 <div class="top" id="top">
@@ -840,11 +844,101 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
 
 
 
+
+  /* ---------- floating ternary complexes (background) ---------- */
+  // Each "complex" is a target protein (lumpy blob), the two SELFTAC halves joined as the bridge
+  // (circle, linker, rounded square) and an E3 ligase (crescent). Loose halves and ubiquitin chains
+  // drift between them. Drawn as low-contrast line art, with depth-based scroll parallax.
+  function makeBg(canvas) {
+    var ctx = canvas.getContext('2d'), w = 0, h = 0, dpr = 1, items = [], t = 0, col = null;
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+    function readCol() {
+      var cs = getComputedStyle(root);
+      return { a: hexToRgb(cs.getPropertyValue('--accent')), b: hexToRgb(cs.getPropertyValue('--accent-2')), ink: hexToRgb(cs.getPropertyValue('--ink')) };
+    }
+    function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
+    function build() {
+      items = [];
+      var n = w < 700 ? 6 : w < 1100 ? 9 : 11, kinds = ['complex', 'complex', 'complex', 'blob', 'e3', 'halfA', 'halfB', 'ubq'];
+      for (var i = 0; i < n; i++) {
+        var k = i < Math.ceil(n * .6) ? 'complex' : kinds[3 + Math.floor(Math.random() * 5)];
+        items.push({ k: k, x: (i % 2 ? rnd(.55, .97) : rnd(.03, .45)), y: (i + rnd(.1, .9)) / n, z: rnd(.6, 1.3), r: rnd(-.45, .45), vr: rnd(-.015, .015),
+          ph: rnd(0, 100), sp: rnd(.08, .18), amp: rnd(10, 26),
+          lobes: [rnd(.08, .16), rnd(.05, .1), rnd(.03, .07)], lp: [rnd(0, 6), rnd(0, 6), rnd(0, 6)], ub: Math.floor(rnd(0, 4.99)) });
+      }
+    }
+    function size() {
+      dpr = Math.min(devicePixelRatio || 1, 2); w = innerWidth; h = innerHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!items.length || Math.abs(items._w - w) > 200) { build(); items._w = w; }
+      col = readCol(); draw();
+    }
+    function blob(R, it, tt) {
+      ctx.beginPath();
+      for (var i = 0; i <= 48; i++) {
+        var a = i / 48 * Math.PI * 2;
+        var d = 1 + it.lobes[0] * Math.sin(3 * a + it.lp[0] + tt * .3) + it.lobes[1] * Math.sin(5 * a + it.lp[1]) + it.lobes[2] * Math.sin(7 * a + it.lp[2] - tt * .2);
+        var x = Math.cos(a) * R * d, y = Math.sin(a) * R * d * .82;
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = rgba(col.a, .13); ctx.fill();
+      ctx.strokeStyle = rgba(col.ink, .28); ctx.lineWidth = 1.2; ctx.stroke();
+    }
+    function e3(R) { // crescent opening to the left, cupping the degrader
+      ctx.beginPath();
+      ctx.arc(0, 0, R, Math.PI * .72, Math.PI * 1.28, true);
+      ctx.arc(-R * .32, 0, R * .66, Math.PI * 1.2, Math.PI * .8, false);
+      ctx.closePath();
+      ctx.fillStyle = rgba(col.b, .18); ctx.fill();
+      ctx.strokeStyle = rgba(col.ink, .28); ctx.lineWidth = 1.2; ctx.stroke();
+    }
+    function halfA(s) { ctx.beginPath(); ctx.moveTo(s * .8, 0); ctx.lineTo(s * 1.7, 0); ctx.strokeStyle = rgba(col.ink, .4); ctx.lineWidth = 1.6; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, s, 0, Math.PI * 2); ctx.fillStyle = rgba(col.a, .38); ctx.fill(); ctx.strokeStyle = rgba(col.ink, .35); ctx.lineWidth = 1.1; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, s * .26, 0, Math.PI * 2); ctx.fillStyle = rgba(col.ink, .45); ctx.fill(); }
+    function halfB(s) { ctx.beginPath(); ctx.moveTo(-s * .8, 0); ctx.lineTo(-s * 1.7, 0); ctx.strokeStyle = rgba(col.ink, .4); ctx.lineWidth = 1.6; ctx.stroke();
+      ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-s * .9, -s * .9, s * 1.8, s * 1.8, s * .45); else ctx.rect(-s * .9, -s * .9, s * 1.8, s * 1.8);
+      ctx.fillStyle = rgba(col.b, .45); ctx.fill(); ctx.strokeStyle = rgba(col.ink, .35); ctx.lineWidth = 1.1; ctx.stroke();
+      ctx.beginPath(); ctx.rect(-s * .24, -s * .24, s * .48, s * .48); ctx.fillStyle = rgba(col.ink, .45); ctx.fill(); }
+    function ubq(n, s) { for (var i = 0; i < n; i++) { ctx.beginPath(); ctx.arc(-i * s * 2.1, i * s * (i % 2 ? .9 : -.4), s, 0, Math.PI * 2);
+      ctx.fillStyle = rgba(col.ink, .2); ctx.fill(); ctx.strokeStyle = rgba(col.ink, .32); ctx.lineWidth = 1; ctx.stroke(); } }
+    function draw() {
+      if (!w) return;
+      ctx.clearRect(0, 0, w, h);
+      var sy = window.scrollY, field = h * 2.2;
+      items.forEach(function (it) {
+        var S = 56 * it.z * (w < 700 ? .7 : 1);
+        var y = ((it.y * field - sy * (.18 + it.z * .22)) % field + field) % field - h * .6;
+        if (y < -S * 4 || y > h + S * 4) return;
+        var x = it.x * w + Math.sin(t * it.sp + it.ph) * it.amp;
+        y += Math.cos(t * it.sp * .8 + it.ph) * it.amp * .7;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(it.r + t * it.vr); ctx.globalAlpha = .38 + it.z * .22;
+        if (it.k === 'complex') {
+          var breathe = Math.sin(t * .5 + it.ph) * S * .04; // the complex gently flexes as one unit
+          ctx.save(); ctx.translate(-S * 1.55 - breathe, 0); blob(S, it, t); if (it.ub) { ctx.translate(-S * .5, S * .78); ubq(it.ub, S * .14); } ctx.restore();
+          ctx.save(); ctx.translate(-S * .48, 0); halfA(S * .26); ctx.restore();
+          ctx.save(); ctx.translate(S * .1, 0); halfB(S * .24); ctx.restore();
+          ctx.save(); ctx.translate(S * 1.05 + breathe, 0); e3(S * .78); ctx.restore();
+        } else if (it.k === 'blob') blob(S * .8, it, t);
+        else if (it.k === 'e3') e3(S * .7);
+        else if (it.k === 'halfA') halfA(S * .3);
+        else if (it.k === 'halfB') halfB(S * .28);
+        else ubq(4, S * .16);
+        ctx.restore();
+      });
+    }
+    function loop() { if (!reduce) t += .016; draw(); requestAnimationFrame(loop); }
+    window.addEventListener('resize', size);
+    size(); requestAnimationFrame(loop);
+    return { refresh: function () { col = readCol(); draw(); } };
+  }
+
   /* ---------- init ---------- */
   var savedTheme = store('oyster-theme');
   if (savedTheme === 'light' || savedTheme === 'dark') root.setAttribute('data-theme', savedTheme);
   var wide = window.innerWidth > 900;
   arts.push(makeArt(document.getElementById('heroArt'), { pearl: true, track: true, cx: .5, cy: wide ? .7 : .66, scale: wide ? .5 : .55, rings: 30 }));
+  arts.push(makeBg(document.getElementById('bgArt')));
   var saved = store('oyster-palette');
   applyPalette(PALETTES[saved] ? saved : 'nacre');
   requestAnimationFrame(frame);
