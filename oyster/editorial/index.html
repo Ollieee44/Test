@@ -180,7 +180,7 @@ section { position: relative; }
 .in { transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: calc(var(--d, 0) * 90ms); }
 
 /* ---------- SELFTAC (pinned, scrubbed) ---------- */
-.selftac { height: 520vh; }
+.selftac { height: 620vh; }
 .pin { position: sticky; top: 0; height: 100svh; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 1.176rem; align-items: center; padding-top: 142px; padding-bottom: 24px; }
 .st-art { grid-column: 1 / 8; background: var(--surface); padding: clamp(10px, 1.6vw, 22px); transition: background-color .5s var(--ease); max-height: calc(100svh - 170px); display: flex; flex-direction: column; }
 .st-art svg { width: 100%; height: auto; max-height: calc(100svh - 250px); margin-inline: auto; }
@@ -243,6 +243,12 @@ section { position: relative; }
 .dg .p20 { fill: color-mix(in srgb, var(--ink) 52%, var(--surface)); }
 .dg .psub { stroke: var(--surface); stroke-opacity: .35; stroke-width: 1; }
 .dg .p19 { fill: color-mix(in srgb, var(--ink) 36%, var(--surface)); stroke: color-mix(in srgb, var(--ink) 52%, var(--surface)); stroke-width: 1; }
+.dg .e2 { fill: color-mix(in srgb, var(--accent-2) 55%, var(--surface)); stroke: color-mix(in srgb, var(--accent-2) 70%, var(--ink)); stroke-width: 1.3; }
+.dg .e2-l { font-size: 9px; font-weight: 600; fill: var(--ink); }
+.dg #e2ub { fill: var(--accent-ink); stroke: var(--surface); stroke-width: 1.2; }
+.dg .rip { fill: none; stroke: var(--accent-ink); stroke-width: 1.6; }
+.dg .fx-ring { fill: none; stroke: var(--accent-ink); stroke-width: 2; }
+.dg .fx-ray { stroke: var(--accent-ink); stroke-width: 1.8; stroke-linecap: round; }
 /* selftac-art:end */
 .dg .e3 { fill: color-mix(in srgb, var(--accent-2) 30%, var(--surface)); stroke: color-mix(in srgb, var(--accent-2) 70%, var(--ink)); stroke-width: 1.5; }
 .dg .brd4 { fill: color-mix(in srgb, var(--accent-ink) 16%, var(--surface)); stroke: color-mix(in srgb, var(--accent-ink) 75%, var(--ink)); stroke-width: 1.5; }
@@ -525,16 +531,24 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
           <!-- target protein: BRD4 bromodomain 2 from PDB 5T35, with ubiquitin chain -->
           <g id="tgtG" class="fl" style="--fa:1.5px;--fd:-2.2s">
             <path class="brd4" d="M321.0 482.9C314.6 485.7 315.6 485.2 309.9 482.1C304.2 479.0 291.5 468.8 287.0 464.4C282.4 460.0 283.8 461.5 282.7 455.8C281.6 450.1 276.8 438.9 280.5 430.1C284.2 421.3 294.8 409.1 305.0 402.9C315.2 396.6 332.0 391.9 341.8 392.8C351.5 393.7 358.4 399.2 363.5 408.1C368.7 416.9 371.3 437.2 372.8 446.0C374.2 454.8 372.9 457.4 372.0 460.7C371.2 464.1 371.5 465.4 367.5 466.2C363.5 466.9 355.6 462.7 347.9 465.5C340.1 468.3 327.3 480.2 321.0 482.9Z"/><path class="pdet" d="M317.3 475.7C312.0 478.2 314.1 476.5 312.4 475.0C310.6 473.5 310.4 469.8 306.8 466.8C303.2 463.8 292.6 463.6 290.9 457.0C289.2 450.5 293.7 435.1 296.6 427.6C299.6 420.2 303.6 416.7 308.7 412.5C313.8 408.3 321.6 404.4 327.1 402.4C332.6 400.4 336.4 398.4 341.8 400.6C347.1 402.7 355.5 406.8 359.3 415.4C363.1 424.0 364.2 445.3 364.5 452.1C364.9 459.0 364.8 455.0 361.4 456.4C358.0 457.8 351.6 457.2 344.2 460.4C336.9 463.6 322.6 473.3 317.3 475.7Z"/>
-            <g id="ubq"><circle cx="296" cy="478" r="5.5"/><circle cx="287" cy="488" r="5.5"/><circle cx="283" cy="500" r="5.5"/><circle cx="290" cy="511" r="5.5"/></g>
+            <g id="ubq"><circle cx="361.5" cy="402.1" r="5.2"/><circle cx="354.5" cy="391.6" r="5.2"/><circle cx="355.5" cy="381.1" r="5.2"/><circle cx="348.5" cy="370.6" r="5.2"/></g>
           </g>
+          <!-- the next target protein, which arrives once the first is destroyed -->
+          <g id="tgt2" opacity="0"><path class="brd4" d="M321.0 482.9C314.6 485.7 315.6 485.2 309.9 482.1C304.2 479.0 291.5 468.8 287.0 464.4C282.4 460.0 283.8 461.5 282.7 455.8C281.6 450.1 276.8 438.9 280.5 430.1C284.2 421.3 294.8 409.1 305.0 402.9C315.2 396.6 332.0 391.9 341.8 392.8C351.5 393.7 358.4 399.2 363.5 408.1C368.7 416.9 371.3 437.2 372.8 446.0C374.2 454.8 372.9 457.4 372.0 460.7C371.2 464.1 371.5 465.4 367.5 466.2C363.5 466.9 355.6 462.7 347.9 465.5C340.1 468.3 327.3 480.2 321.0 482.9Z"/><path class="pdet" d="M317.3 475.7C312.0 478.2 314.1 476.5 312.4 475.0C310.6 473.5 310.4 469.8 306.8 466.8C303.2 463.8 292.6 463.6 290.9 457.0C289.2 450.5 293.7 435.1 296.6 427.6C299.6 420.2 303.6 416.7 308.7 412.5C313.8 408.3 321.6 404.4 327.1 402.4C332.6 400.4 336.4 398.4 341.8 400.6C347.1 402.7 355.5 406.8 359.3 415.4C363.1 424.0 364.2 445.3 364.5 452.1C364.9 459.0 364.8 455.0 361.4 456.4C358.0 457.8 351.6 457.2 344.2 460.4C336.9 463.6 322.6 473.3 317.3 475.7Z"/></g>
+          <!-- E2 enzyme carrying ubiquitin, which docks on the E3 ligase -->
+          <g id="e2G" opacity="0"><path class="e2" d="M16.3 0.0C16.1 1.0 15.4 1.9 14.8 2.8C14.1 3.6 13.2 4.3 12.4 5.0C11.5 5.7 10.6 6.2 9.7 6.8C8.8 7.4 7.9 7.9 6.9 8.4C5.9 8.8 4.8 9.3 3.7 9.6C2.5 10.0 1.3 10.2 0.0 10.3C-1.3 10.4 -2.6 10.4 -3.9 10.2C-5.2 10.0 -6.4 9.6 -7.5 9.1C-8.7 8.7 -9.7 8.1 -10.6 7.4C-11.5 6.8 -12.4 6.1 -13.1 5.3C-13.8 4.5 -14.4 3.7 -14.9 2.8C-15.3 1.9 -15.7 1.0 -15.9 0.0C-16.0 -1.0 -15.9 -2.0 -15.6 -2.9C-15.3 -3.9 -14.7 -4.8 -13.9 -5.6C-13.1 -6.4 -12.0 -7.1 -10.8 -7.6C-9.7 -8.1 -8.4 -8.4 -7.1 -8.7C-5.9 -8.9 -4.6 -9.0 -3.5 -9.0C-2.3 -9.1 -1.2 -9.1 -0.0 -9.1C1.2 -9.1 2.3 -9.2 3.5 -9.1C4.7 -9.1 6.0 -9.1 7.3 -8.9C8.6 -8.6 10.0 -8.4 11.3 -7.9C12.5 -7.4 13.7 -6.7 14.6 -5.9C15.4 -5.1 16.1 -4.1 16.4 -3.1C16.7 -2.1 16.6 -1.0 16.3 0.0Z"/><text class="e2-l" x="2" y="3.5" text-anchor="middle">E2</text></g>
+          <circle id="e2ub" r="5.2" opacity="0"/>
           <text x="270" y="376" id="tgtLbl" class="in-lbl">Target protein</text>
           <g id="frags" opacity="0"><circle cx="452" cy="522" r="3"/><circle cx="464" cy="532" r="2.5"/><circle cx="458" cy="514" r="2"/><circle cx="474" cy="524" r="2.8"/><circle cx="468" cy="540" r="2"/></g>
+          <!-- membrane crossings -->
+          <ellipse id="ripA" class="rip" rx="17" ry="4.5" opacity="0"/><ellipse id="ripB" class="rip" rx="17" ry="4.5" opacity="0"/>
           <!-- selftac-cell:end -->
 
           <!-- the two SELFTAC halves -->
           <!-- selftac-halves:start (generated by molecule/gen_site_icon.py) -->
           <g id="halfA" class="fl hz-a" style="--fa:1.5px;--fd:-1.2s"><path class="bz-s" d="M-9.4 19.8C-10.5 19.9 -11.5 19.8 -12.6 19.6C-13.7 19.5 -14.7 19.3 -15.8 19.0C-16.9 18.6 -18.2 18.2 -19.3 17.7C-20.4 17.2 -21.6 16.6 -22.5 16.0C-23.5 15.4 -24.3 14.8 -25.1 14.1C-25.8 13.5 -26.4 12.8 -27.0 12.1C-27.6 11.4 -28.1 10.7 -28.5 9.9C-29.0 9.1 -29.3 8.4 -29.7 7.3C-30.0 6.2 -30.4 4.8 -30.6 3.5C-30.9 2.1 -31.0 0.6 -31.1 -1.0C-31.1 -2.6 -31.1 -4.6 -30.9 -6.1C-30.8 -7.7 -30.6 -9.1 -30.2 -10.3C-29.9 -11.5 -29.6 -12.5 -29.1 -13.5C-28.6 -14.5 -28.0 -15.3 -27.4 -16.1C-26.8 -16.8 -26.2 -17.4 -25.4 -17.9C-24.6 -18.4 -23.8 -18.9 -22.8 -19.2C-21.9 -19.5 -20.7 -19.7 -19.6 -19.8C-18.6 -19.8 -17.5 -19.7 -16.4 -19.5C-15.4 -19.3 -14.4 -19.0 -13.2 -18.5C-12.1 -18.0 -11.2 -17.5 -9.7 -16.5C-8.3 -15.5 -6.2 -13.9 -4.6 -12.6C-3.0 -11.2 -1.4 -9.7 -0.2 -8.4C1.0 -7.1 1.7 -6.0 2.4 -4.9C3.1 -3.7 3.7 -2.6 4.1 -1.3C4.5 -0.1 4.8 1.2 4.9 2.5C5.0 3.8 5.0 5.1 4.9 6.3C4.7 7.6 4.5 8.7 4.1 9.9C3.7 11.0 3.2 12.1 2.5 13.1C1.9 14.1 1.1 15.0 0.2 15.9C-0.7 16.7 -1.7 17.4 -2.7 17.9C-3.7 18.5 -4.8 18.9 -5.9 19.2C-7.0 19.6 -8.3 19.7 -9.4 19.8Z"/><path class="bz-o" d="M-8.1 17.9C-9.0 18.1 -9.4 18.1 -10.0 18.1C-10.7 18.0 -10.7 18.3 -12.0 17.7C-13.2 17.0 -15.5 15.2 -17.6 14.3C-19.6 13.5 -22.7 13.1 -24.1 12.6C-25.5 12.1 -25.5 11.8 -26.0 11.3C-26.6 10.8 -27.0 10.3 -27.3 9.5C-27.6 8.8 -27.9 8.6 -27.9 7.0C-27.8 5.3 -27.1 2.5 -27.1 -0.4C-27.1 -3.3 -27.7 -8.5 -27.8 -10.6C-27.9 -12.8 -27.8 -12.5 -27.7 -13.2C-27.7 -13.9 -27.6 -14.3 -27.4 -14.8C-27.3 -15.3 -27.0 -15.9 -26.7 -16.4C-26.4 -16.8 -26.1 -17.2 -25.7 -17.5C-25.4 -17.9 -25.0 -18.1 -24.4 -18.4C-23.9 -18.6 -23.2 -18.8 -22.5 -18.9C-21.8 -19.0 -21.1 -18.9 -20.3 -18.8C-19.4 -18.6 -18.4 -18.3 -17.4 -17.9C-16.4 -17.5 -15.3 -16.9 -14.5 -16.5C-13.8 -16.1 -13.4 -15.9 -12.9 -15.5C-12.4 -15.1 -12.2 -15.0 -11.4 -14.1C-10.7 -13.3 -9.1 -11.1 -8.4 -10.2C-7.8 -9.4 -7.7 -9.4 -7.3 -9.0C-6.8 -8.7 -6.8 -8.6 -5.8 -8.1C-4.7 -7.6 -2.1 -6.5 -1.1 -6.0C-0.1 -5.5 -0.1 -5.3 0.3 -4.9C0.7 -4.4 1.1 -4.0 1.4 -3.3C1.6 -2.6 1.9 -2.3 2.0 -0.7C2.2 0.9 2.3 4.7 2.3 6.3C2.3 7.9 2.3 8.1 2.1 8.9C1.9 9.7 1.7 10.4 1.4 11.1C1.0 11.9 0.5 12.7 -0.1 13.4C-0.7 14.0 -1.2 14.5 -2.0 15.1C-2.9 15.6 -3.9 16.3 -4.9 16.7C-5.9 17.2 -7.3 17.7 -8.1 17.9Z"/><path class="bz-c" d="M-8.1 14.7C-8.7 14.8 -9.0 14.8 -9.4 14.8C-9.8 14.7 -9.6 15.0 -10.7 14.5C-11.8 14.0 -14.0 12.5 -15.8 11.8C-17.6 11.0 -20.4 10.6 -21.6 10.2C-22.8 9.7 -22.8 9.6 -23.2 9.2C-23.7 8.8 -24.0 8.5 -24.2 7.9C-24.4 7.4 -24.6 7.5 -24.6 6.0C-24.6 4.6 -24.3 2.1 -24.3 -0.7C-24.4 -3.5 -24.9 -8.8 -24.9 -10.9C-24.9 -13.1 -24.5 -12.9 -24.3 -13.5C-24.2 -14.1 -24.0 -14.2 -23.7 -14.5C-23.5 -14.7 -23.2 -15.0 -22.8 -15.2C-22.5 -15.4 -22.1 -15.5 -21.6 -15.6C-21.0 -15.6 -20.3 -15.6 -19.6 -15.5C-19.0 -15.4 -18.1 -15.1 -17.4 -14.8C-16.7 -14.5 -16.2 -14.3 -15.5 -13.8C-14.8 -13.3 -14.1 -12.9 -13.2 -11.9C-12.4 -10.9 -11.1 -8.9 -10.4 -8.1C-9.7 -7.2 -9.7 -7.2 -9.2 -6.8C-8.7 -6.4 -8.5 -6.1 -7.5 -5.6C-6.5 -5.1 -4.2 -4.1 -3.3 -3.7C-2.5 -3.2 -2.7 -3.2 -2.4 -2.9C-2.1 -2.5 -1.8 -2.2 -1.5 -1.7C-1.3 -1.1 -1.1 -0.7 -0.9 0.6C-0.8 1.8 -0.5 4.5 -0.5 5.7C-0.4 6.9 -0.4 7.0 -0.5 7.6C-0.6 8.3 -0.8 8.9 -1.0 9.5C-1.3 10.1 -1.6 10.7 -2.0 11.3C-2.5 11.8 -3.0 12.3 -3.6 12.8C-4.3 13.2 -5.1 13.7 -5.9 14.0C-6.6 14.3 -7.5 14.6 -8.1 14.7Z"/><path class="bz-ln" d="M-2.4 -1.5C-1.8 -1.1 -0.7 0.7 0.9 0.8C2.5 0.9 5.1 -0.9 7.1 -0.8C9.1 -0.7 10.9 1.4 12.9 1.5C14.9 1.6 17.1 -0.3 19.1 -0.2C21.1 -0.1 22.9 2.0 24.9 2.1C26.9 2.2 30.0 0.7 31.1 0.4"/><circle class="bz-b" cx="0.9" cy="0.8" r="1.9"/><circle class="bz-b" cx="7.1" cy="-0.8" r="1.9"/><circle class="bz-b" cx="12.9" cy="1.5" r="1.9"/><circle class="bz-b" cx="19.1" cy="-0.2" r="1.9"/><circle class="bz-ox" cx="24.9" cy="2.1" r="2.5"/><circle class="bz-x" cx="31.1" cy="0.4" r="3"/></g>
           <g id="halfB" class="fl hz-b" style="--fa:1.5px;--fd:-3.1s"><path class="bz-s" d="M6.7 20.4C5.6 20.6 4.8 20.6 3.8 20.6C2.9 20.7 1.9 20.6 0.9 20.6C-0.0 20.5 -1.0 20.4 -1.9 20.2C-2.8 20.0 -3.7 19.8 -4.5 19.5C-5.3 19.3 -6.0 19.0 -6.7 18.7C-7.5 18.3 -8.3 17.9 -9.0 17.4C-9.7 16.9 -10.3 16.4 -10.9 15.9C-11.4 15.3 -11.8 14.8 -12.3 14.3C-12.7 13.7 -13.1 13.0 -13.4 12.3C-13.8 11.6 -14.1 10.8 -14.3 10.1C-14.5 9.3 -14.7 8.7 -14.8 7.9C-14.8 7.1 -14.9 6.1 -14.8 5.3C-14.8 4.4 -14.6 3.5 -14.4 2.7C-14.2 1.9 -13.9 1.2 -13.6 0.5C-13.3 -0.3 -12.9 -1.1 -12.4 -1.7C-12.0 -2.4 -11.8 -2.8 -11.0 -3.7C-10.2 -4.5 -9.0 -5.8 -7.7 -6.7C-6.4 -7.7 -5.7 -8.2 -3.2 -9.4C-0.7 -10.6 4.1 -12.5 7.3 -13.9C10.4 -15.3 13.5 -16.9 15.7 -17.8C17.9 -18.8 18.7 -19.1 20.5 -19.5C22.2 -20.0 24.4 -20.5 26.2 -20.6C28.0 -20.8 30.1 -20.7 31.3 -20.6C32.6 -20.6 32.9 -20.4 33.6 -20.2C34.3 -20.0 34.9 -19.9 35.5 -19.6C36.1 -19.3 36.8 -19.0 37.4 -18.6C38.0 -18.3 38.5 -18.0 39.1 -17.4C39.7 -16.9 40.4 -16.1 40.9 -15.5C41.4 -14.9 41.8 -14.3 42.1 -13.6C42.4 -12.9 42.7 -12.1 42.9 -11.3C43.1 -10.6 43.2 -9.9 43.2 -9.1C43.3 -8.3 43.2 -7.3 43.1 -6.5C43.0 -5.7 42.8 -5.1 42.5 -4.3C42.3 -3.6 41.9 -2.8 41.5 -2.1C41.1 -1.3 40.6 -0.6 40.0 0.1C39.4 0.8 38.6 1.5 37.7 2.2C36.9 2.8 35.8 3.5 34.9 3.9C33.9 4.4 33.5 4.6 32.0 5.1C30.5 5.6 27.4 6.4 25.9 6.9C24.4 7.4 24.0 7.6 23.2 8.2C22.3 8.7 21.9 8.9 20.7 10.1C19.6 11.3 17.4 14.0 16.3 15.2C15.1 16.4 14.7 16.8 13.7 17.5C12.8 18.2 11.7 18.8 10.5 19.3C9.4 19.8 7.8 20.1 6.7 20.4Z"/><path class="bz-o" d="M9.6 17.8C9.0 17.8 8.4 17.9 7.3 17.7C6.3 17.5 4.4 16.8 3.5 16.5C2.6 16.3 3.0 16.3 1.9 16.3C0.8 16.2 -2.0 16.5 -3.2 16.5C-4.4 16.5 -4.7 16.5 -5.5 16.3C-6.2 16.2 -7.0 15.9 -7.7 15.6C-8.4 15.2 -9.1 14.7 -9.6 14.2C-10.1 13.7 -10.5 13.2 -10.8 12.7C-11.2 12.1 -11.4 11.6 -11.6 11.1C-11.8 10.5 -12.0 9.8 -12.1 9.1C-12.3 8.5 -12.3 8.0 -12.3 7.2C-12.3 6.5 -12.2 5.5 -12.1 4.7C-11.9 3.9 -11.8 3.1 -11.5 2.4C-11.3 1.7 -11.1 1.1 -10.7 0.5C-10.4 -0.1 -10.2 -0.5 -9.6 -1.1C-9.1 -1.7 -9.0 -2.0 -7.4 -2.9C-5.8 -3.9 -1.7 -5.9 -0.0 -6.7C1.6 -7.5 1.2 -7.3 2.5 -7.7C3.9 -8.1 6.8 -8.7 8.0 -9.0C9.2 -9.4 9.3 -9.4 9.9 -9.8C10.5 -10.1 10.8 -10.2 11.8 -11.0C12.9 -11.7 15.1 -13.6 16.3 -14.4C17.5 -15.2 18.3 -15.4 19.2 -15.7C20.0 -16.0 20.3 -16.0 21.4 -16.1C22.5 -16.2 24.4 -16.2 25.9 -16.5C27.4 -16.7 29.3 -17.3 30.4 -17.5C31.5 -17.7 32.0 -17.7 32.6 -17.8C33.3 -17.8 33.7 -17.7 34.2 -17.7C34.8 -17.6 35.1 -17.6 35.8 -17.3C36.5 -16.9 37.7 -16.3 38.4 -15.8C39.0 -15.3 39.4 -14.8 39.8 -14.2C40.2 -13.7 40.4 -13.2 40.7 -12.6C40.9 -12.0 41.1 -11.3 41.2 -10.7C41.3 -10.1 41.3 -9.4 41.3 -8.8C41.3 -8.1 41.2 -7.5 41.0 -6.9C40.9 -6.2 40.6 -5.6 40.3 -4.9C40.0 -4.3 39.7 -3.7 39.2 -3.0C38.8 -2.3 38.2 -1.5 37.6 -0.8C37.0 -0.1 36.0 0.7 35.5 1.1C34.9 1.6 34.6 1.6 34.2 1.8C33.8 2.0 33.4 2.1 32.9 2.2C32.5 2.2 32.5 2.3 31.3 2.3C30.2 2.2 27.8 1.8 25.9 1.9C24.0 1.9 21.3 2.2 20.0 2.4C18.7 2.6 18.4 2.8 17.9 3.1C17.4 3.4 17.2 3.6 16.9 4.0C16.6 4.4 16.5 4.0 16.2 5.3C15.9 6.6 15.2 10.4 14.8 12.0C14.4 13.6 14.0 14.2 13.7 14.8C13.4 15.5 13.3 15.5 13.0 15.9C12.7 16.2 12.3 16.5 12.0 16.8C11.6 17.1 11.3 17.3 10.9 17.4C10.5 17.6 10.2 17.7 9.6 17.8Z"/><path class="bz-c" d="M8.9 14.3C8.4 14.4 8.5 14.5 7.3 14.3C6.2 14.2 4.1 13.4 2.2 13.3C0.3 13.2 -2.8 13.6 -4.2 13.6C-5.5 13.6 -5.2 13.5 -5.8 13.2C-6.3 13.0 -6.8 12.8 -7.4 12.3C-7.9 11.9 -8.5 10.9 -8.8 10.4C-9.2 9.9 -9.2 9.6 -9.3 9.1C-9.4 8.7 -9.5 8.1 -9.5 7.5C-9.6 7.0 -9.5 6.5 -9.5 5.9C-9.4 5.3 -9.2 4.6 -9.1 4.0C-8.9 3.4 -8.6 2.9 -8.4 2.4C-8.2 2.0 -8.2 1.8 -7.7 1.3C-7.2 0.8 -6.9 0.3 -5.5 -0.6C-4.0 -1.5 -0.3 -3.2 1.3 -4.0C2.8 -4.7 2.5 -4.6 3.8 -4.9C5.1 -5.3 7.8 -5.9 9.0 -6.2C10.3 -6.6 10.5 -6.7 11.2 -7.1C11.9 -7.4 12.1 -7.5 13.1 -8.3C14.1 -9.0 16.1 -10.9 17.3 -11.6C18.4 -12.4 19.1 -12.6 19.8 -12.9C20.6 -13.2 20.7 -13.2 21.7 -13.3C22.8 -13.4 24.7 -13.4 26.2 -13.6C27.7 -13.9 29.7 -14.5 30.7 -14.7C31.7 -15.0 31.6 -15.0 32.3 -15.0C33.0 -14.9 34.1 -14.8 34.9 -14.6C35.6 -14.3 36.4 -13.6 36.8 -13.3C37.3 -12.9 37.4 -12.7 37.6 -12.3C37.8 -11.9 38.1 -11.7 38.2 -11.0C38.3 -10.4 38.4 -9.1 38.4 -8.5C38.4 -7.8 38.3 -7.7 38.2 -7.2C38.0 -6.7 37.9 -6.3 37.5 -5.6C37.1 -4.9 36.1 -3.6 35.5 -2.9C34.9 -2.3 34.4 -2.0 33.9 -1.7C33.4 -1.4 33.5 -1.3 32.3 -1.2C31.1 -1.1 28.9 -1.4 26.5 -1.3C24.2 -1.1 20.0 -0.7 18.2 -0.4C16.5 -0.1 16.6 0.1 16.0 0.4C15.4 0.8 14.9 1.3 14.5 1.8C14.2 2.3 14.0 2.1 13.7 3.4C13.3 4.7 12.8 8.2 12.5 9.6C12.1 11.1 11.9 11.4 11.6 12.0C11.3 12.7 11.0 13.1 10.5 13.5C10.1 13.8 9.5 14.1 8.9 14.3Z"/><path class="bz-ln" d="M-43.2 1.6C-42.3 1.4 -39.3 -0.1 -37.5 -0.0C-35.6 0.1 -33.9 2.2 -32.0 2.3C-30.2 2.4 -28.1 0.5 -26.2 0.6C-24.4 0.7 -22.7 2.8 -20.8 2.9C-19.0 3.0 -16.9 1.1 -15.0 1.2C-13.2 1.3 -11.1 3.4 -9.6 3.5C-8.1 3.6 -6.6 2.1 -6.0 1.8"/><circle class="bz-x" cx="-43.2" cy="1.6" r="3"/><circle class="bz-ox" cx="-37.5" cy="-0.0" r="2.5"/><circle class="bz-b" cx="-32.0" cy="2.3" r="1.9"/><circle class="bz-b" cx="-26.2" cy="0.6" r="1.9"/><circle class="bz-ox" cx="-20.8" cy="2.9" r="2.5"/><circle class="bz-b" cx="-15.0" cy="1.2" r="1.9"/><circle class="bz-b" cx="-9.6" cy="3.5" r="1.9"/></g>
+          <g id="bondFx" opacity="0"><circle class="fx-ring" r="7"/><path class="fx-ray" d="M8.3 3.4L12.9 5.3"/><path class="fx-ray" d="M3.5 8.3L5.4 12.9"/><path class="fx-ray" d="M-3.4 8.3L-5.3 12.9"/><path class="fx-ray" d="M-8.3 3.5L-12.9 5.4"/><path class="fx-ray" d="M-8.3 -3.4L-12.9 -5.3"/><path class="fx-ray" d="M-3.5 -8.3L-5.4 -12.9"/><path class="fx-ray" d="M3.4 -8.3L5.3 -12.9"/><path class="fx-ray" d="M8.3 -3.5L12.9 -5.4"/></g>
           <!-- selftac-halves:end -->
           <g id="lkMark" opacity="0"><circle r="9" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3"/></g>
         </svg>
@@ -545,9 +559,10 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
           <div class="st-step"><span class="label">02 / Reversible linker</span><h3>Split in two</h3><p>SELFTAC&reg; places a reversible linker between the two halves, turning one large degrader into two small molecules.</p></div>
           <div class="st-step"><span class="label">03 / Blood-brain barrier</span><h3>Through the barrier</h3><p>Tight junctions seal the gaps between the endothelial cells of brain capillaries, so a drug has to pass through the cells themselves. Small molecules can.</p></div>
           <div class="st-step"><span class="label">04 / Self-assembly</span><h3>Rebuilt in the neuron</h3><p>Inside the cell the two halves recombine into the full degrader. One end holds the target protein, the other an E3 ligase.</p></div>
-          <div class="st-step"><span class="label">05 / Degradation</span><h3>Tagged and cleared</h3><p>The E3 ligase tags the target with ubiquitin and the proteasome breaks it down. The degrader is released to act again.</p></div>
+          <div class="st-step"><span class="label">05 / Degradation</span><h3>Tagged and cleared</h3><p>An E2 enzyme docks on the E3 ligase and hands ubiquitin, one unit at a time, onto the face of the target turned towards it. The proteasome reads the chain and breaks the target down.</p></div>
+          <div class="st-step"><span class="label">06 / Catalytic</span><h3>Ready for the next one</h3><p>The degrader is not used up. Once the target is destroyed it catches another, so one molecule can clear many.</p></div>
         </div>
-        <div class="st-prog" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>
+        <div class="st-prog" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>
       </div>
     </div>
   </section>
@@ -745,23 +760,38 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
   var selftac = document.querySelector('.selftac');
   var steps = document.querySelectorAll('.st-step'), progI = document.querySelectorAll('.st-prog i');
   var lastStep = -1;
-  var HALF_DX = 79.9, HALF_DY = 1.1; // joined offset of half B from half A, written by molecule/gen_site_icon.py
+  var HALF_DX = 79.9, HALF_DY = 1.1; var HALF_BRK = [[31.1, 0.4], [-43.2, 1.6]]; // joined offset of half B from half A, written by molecule/gen_site_icon.py
   var A = document.getElementById('halfA'), B = document.getElementById('halfB'), LK = document.getElementById('lkMark');
   var tgtG = document.getElementById('tgtG'), ubq = document.querySelectorAll('#ubq circle'), frags = document.getElementById('frags');
   var tgtLbl = document.getElementById('tgtLbl');
+  var tgt2 = document.getElementById('tgt2'), e2G = document.getElementById('e2G'), e2ub = document.getElementById('e2ub'), bondFx = document.getElementById('bondFx');
+  var ripA = document.getElementById('ripA'), ripB = document.getElementById('ripB');
   var capT = document.getElementById('capT'), capS = document.getElementById('capS');
   var LABELS = [
     ['Conventional degrader', 'Too large to cross the endothelium'],
-    ['SELFTAC\u00AE molecule', 'Split into two halves by a reversible linker'],
-    ['Crossing the blood-brain barrier', 'Through the endothelial cells, not between them'],
-    ['Degrader assembled', 'Target protein and E3 ligase brought together'],
-    ['Ubiquitin tagging and degradation', 'The proteasome breaks the target down']
+    ['SELFTAC® molecule', 'Split into two halves by a reversible linker'],
+    ['Crossing the blood-brain barrier', 'Through each cell membrane in turn, not between cells'],
+    ['Degrader assembled', 'The linker clicks shut between target protein and E3 ligase'],
+    ['Ubiquitin tagging and degradation', 'An E2 enzyme hands ubiquitin across; the proteasome breaks the target down'],
+    ['Ready for the next target', 'The degrader is released and catches another']
   ];
-  var BOUNDS = [[0, .2], [.2, .36], [.36, .62], [.62, .76], [.76, 1]];
-  // routes through the barrier (viewBox units): lumen -> endothelial cell interior -> end-foot cleft -> neuron
-  var CELL = {"endA": [352, 402], "endB": [438, 398], "asm": [395, 438], "tgt": [329.3, 446.5], "into": [352, 530]}; // neuron layout (soma, BRD4, VHL, proteasome), written by molecule/gen_site_icon.py
-  var PATH_A = [[262, 64], [250, 148], [250, 176], [313, 196], [313, 240], [322, 300], CELL.endA];
-  var PATH_B = [[366, 64], [410, 148], [410, 176], [473, 196], [470, 252], [440, 318], CELL.endB];
+  var BOUNDS = [[0, .17], [.17, .3], [.3, .55], [.55, .69], [.69, .87], [.87, 1]];
+  var CELL = {"endA": [352, 402], "endB": [438, 398], "asm": [395, 438], "tgt": [329.3, 446.5], "into": [352, 530], "ub": [[361.5, 402.1], [354.5, 391.6], [355.5, 381.1], [348.5, 370.6]], "e2": [397.5, 394.1], "e2ub": [-11, 5]}; // neuron layout (soma, BRD4, VHL, proteasome), written by molecule/gen_site_icon.py
+  // routes through the barrier (viewBox units) as [x, y, duration, pause]: lumen, luminal membrane,
+  // endothelial cell, abluminal membrane, end-foot cleft, neuron membrane. Pauses repeat a point.
+  var KEY_A = [[262, 64, 0], [251, 122, 1], [250, 134, .5], [250, 134, .8, 1], [250, 167, 1], [250, 167, .8, 1], [262, 182, .4],
+    [313, 198, .9], [313, 240, .6], [323, 301, .8], [323, 301, .8, 1], CELL.endA.concat(1)];
+  var KEY_B = [[366, 64, 0], [408, 122, 1], [410, 134, .5], [410, 134, .8, 1], [410, 167, 1], [410, 167, .8, 1], [430, 182, .4],
+    [473, 198, .9], [470, 250, .6], [452, 291, .8], [452, 291, .8, 1], CELL.endB.concat(1)];
+  function keyed(K, t) { // position along keyframes; m is progress through a membrane pause, or -1
+    var tot = 0, i; for (i = 1; i < K.length; i++) tot += K[i][2];
+    var g = t * tot;
+    for (i = 1; i < K.length; i++) {
+      if (g <= K[i][2] || i === K.length - 1) { var k = K[i][2] ? clamp(g / K[i][2], 0, 1) : 1, e = ease(k);
+        return { x: lerp(K[i - 1][0], K[i][0], e), y: lerp(K[i - 1][1], K[i][1], e), m: K[i][3] ? k : -1 }; }
+      g -= K[i][2];
+    }
+  }
   function along(pts, t) {
     var L = [], tot = 0, i;
     for (i = 1; i < pts.length; i++) { var d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); L.push(d); tot += d; }
@@ -774,9 +804,9 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
     var r = selftac.getBoundingClientRect();
     if (r.bottom < 0 || r.top > vh) return;
     var p = clamp(-r.top / (r.height - vh), 0, 1);
-    var s0 = clamp((p - .03) / .14, 0, 1), s1 = seg(p, .22, .33), s2 = seg(p, .39, .6), s3 = seg(p, .64, .74);
-    var u = clamp((p - .78) / .08, 0, 1), s4 = seg(p, .87, .95), s5 = seg(p, .92, 1);
-    var ax, ay, bx, by, sc;
+    var s0 = clamp((p - .02) / .12, 0, 1), s1 = seg(p, .19, .28), s2 = clamp((p - .31) / .23, 0, 1), s3 = seg(p, .56, .635);
+    var fx = clamp((p - .635) / .045, 0, 1), u = clamp((p - .7) / .11, 0, 1), s4 = seg(p, .815, .855), s5 = seg(p, .845, .875), s6 = seg(p, .89, .96);
+    var ax, ay, bx, by, sc, qa = 1, qb = 1, ka = { m: -1 }, kb = { m: -1 };
     if (s2 <= 0) {
       // joined degrader bumps against the endothelium, then splits in the blood
       var bump = Math.sin(Math.PI * s0) * 34 * (1 - s1);
@@ -784,23 +814,52 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
       ax = lerp(309 - HALF_DX * sc / 2, 262, s1); ay = lerp(64 - HALF_DY * sc / 2, 64, s1) + bump;
       bx = lerp(309 + HALF_DX * sc / 2, 366, s1); by = lerp(64 + HALF_DY * sc / 2, 64, s1) + bump;
     } else {
-      var pa = along(PATH_A, s2), pb = along(PATH_B, s2);
-      // reassembles between the target protein and the E3 ligase
-      ax = lerp(pa[0], CELL.asm[0] - HALF_DX * .4, s3); ay = lerp(pa[1], CELL.asm[1] - HALF_DY * .4, s3);
-      bx = lerp(pb[0], CELL.asm[0] + HALF_DX * .4, s3); by = lerp(pb[1], CELL.asm[1] + HALF_DY * .4, s3); sc = .8;
+      // each half pauses at every membrane it crosses, squeezing slightly as it passes through
+      ka = keyed(KEY_A, s2); kb = keyed(KEY_B, s2);
+      if (ka.m >= 0) qa = 1 - .14 * Math.sin(Math.PI * ka.m);
+      if (kb.m >= 0) qb = 1 - .14 * Math.sin(Math.PI * kb.m);
+      // then reassembles between the target protein and the E3 ligase
+      ax = lerp(ka.x, CELL.asm[0] - HALF_DX * .4, s3); ay = lerp(ka.y, CELL.asm[1] - HALF_DY * .4, s3);
+      bx = lerp(kb.x, CELL.asm[0] + HALF_DX * .4, s3); by = lerp(kb.y, CELL.asm[1] + HALF_DY * .4, s3); sc = .8;
     }
-    A.setAttribute('transform', 'translate(' + ax.toFixed(1) + ' ' + ay.toFixed(1) + ') scale(' + sc.toFixed(3) + ')');
-    B.setAttribute('transform', 'translate(' + bx.toFixed(1) + ' ' + by.toFixed(1) + ') scale(' + sc.toFixed(3) + ')');
-    LK.setAttribute('transform', 'translate(' + ((ax + bx) / 2).toFixed(1) + ' ' + ((ay + by) / 2).toFixed(1) + ')');
-    LK.setAttribute('opacity', (s1 > 0 && s2 < .15 ? s1 * (1 - s2 / .15) : 0).toFixed(2));
-    // ubiquitin chain grows one unit at a time, then the tagged target is fed into the proteasome
-    ubq.forEach(function (c, i) { c.setAttribute('opacity', clamp(u * 4 - i, 0, 1).toFixed(2)); });
+    A.setAttribute('transform', 'translate(' + ax.toFixed(1) + ' ' + ay.toFixed(1) + ') scale(' + sc.toFixed(3) + ' ' + (sc * qa).toFixed(3) + ')');
+    B.setAttribute('transform', 'translate(' + bx.toFixed(1) + ' ' + by.toFixed(1) + ') scale(' + sc.toFixed(3) + ' ' + (sc * qb).toFixed(3) + ')');
+    [[ripA, ka], [ripB, kb]].forEach(function (rk) {
+      var k = rk[1], on = k.m >= 0 && s3 <= 0;
+      rk[0].setAttribute('opacity', on ? (Math.sin(Math.PI * k.m) * .8).toFixed(2) : '0');
+      if (on) rk[0].setAttribute('transform', 'translate(' + k.x.toFixed(1) + ' ' + k.y.toFixed(1) + ') scale(' + (.6 + .9 * k.m).toFixed(2) + ')');
+    });
+    // the reversible bond: dashed while open, then it clicks shut with a flash
+    var mx = (ax + HALF_BRK[0][0] * sc + bx + HALF_BRK[1][0] * sc) / 2, my = (ay + HALF_BRK[0][1] * sc + by + HALF_BRK[1][1] * sc) / 2;
+    LK.setAttribute('transform', 'translate(' + mx.toFixed(1) + ' ' + my.toFixed(1) + ')');
+    var lkOn = s1 > 0 && s2 < .15 ? s1 * (1 - s2 / .15) : s3 > .4 && fx < .2 ? (s3 - .4) / .6 * (1 - fx / .2) : 0;
+    LK.setAttribute('opacity', lkOn.toFixed(2));
+    bondFx.setAttribute('opacity', (fx > 0 && fx < 1 ? Math.sin(Math.PI * fx) : 0).toFixed(2));
+    bondFx.setAttribute('transform', 'translate(' + mx.toFixed(1) + ' ' + my.toFixed(1) + ') scale(' + (.7 + 1.5 * fx).toFixed(2) + ')');
+    // an E2 enzyme docks on the E3 ligase and hands over four ubiquitins, one at a time, onto
+    // the face of the target turned towards the ligase; it leaves as the target is destroyed
+    var arrive = seg(u, 0, .18), dx2 = lerp(620, CELL.e2[0], arrive) + 220 * s4, dy2 = lerp(300, CELL.e2[1], arrive) - 40 * s4;
+    e2G.setAttribute('transform', 'translate(' + dx2.toFixed(1) + ' ' + dy2.toFixed(1) + ')');
+    e2G.setAttribute('opacity', (u > 0 ? Math.min(arrive * 2, 1 - s4) : 0).toFixed(2));
+    var done = 0, hop = -1;
+    for (var i = 0; i < 4; i++) { var q = (u - .2 - i * .2) / .2; if (q >= .999) done++; else if (q >= 0 && hop < 0) hop = q; }
+    ubq.forEach(function (c, i) { c.setAttribute('opacity', i < done ? '1' : '0'); });
+    var sx = dx2 + CELL.e2ub[0], sy = dy2 + CELL.e2ub[1];
+    if (u > 0 && done < 4) {
+      var tq = hop < 0 ? 0 : ease(hop), slot = CELL.ub[done];
+      e2ub.setAttribute('cx', lerp(sx, slot[0], tq).toFixed(1)); e2ub.setAttribute('cy', (lerp(sy, slot[1], tq) - 16 * Math.sin(Math.PI * tq)).toFixed(1));
+      e2ub.setAttribute('opacity', Math.min(arrive * 2, 1).toFixed(2));
+    } else e2ub.setAttribute('opacity', '0');
+    // the tagged target is fed into the proteasome
     var k = 1 - .8 * s4;
     tgtG.setAttribute('transform', 'translate(' + ((CELL.into[0] - CELL.tgt[0]) * s4 + CELL.tgt[0] * (1 - k)).toFixed(1) + ' ' + ((CELL.into[1] - CELL.tgt[1]) * s4 + CELL.tgt[1] * (1 - k)).toFixed(1) + ') scale(' + k.toFixed(3) + ')');
-    tgtG.setAttribute('opacity', (1 - seg(p, .9, .95)).toFixed(2));
-    tgtLbl.setAttribute('opacity', (1 - s4).toFixed(2));
-    frags.setAttribute('opacity', s5.toFixed(2));
+    tgtG.setAttribute('opacity', (1 - seg(p, .84, .87)).toFixed(2));
+    frags.setAttribute('opacity', (s5 * (1 - s6)).toFixed(2));
     frags.setAttribute('transform', 'translate(' + (s5 * 18).toFixed(1) + ' 0)');
+    // the degrader is not used up: a second target drifts in and is caught by the warhead
+    tgt2.setAttribute('opacity', s6.toFixed(2));
+    tgt2.setAttribute('transform', 'translate(' + (-150 * (1 - s6)).toFixed(1) + ' ' + (24 * (1 - s6)).toFixed(1) + ')');
+    tgtLbl.setAttribute('opacity', Math.max(1 - seg(p, .7, .74), s6).toFixed(2));
     var step = 0; BOUNDS.forEach(function (bd, i) { if (p >= bd[0]) step = i; });
     if (step !== lastStep) {
       steps.forEach(function (el, i) { el.classList.toggle('on', i === step); });

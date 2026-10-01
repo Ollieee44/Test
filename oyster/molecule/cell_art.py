@@ -239,4 +239,10 @@ CSS = '''.dg { overflow: hidden; }
 .dg .p20 { fill: color-mix(in srgb, var(--ink) 52%, var(--surface)); }
 .dg .psub { stroke: var(--surface); stroke-opacity: .35; stroke-width: 1; }
 .dg .p19 { fill: color-mix(in srgb, var(--ink) 36%, var(--surface)); stroke: color-mix(in srgb, var(--ink) 52%, var(--surface)); stroke-width: 1; }
+.dg .e2 { fill: color-mix(in srgb, var(--accent-2) 55%, var(--surface)); stroke: color-mix(in srgb, var(--accent-2) 70%, var(--ink)); stroke-width: 1.3; }
+.dg .e2-l { font-size: 9px; font-weight: 600; fill: var(--ink); }
+.dg #e2ub { fill: var(--accent-ink); stroke: var(--surface); stroke-width: 1.2; }
+.dg .rip { fill: none; stroke: var(--accent-ink); stroke-width: 1.6; }
+.dg .fx-ring { fill: none; stroke: var(--accent-ink); stroke-width: 2; }
+.dg .fx-ray { stroke: var(--accent-ink); stroke-width: 1.8; stroke-linecap: round; }
 '''
