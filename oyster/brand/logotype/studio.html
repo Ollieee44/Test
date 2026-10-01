@@ -72,7 +72,7 @@ textarea { width: 100%; min-height: 70px; resize: vertical; font: 400 14px/1.45 
   <header>
     <span class="eyebrow">Oyster Therapeutics &middot; Wordmark spacing</span>
     <h1>Oyster Logotype</h1>
-    <p>The wordmark is drawn from the letter outlines, so each gap can be set by hand. The shading shows the white space between neighbouring letters across the x-height; the number above each gap is its average width in font units (1000 to the em). Even spacing makes those numbers match. Save when you are happy and I will apply it to the site.</p>
+    <p>The wordmark is drawn from the letter outlines, so each gap can be set by hand. The shading shows the white space between neighbouring letters across the x-height; the number above each gap is its average width in font units (1000 to the em). Even spacing makes those numbers match. The saved setting is what the websites and logo files use; save a new one and ask Claude to apply it.</p>
   </header>
 
   <div class="bench">
@@ -103,7 +103,7 @@ textarea { width: 100%; min-height: 70px; resize: vertical; font: 400 14px/1.45 
 
       <section class="panel" aria-labelledby="spH">
         <h2 id="spH">Spacing</h2>
-        <div class="seg" role="group" aria-label="Spacing starting point"><button type="button" id="modeSite" data-mode="site">As on the site</button><button type="button" id="modeEven" data-mode="even">Optically even</button></div>
+        <div class="seg" role="group" aria-label="Spacing starting point"><button type="button" id="modeSite" data-mode="site">Font spacing</button><button type="button" id="modeEven" data-mode="even">Optically even</button></div>
         <div class="row"><label for="target">Gap</label><input type="range" id="target" min="20" max="160" step="1"><output id="targetV" for="target"></output></div>
         <p class="hint" id="targetHint">Target width for every gap. Lower is tighter.</p>
         <label class="check"><input type="checkbox" id="shade" checked> Shade the gaps</label>
@@ -267,7 +267,7 @@ textarea { width: 100%; min-height: 70px; resize: vertical; font: 400 14px/1.45 
     $('targetHint').textContent = st.mode === 'even' ? 'Target width for every gap. Lower is tighter.' : 'Switch to Optically even to set one width for every gap.';
     $('shade').checked = state.shade;
     var stage = $('stage'); stage.style.background = d.bg; stage.style.color = d.ink;
-    $('stageLab').textContent = d.label + ' · ' + d.font; $('modeLab').textContent = st.mode === 'even' ? 'Optically even' : 'As on the site';
+    $('stageLab').textContent = d.label + ' · ' + d.font; $('modeLab').textContent = st.mode === 'even' ? 'Optically even' : 'Font spacing';
     var lay = draw($('spec'), pal, st, st.mode, { nudges: true, shade: state.shade, labels: true, sub: true });
     PAIRS.forEach(function (p, i) {
       $('n' + p).value = st.nudges[p] || 0;
@@ -277,10 +277,10 @@ textarea { width: 100%; min-height: 70px; resize: vertical; font: 400 14px/1.45 
     var site = layout(pal, st, 'site', false), effs = lay.gaps.map(function (g) { return g.eff * 1000; }), seff = site.gaps.map(function (g) { return g.eff * 1000; });
     var spread = function (a) { return Math.round(Math.max.apply(null, a) - Math.min.apply(null, a)); };
     var mean = function (a) { return Math.round(a.reduce(function (x, y) { return x + y; }, 0) / a.length); };
-    $('stats').innerHTML = '<span>Average gap <b>' + mean(effs) + '</b> (site ' + mean(seff) + ')</span><span>Spread <b>' + spread(effs) + '</b> (site ' + spread(seff) + ')</span><span>Width <b>' + ((lay.end - lay.items[0].x) / (site.end - site.items[0].x) * 100).toFixed(1) + '%</b> of the site wordmark</span>';
+    $('stats').innerHTML = '<span>Average gap <b>' + mean(effs) + '</b> (font ' + mean(seff) + ')</span><span>Spread <b>' + spread(effs) + '</b> (font ' + spread(seff) + ')</span><span>Width <b>' + ((lay.end - lay.items[0].x) / (site.end - site.items[0].x) * 100).toFixed(1) + '%</b> of the font-spaced wordmark</span>';
     // side by side
     var cmp = $('compare'); cmp.innerHTML = '';
-    [['As on the site', 'font spacing', 'site', false], ['Optically even', 'gap ' + st.target + ', no nudges', 'even', false], ['Your setting', st.mode === 'even' ? 'even + nudges' : 'site + nudges', st.mode, true]].forEach(function (r) {
+    [['Font spacing', 'the typeface as designed', 'site', false], ['Optically even', 'gap ' + st.target + ', no nudges', 'even', false], ['Your setting', st.mode === 'even' ? 'even + nudges' : 'font + nudges', st.mode, true]].forEach(function (r) {
       var box = document.createElement('div'); box.className = 'cmp'; box.style.background = d.bg; box.style.color = d.ink;
       box.innerHTML = '<div class="lab">' + r[0] + '<span>' + r[1] + '</span></div>';
       var s = document.createElementNS(NS, 'svg'); s.setAttribute('role', 'img'); s.setAttribute('aria-label', r[0]); box.appendChild(s); cmp.appendChild(box);

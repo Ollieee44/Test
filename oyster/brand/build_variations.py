@@ -3,6 +3,8 @@ import os
 from wordmark_metrics import style
 D=os.path.dirname(os.path.abspath(__file__))+'/'
 defs=open(D+'variations_defs.svg').read()
+import sys; sys.path.insert(0, D + 'logotype')
+from build_logotype import logotype_svg
 AH='aria-hidden="true"'
 OPTS=[
  ('v-open','00','The Open Shell','The current mark, shown for reference: two shells, a hinge gap and a pearl.','The baseline. Simple and recognisable at every size.','The pearl floats in open space, so it is the least compact of the set.'),
@@ -33,9 +35,9 @@ for i,n,t,idea,good,watch in OPTS:
     # the mark standing in for the O: its ink runs from the round-letter overshoot below the
     # baseline up to the x-height of s, e and r, with side bearings matched to the letter o
     extra=(f'<div class="panel nacre oword"><span class="mono">Mark as the O &middot; Nacre</span>'
-           f'<div class="olock serif">{omark(i,"serif",*N)}<span>yster</span></div></div>'
+           f'<div class="olock">{logotype_svg("nacre", mark_id=i, sub=False, style=f"color:{N[0]};--p1:{N[1]};--p2:{N[2]}", mark_ink=INK[i])}</div></div>'
            f'<div class="panel tide oword"><span class="mono">Mark as the O &middot; Tidepool</span>'
-           f'<div class="olock sans">{omark(i,"sans",*TD)}<span>yster</span></div></div>')
+           f'<div class="olock">{logotype_svg("tidepool", mark_id=i, sub=False, style=f"color:{TD[0]};--p1:{TD[1]};--p2:{TD[2]}", mark_ink=INK[i])}</div></div>')
     smallN=use(i,48,*N,AH)+use(i,32,*N,AH)+use(i,24,*N,AH)+app(i,N[0],'#EFE6E1',N[1],N[2],32)+app(i,N[0],'#EFE6E1',N[1],N[2],16)
     smallT=use(i,48,*TD,AH)+use(i,32,*TD,AH)+use(i,24,*TD,AH)+app(i,'#EAF3EF','#0F4C4A',TD[1],TD[2],32)+app(i,'#EAF3EF','#0F4C4A',TD[1],TD[2],16)
     heroN=use(i,220,*N,f'role="img" aria-label="{t} mark in Nacre colours" class="hero-m"')
@@ -73,7 +75,7 @@ html=f'''<!doctype html>
   <div class="wrap">
     <span class="mono">Oyster Therapeutics &middot; Brand mark</span>
     <h1>Variations on the Open Shell</h1>
-    <p>Five directions built on the current mark, now all sharing The Hollow&rsquo;s cradle: the pearl sits in a round hollow cut into the lower shell. The original is shown first for comparison. Each option is also shown standing in for the O of the wordmark.</p>
+    <p>Five directions built on the current mark, now all sharing The Hollow&rsquo;s cradle: the pearl sits in a round hollow cut into the lower shell. The original is shown first for comparison. Each option is also shown as the O of the Oyster logotype, with the letter spacing set in the Logotype studio.</p>
   </div>
 </header>
 <main>
