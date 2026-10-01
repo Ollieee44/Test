@@ -199,6 +199,7 @@ section { position: relative; }
 .st-cap span { font-size: 14px; color: var(--muted); }
 .dg text { font-family: var(--font-body); fill: var(--muted); font-size: 13px; font-weight: 500; }
 .dg .strong { fill: var(--ink); font-weight: 600; }
+.dg .in-lbl { font-size: 13px; }
 .dg .lumen { fill: color-mix(in srgb, var(--rbc) 14%, var(--surface)); }
 .dg .rbc-o { fill: var(--rbc); }
 .dg .rbc-i { fill: color-mix(in srgb, var(--rbc) 70%, #3a0f16); opacity: .45; }
@@ -350,6 +351,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
   .st-copy { padding-left: 0; }
   .st-cap { display: none; }
   .dg text { font-size: 17px; }
+  .dg .in-lbl { font-size: 15px; }
   .pipe-row.head { display: none; }
   .pipe-row .a, .pipe-row .b, .pipe-row .c { grid-column: 1 / -1; }
   .pipe-row .b { margin: 4px 0 12px; }
@@ -486,24 +488,24 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
 
           <!-- neuron -->
           <g class="dend"><path d="M318 350 C292 322 262 300 238 262"/><path d="M400 324 C398 292 392 264 380 238"/><path d="M392 268 C410 254 428 244 452 240"/><path d="M494 352 C532 322 566 302 608 292"/><path d="M468 520 C500 548 540 566 604 592"/></g>
-          <path class="soma" d="M280 432 C280 358 336 324 400 324 C470 326 520 364 518 434 C516 504 460 536 400 534 C334 532 280 502 280 432 Z"/>
-          <circle class="nuc fl" style="--fa:1.5px;--fd:-2.7s" cx="470" cy="392" r="32"/>
-          <circle class="nucl" cx="478" cy="400" r="8"/>
+          <path class="soma" d="M264 430 C264 352 328 312 396 312 C470 312 528 356 528 430 C528 508 468 548 396 548 C326 548 264 508 264 430 Z"/>
+          <circle class="nuc fl" style="--fa:1.5px;--fd:-2.7s" cx="490" cy="402" r="26"/>
+          <circle class="nucl" cx="496" cy="408" r="7"/>
 
           <!-- proteasome -->
           <g class="prot fl" style="--fa:1.5px;--fd:-4s"><rect x="334" y="476" width="10" height="26" rx="4"/><rect x="347" y="471" width="11" height="36" rx="3"/><rect x="360" y="471" width="11" height="36" rx="3"/><rect x="373" y="471" width="11" height="36" rx="3"/><rect x="386" y="471" width="11" height="36" rx="3"/><rect x="399" y="476" width="10" height="26" rx="4"/></g>
-          <text x="372" y="524" text-anchor="middle">Proteasome</text>
+          <text x="372" y="526" text-anchor="middle" class="in-lbl">Proteasome</text>
 
           <!-- E3 ligase -->
           <path class="e3 fl" style="--fa:2px;--fd:-.6s" d="M390 414 C398 402 416 402 422 414 C428 428 420 444 406 446 C392 448 384 436 390 414 Z"/>
-          <text x="410" y="396" text-anchor="middle">E3 ligase</text>
+          <text x="452" y="392" text-anchor="end" class="in-lbl">E3 ligase</text>
 
           <!-- target protein with ubiquitin chain -->
           <g id="tgtG" class="fl" style="--fa:2.5px;--fd:-2.2s">
             <path class="coil" d="M300 432 c2 -14 16 -18 22 -8 s-10 16 -2 20 s16 -4 12 -16 s-14 -10 -8 -18 s12 0 10 10"/>
             <g id="ubq"><circle cx="308" cy="452" r="5"/><circle cx="300" cy="461" r="5"/><circle cx="294" cy="472" r="5"/><circle cx="302" cy="482" r="5"/></g>
           </g>
-          <text x="314" y="396" text-anchor="middle" id="tgtLbl">Target protein</text>
+          <text x="286" y="392" id="tgtLbl" class="in-lbl">Target protein</text>
           <g id="frags" opacity="0"><circle cx="418" cy="486" r="3"/><circle cx="430" cy="496" r="2.5"/><circle cx="424" cy="478" r="2"/><circle cx="440" cy="488" r="2.8"/><circle cx="434" cy="504" r="2"/></g>
 
           <!-- the two SELFTAC halves -->
@@ -860,7 +862,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
     function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
     function layout() { // a loose staggered grid of copies, some running off the edges
       seed = 11; items = [];
-      var cols = w < 700 ? 2 : 3, rows = 2, S = Math.max(w / cols, h / rows) * (w < 700 ? .62 : .62);
+      var cols = w < 700 ? 3 : 5, rows = w < 700 ? 4 : 3, S = Math.max(w / cols, h / rows) * (w < 700 ? .7 : .66);
       for (var r = 0; r < rows; r++) for (var c = 0; c < cols; c++) {
         var cx = (c + .5 + (r % 2 ? .35 : -.15)) * w / cols + rnd(-.08, .08) * w / cols;
         var cy = (r + .5) * h / rows + rnd(-.12, .12) * h / rows;
