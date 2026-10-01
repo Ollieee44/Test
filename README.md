@@ -33,3 +33,7 @@ The Playwright CLI is installed automatically at the start of each Claude Code o
 ### Brand mark
 
 `oyster/brand/index.html` is the brand sheet for the mark, "The Open Shell": two valves holding a pearl. It covers construction, lockups, colour versions, small sizes, usage and the alternatives explored. SVG files are in `oyster/brand/`.
+
+### Editorial version
+
+`oyster/editorial/index.html` is a second take on the site after nabla.bio. It uses the same content, palettes, logo, pearl hero and SELFTAC diagram, set in an editorial 12-column layout. It adds an announcement strip, a header that fades the page beneath it, "● label" sections over hairlines, square outlined buttons and a dark footer.
