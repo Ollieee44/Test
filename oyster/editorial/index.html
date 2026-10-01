@@ -614,7 +614,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
       </div>
     </div>
     <div class="grid base">
-      <div class="addr">Offices and laboratories<br>London, United Kingdom</div>
+      <div class="addr">Offices and laboratories<br>London, United Kingdom<p class="label" style="margin-top:22px;opacity:.75">Background: PROTAC ternary complex BRD4, MZ1, VHL and Elongin B/C, traced from PDB 5T35 (Gadd et al., Nat. Chem. Biol. 2017)</p></div>
       <div class="legal"><div class="swatches" id="swatches" aria-label="Current brand palette"></div><span>&copy; 2026 Oyster Therapeutics. Formerly Kesmalea Therapeutics.</span></div>
     </div>
   </div>
@@ -845,92 +845,86 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
 
 
 
-  /* ---------- floating ternary complexes (background) ---------- */
-  // Each "complex" is a target protein (lumpy blob), the two SELFTAC halves joined as the bridge
-  // (circle, linker, rounded square) and an E3 ligase (crescent). Loose halves and ubiquitin chains
-  // drift between them. Drawn as low-contrast line art, with depth-based scroll parallax.
+  /* ---------- ternary complex background, traced from PDB 5T35 ---------- */
+  // Outlines of BRD4 (target), VHL (E3 ligase), Elongin C and Elongin B, with the PROTAC MZ1 as sticks,
+  // projected from the crystal structure and smoothed. They sit at fixed places on the page and scroll
+  // with it; when the page is still they wiggle gently (outlines flex, parts rock, MZ1 bobs).
+  var TC = {"parts":{"target":{"outer":[[-0.3315,0.0327],[-0.3737,0.0297],[-0.4706,-0.0307],[-0.4953,-0.0781],[-0.5133,-0.1939],[-0.4158,-0.3105],[-0.2631,-0.3343],[-0.1947,-0.3037],[-0.1648,-0.2676],[-0.1523,-0.2203],[-0.1599,-0.1676],[-0.1328,-0.1097],[-0.1332,-0.0518],[-0.1525,-0.0282],[-0.2315,-0.028]],"inner":[[[-0.3473,0.0019],[-0.3737,-0.0046],[-0.4606,-0.0781],[-0.447,-0.2045],[-0.4235,-0.2466],[-0.3579,-0.2917],[-0.2631,-0.3035],[-0.2105,-0.2802],[-0.1891,-0.2518],[-0.1984,-0.1571],[-0.1683,-0.0845]],[[-0.3263,-0.0303],[-0.3579,-0.0306],[-0.3894,-0.0655],[-0.4307,-0.0834],[-0.4404,-0.115],[-0.3912,-0.1939],[-0.3866,-0.2308],[-0.3521,-0.2729],[-0.2684,-0.2876],[-0.2115,-0.2518],[-0.2307,-0.1518],[-0.1952,-0.0939]],[[-0.3105,-0.0511],[-0.3412,-0.0571],[-0.4137,-0.115],[-0.3526,-0.1972],[-0.3202,-0.2097],[-0.3394,-0.2361],[-0.3348,-0.2624],[-0.2947,-0.2724],[-0.2478,-0.2466],[-0.2827,-0.2097],[-0.3011,-0.136],[-0.2294,-0.0992]]]},"e3":{"outer":[[0.0001,0.0483],[-0.0683,0.0361],[-0.1733,-0.036],[-0.194,-0.3045],[-0.0841,-0.3576],[-0.0157,-0.3687],[0.0528,-0.3513],[0.1001,-0.3745],[0.137,-0.3746],[0.1804,-0.3308],[0.1735,-0.2518],[0.2423,-0.1966],[0.2618,-0.1624],[0.267,-0.1255],[0.2471,-0.0571],[0.2212,-0.0236]],"inner":[[[0.0212,0.0015],[-0.0525,-0.0006],[-0.1304,-0.0676],[-0.1465,-0.1518],[-0.1369,-0.2834],[-0.0999,-0.3149],[-0.0578,-0.3205],[0.0106,-0.2592],[0.1001,-0.3352],[0.1265,-0.3392],[0.1461,-0.3098],[0.1153,-0.2361],[0.2141,-0.1624],[0.2171,-0.0834],[0.188,-0.0518]],[[0.0106,-0.0352],[-0.0841,-0.0596],[-0.1199,-0.0992],[-0.1138,-0.2361],[-0.0894,-0.2932],[-0.0537,-0.2834],[-0.0262,-0.2129],[0.0106,-0.1734],[0.0949,-0.1886],[0.1881,-0.0992],[0.1844,-0.0779],[0.152,-0.0571],[0.0896,-0.0374]],[[0.1054,-0.0612],[-0.0077,-0.0939],[0.026,-0.136],[0.0738,-0.1568],[0.1456,-0.0886]],[[-0.0578,-0.0868],[-0.0841,-0.0876],[-0.1016,-0.1097],[-0.0841,-0.1547],[-0.0457,-0.1097]]]},"eloc":{"outer":[[0.3423,0.1378],[0.2002,0.0928],[0.1317,0.0924],[0.037,0.0354],[0.0329,0.0008],[0.0686,-0.0483],[0.2423,-0.161],[0.416,-0.1495],[0.445,-0.115],[0.445,-0.0571],[0.4737,0.0272],[0.4238,0.1114]],"inner":[[[0.3634,0.107],[0.2002,0.0612],[0.1265,0.0611],[0.078,0.0219],[0.0728,-0.0097],[0.2581,-0.1282],[0.3897,-0.1145],[0.4036,-0.0992],[0.3968,-0.0623],[0.4415,0.0114],[0.3951,0.0903]],[[0.3686,0.0905],[0.337,0.092],[0.2897,0.0618],[0.2054,0.0445],[0.1317,0.0486],[0.0969,0.0219],[0.0903,-0.0044],[0.2581,-0.1011],[0.3226,-0.1044],[0.353,-0.0518],[0.4002,-0.0259],[0.4181,0.0008]],[[0.2686,0.0381],[0.2002,0.0242],[0.1423,0.037],[0.1106,0.0061],[0.216,-0.0528],[0.2902,0.0114]],[[0.3528,0.0802],[0.3265,0.0681],[0.3041,0.0272],[0.316,-0.0315],[0.3924,0.0061],[0.3815,0.0535]]]},"elob":{"outer":[[0.4529,0.3698],[0.337,0.3459],[0.2423,0.3542],[0.2025,0.3325],[0.1327,0.222],[0.068,0.1588],[0.0949,0.0745],[0.0491,0.0324],[0.0408,0.0061],[0.0791,-0.0713],[0.1265,-0.0724],[0.1942,-0.0044],[0.2581,0.0293],[0.4792,0.1009],[0.5153,0.3114],[0.495,0.3516]],"inner":[[[0.4476,0.3231],[0.337,0.3072],[0.2528,0.3255],[0.1896,0.2755],[0.1673,0.2062],[0.1243,0.1535],[0.1429,0.0798],[0.1282,0.043],[0.0896,0.0058],[0.0949,-0.0302],[0.1265,-0.0297],[0.1633,0.0197],[0.4253,0.1219],[0.4544,0.1851],[0.4684,0.2799],[0.4645,0.3114]],[[0.2844,0.3076],[0.2475,0.3037],[0.1943,0.2535],[0.2011,0.1693],[0.1641,0.1377],[0.1629,0.0588],[0.1738,0.0456],[0.3844,0.1222],[0.4336,0.1904],[0.4307,0.2799],[0.337,0.2858]],[[0.2897,0.2802],[0.2619,0.2746],[0.2892,0.2377],[0.2682,0.164],[0.205,0.1272],[0.1949,0.0754],[0.2799,0.0903],[0.316,0.1383],[0.3637,0.1377],[0.4126,0.2009],[0.4002,0.2534]]]}},"lig":{"a":[[-0.1385,-0.0924],[-0.1236,-0.0987],[-0.1124,-0.0915],[-0.1,-0.098],[-0.1028,-0.1133],[-0.1205,-0.1114],[-0.1293,-0.1208],[-0.1249,-0.1276],[-0.1335,-0.1374],[-0.1427,-0.1243],[-0.1514,-0.1341],[-0.1469,-0.1409],[-0.1555,-0.1506],[-0.1467,-0.1618],[-0.1431,-0.174],[-0.147,-0.1773],[-0.1342,-0.183],[-0.1188,-0.1791],[-0.1107,-0.1928],[-0.1076,-0.1956],[-0.1207,-0.2042],[-0.1351,-0.1987],[-0.1474,-0.2058],[-0.1586,-0.2],[-0.1473,-0.2217],[-0.1532,-0.2265],[-0.1561,-0.2423],[-0.1669,-0.2189],[-0.1426,-0.2237],[-0.1567,-0.2268],[-0.153,-0.2351],[-0.1414,-0.2407],[-0.1655,-0.238],[-0.1749,-0.2442],[-0.1897,-0.2431],[-0.1948,-0.2378],[-0.2029,-0.2251],[-0.1948,-0.2127],[-0.2048,-0.2003],[-0.2149,-0.2037],[-0.2134,-0.1949],[-0.2202,-0.1804],[-0.2303,-0.18],[-0.2278,-0.1733],[-0.2166,-0.1676],[-0.2403,-0.1735],[-0.2355,-0.1704],[-0.2276,-0.1824],[-0.2466,-0.1676],[-0.2603,-0.1672],[-0.2672,-0.1644],[-0.2583,-0.1629],[-0.2625,-0.1594],[-0.2453,-0.165],[-0.2329,-0.1644],[-0.2287,-0.1521],[-0.2127,-0.158],[-0.2019,-0.1518],[-0.2104,-0.1688],[-0.196,-0.1762],[-0.2215,-0.1726],[-0.2213,-0.1832],[-0.2149,-0.1961],[-0.217,-0.2032],[-0.2104,-0.2161],[-0.2017,-0.2221],[-0.1932,-0.2385],[-0.1998,-0.215],[-0.2064,-0.2022]],"b":[[0,1],[1,2],[1,5],[2,3],[3,4],[4,5],[5,6],[6,7],[6,9],[7,8],[8,11],[9,10],[10,11],[11,12],[12,13],[13,14],[14,15],[14,16],[16,17],[16,21],[17,18],[18,19],[18,20],[20,21],[21,22],[22,23],[22,24],[24,25],[24,29],[25,26],[25,27],[25,28],[29,30],[30,31],[30,32],[32,33],[33,34],[34,35],[35,36],[36,37],[37,38],[38,39],[39,40],[40,41],[41,42],[42,43],[43,44],[43,45],[45,46],[46,47],[46,48],[47,61],[48,49],[48,53],[49,50],[50,51],[51,52],[51,53],[53,54],[54,55],[54,60],[55,56],[56,57],[56,58],[58,59],[58,60],[60,61],[61,62],[62,63],[62,68],[63,64],[64,65],[65,66],[65,67],[67,68]]}};
   function makeBg(canvas) {
-    var ctx = canvas.getContext('2d'), w = 0, h = 0, dpr = 1, items = [], t = 0, col = null;
+    var ctx = canvas.getContext('2d'), w = 0, h = 0, dpr = 1, items = [], t = 0, wig = 0, col = null, lastSig = '';
+    var ORDER = ['elob', 'eloc', 'e3', 'target'];
+    var cents = {}; ORDER.forEach(function (k) { var o = TC.parts[k].outer, x = 0, y = 0; o.forEach(function (q) { x += q[0]; y += q[1]; }); cents[k] = [x / o.length, y / o.length]; });
     function rnd(a, b) { return a + Math.random() * (b - a); }
-    function readCol() {
-      var cs = getComputedStyle(root);
-      return { a: hexToRgb(cs.getPropertyValue('--accent')), b: hexToRgb(cs.getPropertyValue('--accent-2')), ink: hexToRgb(cs.getPropertyValue('--ink')) };
-    }
+    function readCol() { var cs = getComputedStyle(root); return { a: hexToRgb(cs.getPropertyValue('--accent')), b: hexToRgb(cs.getPropertyValue('--accent-2')), ink: hexToRgb(cs.getPropertyValue('--ink')) }; }
     function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
-    function build() {
+    function layout() {
+      var docH = document.documentElement.scrollHeight, top = hero.offsetHeight + 60, bottom = foot.offsetTop - 120;
+      var region = Math.max(0, bottom - top), n = Math.max(2, Math.round(region / (w < 700 ? 760 : 620)));
       items = [];
-      var n = w < 700 ? 6 : w < 1100 ? 9 : 11, kinds = ['complex', 'complex', 'complex', 'blob', 'e3', 'halfA', 'halfB', 'ubq'];
       for (var i = 0; i < n; i++) {
-        var k = i < Math.ceil(n * .6) ? 'complex' : kinds[3 + Math.floor(Math.random() * 5)];
-        items.push({ k: k, x: (i % 2 ? rnd(.55, .97) : rnd(.03, .45)), y: (i + rnd(.1, .9)) / n, z: rnd(.6, 1.3), r: rnd(-.45, .45), vr: rnd(-.015, .015),
-          ph: rnd(0, 100), sp: rnd(.08, .18), amp: rnd(10, 26),
-          lobes: [rnd(.08, .16), rnd(.05, .1), rnd(.03, .07)], lp: [rnd(0, 6), rnd(0, 6), rnd(0, 6)], ub: Math.floor(rnd(0, 4.99)) });
+        var kind = i % 4 === 3 ? (i % 8 === 3 ? 'target' : 'e3') : 'complex';
+        var S = (w < 700 ? rnd(170, 220) : rnd(250, 340)) * (kind === 'complex' ? 1 : .8);
+        items.push({ kind: kind, S: S, y: top + (i + rnd(.25, .75)) * region / n,
+          x: i % 2 ? w - rnd(.02, .09) * w : rnd(.02, .09) * w, r: rnd(-.45, .45), ph: rnd(0, 100) });
       }
     }
     function size() {
       dpr = Math.min(devicePixelRatio || 1, 2); w = innerWidth; h = innerHeight;
       canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (!items.length || Math.abs(items._w - w) > 200) { build(); items._w = w; }
-      col = readCol(); draw();
+      layout(); col = readCol(); lastSig = ''; draw();
     }
-    function blob(R, it, tt) {
-      ctx.beginPath();
-      for (var i = 0; i <= 48; i++) {
-        var a = i / 48 * Math.PI * 2;
-        var d = 1 + it.lobes[0] * Math.sin(3 * a + it.lp[0] + tt * .3) + it.lobes[1] * Math.sin(5 * a + it.lp[1]) + it.lobes[2] * Math.sin(7 * a + it.lp[2] - tt * .2);
-        var x = Math.cos(a) * R * d, y = Math.sin(a) * R * d * .82;
-        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-      }
+    function path(pts, amp, ph) { // closed smooth curve through the points, each vertex wobbling a little
+      var n = pts.length, q = [], i;
+      for (i = 0; i < n; i++) q.push([pts[i][0] + amp * Math.sin(t * 1.7 + i * 1.9 + ph), pts[i][1] + amp * Math.cos(t * 1.4 + i * 2.3 + ph)]);
+      var P = function (k) { return q[(k + n) % n]; };
+      ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]);
+      for (i = 0; i < n; i++) { var p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+        ctx.bezierCurveTo(p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6, p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6, p2[0], p2[1]); }
       ctx.closePath();
-      ctx.fillStyle = rgba(col.a, .13); ctx.fill();
-      ctx.strokeStyle = rgba(col.ink, .28); ctx.lineWidth = 1.2; ctx.stroke();
     }
-    function e3(R) { // crescent opening to the left, cupping the degrader
-      ctx.beginPath();
-      ctx.arc(0, 0, R, Math.PI * .72, Math.PI * 1.28, true);
-      ctx.arc(-R * .32, 0, R * .66, Math.PI * 1.2, Math.PI * .8, false);
-      ctx.closePath();
-      ctx.fillStyle = rgba(col.b, .18); ctx.fill();
-      ctx.strokeStyle = rgba(col.ink, .28); ctx.lineWidth = 1.2; ctx.stroke();
+    function part(k, it, lw) {
+      var c = cents[k], rock = wig * .045 * Math.sin(t * .9 + it.ph + k.length), dx = wig * .006 * Math.sin(t * 1.1 + it.ph * 2 + k.length);
+      ctx.save(); ctx.translate(c[0] + dx, c[1]); ctx.rotate(rock); ctx.translate(-c[0], -c[1]);
+      var fill = k === 'target' ? rgba(col.a, .34) : k === 'e3' ? rgba(col.b, .36) : rgba(col.ink, k === 'eloc' ? .07 : .045);
+      path(TC.parts[k].outer, wig * .0045, it.ph); ctx.fillStyle = fill; ctx.fill();
+      ctx.strokeStyle = rgba(col.ink, .32); ctx.lineWidth = lw * 1.2; ctx.stroke();
+      ctx.strokeStyle = rgba(col.ink, .13); ctx.lineWidth = lw;
+      TC.parts[k].inner.forEach(function (c2, j) { path(c2, wig * .004, it.ph + j); ctx.stroke(); });
+      ctx.restore();
     }
-    function halfA(s) { ctx.beginPath(); ctx.moveTo(s * .8, 0); ctx.lineTo(s * 1.7, 0); ctx.strokeStyle = rgba(col.ink, .4); ctx.lineWidth = 1.6; ctx.stroke();
-      ctx.beginPath(); ctx.arc(0, 0, s, 0, Math.PI * 2); ctx.fillStyle = rgba(col.a, .38); ctx.fill(); ctx.strokeStyle = rgba(col.ink, .35); ctx.lineWidth = 1.1; ctx.stroke();
-      ctx.beginPath(); ctx.arc(0, 0, s * .26, 0, Math.PI * 2); ctx.fillStyle = rgba(col.ink, .45); ctx.fill(); }
-    function halfB(s) { ctx.beginPath(); ctx.moveTo(-s * .8, 0); ctx.lineTo(-s * 1.7, 0); ctx.strokeStyle = rgba(col.ink, .4); ctx.lineWidth = 1.6; ctx.stroke();
-      ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-s * .9, -s * .9, s * 1.8, s * 1.8, s * .45); else ctx.rect(-s * .9, -s * .9, s * 1.8, s * 1.8);
-      ctx.fillStyle = rgba(col.b, .45); ctx.fill(); ctx.strokeStyle = rgba(col.ink, .35); ctx.lineWidth = 1.1; ctx.stroke();
-      ctx.beginPath(); ctx.rect(-s * .24, -s * .24, s * .48, s * .48); ctx.fillStyle = rgba(col.ink, .45); ctx.fill(); }
-    function ubq(n, s) { for (var i = 0; i < n; i++) { ctx.beginPath(); ctx.arc(-i * s * 2.1, i * s * (i % 2 ? .9 : -.4), s, 0, Math.PI * 2);
-      ctx.fillStyle = rgba(col.ink, .2); ctx.fill(); ctx.strokeStyle = rgba(col.ink, .32); ctx.lineWidth = 1; ctx.stroke(); } }
+    function ligand(it, lw) {
+      var bob = wig * .008 * Math.sin(t * 1.6 + it.ph);
+      ctx.save(); ctx.translate(0, bob);
+      ctx.strokeStyle = rgba(col.ink, .55); ctx.lineWidth = lw * 2.2; ctx.lineCap = 'round'; ctx.beginPath();
+      TC.lig.b.forEach(function (bd) { var a = TC.lig.a[bd[0]], b = TC.lig.a[bd[1]]; ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); });
+      ctx.stroke(); ctx.restore();
+    }
     function draw() {
-      if (!w) return;
+      if (!w || !col) return;
+      var sy = window.scrollY, sig = sy + '|' + wig.toFixed(3) + '|' + (wig > 0 ? t.toFixed(2) : '');
+      if (sig === lastSig) return; lastSig = sig;
       ctx.clearRect(0, 0, w, h);
-      var sy = window.scrollY, field = h * 2.2;
       items.forEach(function (it) {
-        var S = 56 * it.z * (w < 700 ? .7 : 1);
-        var y = ((it.y * field - sy * (.18 + it.z * .22)) % field + field) % field - h * .6;
-        if (y < -S * 4 || y > h + S * 4) return;
-        var x = it.x * w + Math.sin(t * it.sp + it.ph) * it.amp;
-        y += Math.cos(t * it.sp * .8 + it.ph) * it.amp * .7;
-        ctx.save(); ctx.translate(x, y); ctx.rotate(it.r + t * it.vr); ctx.globalAlpha = .38 + it.z * .22;
-        if (it.k === 'complex') {
-          var breathe = Math.sin(t * .5 + it.ph) * S * .04; // the complex gently flexes as one unit
-          ctx.save(); ctx.translate(-S * 1.55 - breathe, 0); blob(S, it, t); if (it.ub) { ctx.translate(-S * .5, S * .78); ubq(it.ub, S * .14); } ctx.restore();
-          ctx.save(); ctx.translate(-S * .48, 0); halfA(S * .26); ctx.restore();
-          ctx.save(); ctx.translate(S * .1, 0); halfB(S * .24); ctx.restore();
-          ctx.save(); ctx.translate(S * 1.05 + breathe, 0); e3(S * .78); ctx.restore();
-        } else if (it.k === 'blob') blob(S * .8, it, t);
-        else if (it.k === 'e3') e3(S * .7);
-        else if (it.k === 'halfA') halfA(S * .3);
-        else if (it.k === 'halfB') halfB(S * .28);
-        else ubq(4, S * .16);
+        var y = it.y - sy; if (y < -it.S || y > h + it.S) return;
+        ctx.save(); ctx.translate(it.x, y); ctx.rotate(it.r + wig * .02 * Math.sin(t * .5 + it.ph)); ctx.scale(it.S, it.S);
+        ctx.globalAlpha = .6;
+        var lw = 1 / it.S;
+        if (it.kind === 'complex') { ORDER.forEach(function (k) { part(k, it, lw); }); ligand(it, lw); }
+        else if (it.kind === 'target') { ctx.translate(-cents.target[0], -cents.target[1]); part('target', it, lw); }
+        else { ctx.translate(-(cents.e3[0] + cents.eloc[0]) / 2, -(cents.e3[1] + cents.eloc[1]) / 2); ['elob', 'eloc', 'e3'].forEach(function (k) { part(k, it, lw); }); }
         ctx.restore();
       });
     }
-    function loop() { if (!reduce) t += .016; draw(); requestAnimationFrame(loop); }
+    function loop() {
+      var target = body.classList.contains('idle') && !reduce ? 1 : 0;
+      wig += (target - wig) * (target ? .03 : .12); if (wig < .002) wig = 0;
+      if (wig > 0) t += .016;
+      draw(); requestAnimationFrame(loop);
+    }
     window.addEventListener('resize', size);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { layout(); lastSig = ''; });
     size(); requestAnimationFrame(loop);
-    return { refresh: function () { col = readCol(); draw(); } };
+    return { refresh: function () { col = readCol(); lastSig = ''; draw(); } };
   }
 
   /* ---------- init ---------- */
