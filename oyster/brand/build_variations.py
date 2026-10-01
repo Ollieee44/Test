@@ -1,5 +1,6 @@
 """Build variations.html, the comparison sheet of Open Shell variations, from variations_defs.svg and sheet.css."""
 import os
+from wordmark_metrics import style
 D=os.path.dirname(os.path.abspath(__file__))+'/'
 defs=open(D+'variations_defs.svg').read()
 AH='aria-hidden="true"'
@@ -18,13 +19,9 @@ def app(id, tile, fg, p1, p2, sz):
 
 # measured in the browser: ink bounds of each mark in its 0-100 viewBox, and font metrics in em
 INK={'v-open':(8.5,10.56,90.69,91.5),'v-hollow':(8.5,10.56,90.69,91.5),'v-inside':(8,9.5,92,93.5),'v-layers':(8.5,10.56,90.69,91.5),'v-halves':(8.5,10.56,90.69,91.5),'v-strand':(8.5,10.56,90.69,91.5)}
-FONT={'serif':dict(top=.478,over=.011,lsb=.03,rsb=.03),'sans':dict(top=.536,over=.011,lsb=.03,rsb=.035)}
+FACE={'serif':'newsreader-500','sans':'archivo-700'}
 def omark(id, face, ink, p1, p2):
-    x0,y0,x1,y1=INK[id]; f=FONT[face]
-    size=(f['top']+f['over'])*100/(y1-y0)
-    va=-f['over']-(100-y1)/100*size
-    ml=-x0/100*size+f['lsb']; mr=-(100-x1)/100*size+f['rsb']
-    st=f'width:{size:.4f}em;height:{size:.4f}em;vertical-align:{va:.4f}em;margin:0 {mr:.4f}em 0 {ml:.4f}em;color:{ink};fill:currentColor;--p1:{p1};--p2:{p2}'
+    st=style(INK[id], FACE[face])+f';color:{ink};fill:currentColor;--p1:{p1};--p2:{p2}'
     return f'<svg class="omark" viewBox="0 0 100 100" style="{st}" {AH}><use href="#{id}"/></svg>'
 N=('#2B2230','#C99BB0','#B8A7C9'); TD=('#EAF3EF','#F2B84B','#7FC4B0')
 strip=''.join(f'<a class="cell" href="#{i}"><span class="mono">{n}</span>{use(i,72,*N,AH)}<span class="nm">{t}</span></a>' for i,n,t,*_ in OPTS)

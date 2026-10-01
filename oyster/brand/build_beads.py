@@ -5,6 +5,7 @@ beads, --p1 and --p2 for the palette accents. Run measure_beads.js afterwards to
 beads_ink.json (each mark's ink bounds), which sizes the mark when it stands in for the O.
 """
 import json, math, os
+from wordmark_metrics import style
 
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 LOW = 'M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z'
@@ -91,15 +92,10 @@ def app(id, tile, fg, p1, p2, sz):
 # ink bounds of each mark (from measure_beads.js) and font metrics in em, as on the variations sheet
 try: INK = json.load(open(D + 'beads_ink.json'))
 except FileNotFoundError: INK = {}
-FONT = {'serif': dict(top=.478, over=.011, lsb=.03, rsb=.03), 'sans': dict(top=.536, over=.011, lsb=.03, rsb=.035)}
+FACE = {'serif': 'newsreader-500', 'sans': 'archivo-700'}
 def omark(id, face, ink, p1, p2):
-    """The mark standing in for the O: its ink runs from the round-letter overshoot below the
-    baseline up to the x-height of s, e and r, with side bearings matched to the letter o."""
-    x0, y0, x1, y1 = INK.get(id, (8.5, 10.5, 90.7, 91.5)); f = FONT[face]
-    size = (f['top'] + f['over']) * 100 / (y1 - y0)
-    va = -f['over'] - (100 - y1) / 100 * size
-    ml = -x0 / 100 * size + f['lsb']; mr = -(100 - x1) / 100 * size + f['rsb']
-    st = f'width:{size:.4f}em;height:{size:.4f}em;vertical-align:{va:.4f}em;margin:0 {mr:.4f}em 0 {ml:.4f}em;color:{ink};fill:currentColor;--p1:{p1};--p2:{p2}'
+    """The mark standing in for the O, sized by wordmark_metrics to the o of the wordmark face."""
+    st = style(INK.get(id, (8.5, 10.5, 90.7, 91.5)), FACE[face]) + f';color:{ink};fill:currentColor;--p1:{p1};--p2:{p2}'
     return f'<svg class="omark" viewBox="0 0 100 100" style="{st}" {AH}><use href="#{id}"/></svg>'
 
 N_ = ('#2B2230', '#C99BB0', '#B8A7C9'); TD = ('#EAF3EF', '#F2B84B', '#7FC4B0')
