@@ -73,7 +73,7 @@ html=f'''<!doctype html>
   <div class="wrap">
     <span class="mono">Oyster Therapeutics &middot; Brand mark</span>
     <h1>Variations on the Open Shell</h1>
-    <p>Five new directions built on the current mark, most of them using negative space to add a second meaning. The original is shown first for comparison. Each option is also shown standing in for the O of the wordmark.</p>
+    <p>Five directions built on the current mark, now all sharing The Hollow&rsquo;s cradle: the pearl sits in a round hollow cut into the lower shell. The original is shown first for comparison. Each option is also shown standing in for the O of the wordmark.</p>
   </div>
 </header>
 <main>
