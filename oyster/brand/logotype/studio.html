@@ -1,0 +1,349 @@
+<title>Oyster Logotype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: a spacing workbench. The specimen sits on its palette ground at the top; the controls run
+   beside it on wide screens and below it on phones. Specimens use the literal brand colours; the page
+   chrome follows the viewer's theme. Spacing is counted in font units, 1000 to the em. */
+:root {
+  --bg: #F2EEEB; --panel: #FBF9F7; --fg: #241D28; --muted: #6A5F6E; --line: rgba(36, 29, 40, .12);
+  --accent: #8C5572; --accent-weak: rgba(140, 85, 114, .1); --tight: #2F6688; --loose: #A0661D; --ok: #3D7A5C;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #17131A; --panel: #211C25; --fg: #EFE6E1; --muted: #B4A8B6; --line: rgba(239, 230, 225, .13);
+  --accent: #D9AFC2; --accent-weak: rgba(217, 175, 194, .12); --tight: #8DBAD8; --loose: #E3B36B; --ok: #8CCBA8; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #17131A; --panel: #211C25; --fg: #EFE6E1; --muted: #B4A8B6; --line: rgba(239, 230, 225, .13);
+  --accent: #D9AFC2; --accent-weak: rgba(217, 175, 194, .12); --tight: #8DBAD8; --loose: #E3B36B; --ok: #8CCBA8; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 400 15px/1.55 var(--sans); -webkit-font-smoothing: antialiased; padding: 0 clamp(16px, 3.5vw, 40px); padding-block: 28px 48px; }
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: grid; gap: 8px; max-width: 70ch; }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 500 clamp(34px, 4.2vw, 52px)/1.02 var(--serif); letter-spacing: -.015em; margin: 0; text-wrap: balance; }
+header p { margin: 0; color: var(--muted); }
+.bench { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+@media (max-width: 980px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.col { display: grid; gap: 16px; min-width: 0; }
+.stage { border-radius: 18px; padding: clamp(14px, 2.5vw, 28px); display: grid; gap: 10px; transition: background-color .4s; }
+.stage-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
+.stage svg { width: 100%; height: auto; display: block; }
+.stats { display: flex; gap: 18px; flex-wrap: wrap; font: 400 12px/1.4 var(--mono); }
+.stats b { font-weight: 500; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel h2 { font: 600 13px/1.2 var(--sans); margin: 0; letter-spacing: .01em; }
+.panel .hint { color: var(--muted); font-size: 13px; margin: 0; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 3px; }
+.seg button { font: 500 13px/1 var(--sans); border: 0; background: transparent; color: var(--fg); padding: 9px 8px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--panel); }
+.seg button:focus-visible, .btn:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: grid; grid-template-columns: 44px minmax(0, 1fr) 54px; gap: 10px; align-items: center; }
+.row label { font: 500 13px/1 var(--mono); }
+.row output { font: 400 12px/1 var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.row .gapv { display: block; font-size: 10.5px; margin-top: 3px; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.sub-rows .row { grid-template-columns: 74px minmax(0, 1fr) 54px; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; }
+textarea { width: 100%; min-height: 70px; resize: vertical; font: 400 14px/1.45 var(--sans); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { font: 500 13px/1 var(--sans); padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.status { font: 400 12px/1.4 var(--mono); color: var(--muted); min-height: 1.4em; }
+.compare { display: grid; gap: 10px; }
+.cmp { border-radius: 14px; padding: 12px 16px; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: center; }
+.cmp .lab { font: 500 11px/1.35 var(--mono); letter-spacing: .06em; text-transform: uppercase; opacity: .85; }
+.cmp .lab span { display: block; text-transform: none; letter-spacing: 0; opacity: .8; margin-top: 3px; }
+.cmp svg { width: 100%; max-width: 520px; height: auto; display: block; }
+@media (max-width: 560px) { .cmp { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+.sizes { display: flex; gap: 22px; flex-wrap: wrap; align-items: end; border-radius: 14px; padding: 16px; }
+.sizes figure { margin: 0; display: grid; gap: 6px; }
+.sizes figcaption { font: 400 11px/1 var(--mono); opacity: .75; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font: 400 12px/1.3 var(--mono); color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+@media (prefers-reduced-motion: reduce) { .stage { transition: none; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><mask id="lt-mInside" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><g fill="#000" transform="translate(51.5 50) scale(0.76) translate(-50.5 -47.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/></g><circle cx="60.24" cy="53.42" r="10.26" fill="#000"/></mask></defs><symbol id="omark" viewBox="0 0 100 100"><g transform="translate(-1.5 1.5)"><circle cx="51.5" cy="50" r="42" mask="url(#lt-mInside)"/><circle cx="60.24" cy="53.42" r="7.22" style="fill:var(--p1)"/></g></symbol></svg>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Oyster Therapeutics &middot; Wordmark spacing</span>
+    <h1>Oyster Logotype</h1>
+    <p>The wordmark is drawn from the letter outlines, so each gap can be set by hand. The shading shows the white space between neighbouring letters across the x-height; the number above each gap is its average width in font units (1000 to the em). Even spacing makes those numbers match. Save when you are happy and I will apply it to the site.</p>
+  </header>
+
+  <div class="bench">
+    <div class="col">
+      <section class="stage" id="stage" aria-label="Wordmark specimen">
+        <div class="stage-top"><span id="stageLab">Nacre &middot; Newsreader 500</span><span id="modeLab">Optically even</span></div>
+        <svg id="spec" role="img" aria-label="Oyster wordmark with the current spacing"></svg>
+        <div class="stats" id="stats"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="cmpH">
+        <h2 id="cmpH">Side by side</h2>
+        <div class="compare" id="compare"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="sizeH">
+        <h2 id="sizeH">At working sizes</h2>
+        <div class="sizes" id="sizes"></div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="panel" aria-labelledby="palH">
+        <h2 id="palH">Palette</h2>
+        <div class="seg" role="group" aria-label="Palette"><button type="button" id="palN" data-pal="nacre">Nacre</button><button type="button" id="palT" data-pal="tidepool">Tidepool</button></div>
+        <p class="hint">Each palette has its own face, so each keeps its own spacing.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="spH">
+        <h2 id="spH">Spacing</h2>
+        <div class="seg" role="group" aria-label="Spacing starting point"><button type="button" id="modeSite" data-mode="site">As on the site</button><button type="button" id="modeEven" data-mode="even">Optically even</button></div>
+        <div class="row"><label for="target">Gap</label><input type="range" id="target" min="20" max="160" step="1"><output id="targetV" for="target"></output></div>
+        <p class="hint" id="targetHint">Target width for every gap. Lower is tighter.</p>
+        <label class="check"><input type="checkbox" id="shade" checked> Shade the gaps</label>
+      </section>
+
+      <section class="panel" aria-labelledby="nuH">
+        <h2 id="nuH">Fine-tune each pair</h2>
+        <p class="hint">Nudges in font units, added to the starting point. Negative pulls the pair together.</p>
+        <div id="nudges" class="col"></div>
+      </section>
+
+      <section class="panel sub-rows" aria-labelledby="subH">
+        <h2 id="subH">&ldquo;therapeutics&rdquo;</h2>
+        <div class="row"><label for="subDx">Start</label><input type="range" id="subDx" min="-360" max="40" step="1"><output id="subDxV" for="subDx"></output></div>
+        <div class="row"><label for="subGap">Drop</label><input type="range" id="subGap" min="0" max="140" step="1"><output id="subGapV" for="subGap"></output></div>
+        <div class="row"><label for="subSize">Size</label><input type="range" id="subSize" min="70" max="200" step="1"><output id="subSizeV" for="subSize"></output></div>
+        <p class="hint">Start is measured from the end of the y; drop from the baseline to the top of the t and h.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="svH">
+        <h2 id="svH">Save</h2>
+        <label for="note" class="hint">Notes for Claude</label>
+        <textarea id="note" placeholder="Anything you want changed that the sliders can't do, for example the shape of the y's tail."></textarea>
+        <div class="btns"><button type="button" class="btn primary" id="save">Save for Claude</button><button type="button" class="btn" id="copy">Copy settings</button><button type="button" class="btn" id="reset">Reset palette</button></div>
+        <div class="status" id="status" role="status"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var DATA = {"nacre":{"label":"Nacre","font":"Newsreader 500","bg":"#EFE6E1","ink":"#2B2230","p1":"#C99BB0","track":-0.015,"top":0.523,"bot":0.011,"ys":[0.0047,0.014,0.0233,0.0327,0.042,0.0514,0.0607,0.07,0.0794,0.0887,0.0981,0.1074,0.1167,0.1261,0.1354,0.1448,0.1541,0.1634,0.1728,0.1821,0.1915,0.2008,0.2101,0.2195,0.2288,0.2382,0.2475,0.2568,0.2662,0.2755,0.2848,0.2942,0.3035,0.3129,0.3222,0.3315,0.3409,0.3502,0.3596,0.3689,0.3782,0.3876,0.3969,0.4063,0.4156,0.4249,0.4343,0.4436,0.453,0.4623,0.4716,0.481,0.4903,0.4997,0.509,0.5183],"mark":{"s":0.6357,"va":-0.0523,"ml":-0.0171,"mr":-0.0173},"glyphs":{"y":{"adv":0.568,"path":"M0.3610 0.1112 0.2996 -0.0236 0.0528 0.4762 -0.0078 0.4958V0.5120H0.2516V0.4955L0.1831 0.4782ZM0.1311 -0.2315Q0.0976 -0.2315 0.0757 -0.2141Q0.0538 -0.1967 0.0538 -0.1639Q0.0538 -0.1487 0.0590 -0.1384Q0.0642 -0.1282 0.0722 -0.1229Q0.0801 -0.1177 0.0872 -0.1177Q0.0932 -0.1177 0.1040 -0.1235Q0.1147 -0.1293 0.1306 -0.1351Q0.1465 -0.1410 0.1670 -0.1410Q0.1914 -0.1410 0.2094 -0.1347Q0.2274 -0.1284 0.2421 -0.1112Q0.2567 -0.0941 0.2706 -0.0620L0.3065 0.0214L0.3372 0.0952L0.4662 0.4810L0.3961 0.4955V0.5120H0.5688V0.4955L0.5077 0.4812L0.3012 -0.0643Q0.2769 -0.1280 0.2512 -0.1644Q0.2255 -0.2008 0.1962 -0.2161Q0.1669 -0.2315 0.1311 -0.2315Z","L":[0.2856,0.281,0.2764,0.2718,0.2672,0.2626,0.258,0.2534,0.2487,0.2441,0.2395,0.2349,0.2303,0.2257,0.2211,0.2165,0.2119,0.2072,0.2026,0.198,0.1934,0.1888,0.1842,0.1796,0.175,0.1703,0.1657,0.1611,0.1565,0.1519,0.1473,0.1427,0.1381,0.1335,0.1288,0.1242,0.1196,0.115,0.1104,0.1058,0.1012,0.0966,0.0919,0.0873,0.0827,0.0781,0.0735,0.0689,0.0643,0.0597,0.0551,0.038,0.0092,-0.0078,-0.0078,null],"R":[0.3273,0.3308,0.3344,0.3379,0.3415,0.345,0.3485,0.3521,0.3556,0.3591,0.3627,0.3662,0.3697,0.3733,0.3768,0.3803,0.3839,0.3874,0.3909,0.3945,0.398,0.4016,0.4051,0.4086,0.4122,0.4157,0.4192,0.4228,0.4263,0.4298,0.4334,0.4369,0.4404,0.444,0.4475,0.451,0.4546,0.4581,0.4617,0.4652,0.4687,0.4723,0.4758,0.4793,0.4829,0.4864,0.4899,0.4935,0.497,0.5005,0.5041,0.5076,0.5466,0.5688,0.5688,null]},"s":{"adv":0.4315,"path":"M0.2372 0.5230Q0.2737 0.5230 0.3025 0.5161Q0.3313 0.5091 0.3615 0.4952L0.3786 0.3574H0.3630L0.2931 0.4937L0.3341 0.4491Q0.3069 0.4767 0.2835 0.4879Q0.2600 0.4992 0.2288 0.4992Q0.1852 0.4992 0.1617 0.4805Q0.1382 0.4618 0.1382 0.4257Q0.1382 0.4060 0.1465 0.3894Q0.1547 0.3728 0.1804 0.3566Q0.2061 0.3403 0.2593 0.3209Q0.2988 0.3067 0.3252 0.2894Q0.3516 0.2720 0.3670 0.2517Q0.3823 0.2314 0.3888 0.2077Q0.3952 0.1839 0.3952 0.1564Q0.3952 0.1070 0.3680 0.0692Q0.3408 0.0314 0.2952 0.0102Q0.2496 -0.0110 0.1932 -0.0110Q0.1515 -0.0110 0.1194 -0.0035Q0.0873 0.0040 0.0600 0.0183L0.0319 0.1767H0.0497L0.1364 0.0147L0.1097 0.0419Q0.1230 0.0324 0.1377 0.0262Q0.1524 0.0199 0.1682 0.0167Q0.1839 0.0135 0.1997 0.0135Q0.2422 0.0135 0.2747 0.0372Q0.3071 0.0609 0.3071 0.1090Q0.3071 0.1274 0.3011 0.1427Q0.2950 0.1581 0.2809 0.1717Q0.2668 0.1853 0.2427 0.1981Q0.2185 0.2109 0.1818 0.2236Q0.1331 0.2409 0.1044 0.2628Q0.0757 0.2848 0.0633 0.3127Q0.0510 0.3406 0.0510 0.3752Q0.0510 0.4219 0.0763 0.4549Q0.1016 0.4879 0.1438 0.5054Q0.1861 0.5230 0.2372 0.5230Z","L":[0.0914,0.0686,0.0591,0.0574,0.0558,0.0541,0.0525,0.0508,0.0492,0.0475,0.0459,0.0442,0.0425,0.0409,0.0392,0.0376,0.0359,0.0343,0.0326,0.2685,0.2544,0.2374,0.2171,0.1934,0.1679,0.1461,0.128,0.1128,0.1002,0.0897,0.081,0.0738,0.0679,0.0633,0.0596,0.0566,0.0544,0.0528,0.0517,0.0511,0.0511,0.0515,0.0525,0.0541,0.0565,0.0596,0.0636,0.0686,0.0749,0.0824,0.0913,0.1019,0.1149,0.1312,0.153,0.1869],"R":[0.2821,0.303,0.3192,0.3325,0.3437,0.3533,0.3614,0.3686,0.3747,0.3798,0.3841,0.3875,0.3903,0.3924,0.3939,0.3948,0.3951,0.3951,0.3946,0.3937,0.3923,0.3905,0.388,0.3849,0.3809,0.376,0.37,0.3628,0.3542,0.3439,0.3318,0.3175,0.3004,0.28,0.2558,0.2316,0.21,0.1913,0.3783,0.3772,0.376,0.3749,0.3737,0.3725,0.3714,0.3702,0.3691,0.3679,0.3667,0.3656,0.3644,0.3633,0.3621,0.3514,0.3269,0.2918]},"t":{"adv":0.3855,"path":"M0.2007 0.1379Q0.2007 0.1021 0.2231 0.0841Q0.2454 0.0661 0.2842 0.0661Q0.3065 0.0661 0.3310 0.0699Q0.3555 0.0737 0.3883 0.0830V0.0664Q0.3399 0.0359 0.3087 0.0191Q0.2774 0.0022 0.2542 -0.0046Q0.2310 -0.0114 0.2062 -0.0114Q0.1725 -0.0114 0.1448 0.0027Q0.1170 0.0167 0.1003 0.0469Q0.0835 0.0771 0.0835 0.1255V0.4378L0.0157 0.4837V0.4923Q0.0209 0.4958 0.0335 0.5032Q0.0461 0.5106 0.0637 0.5214Q0.0813 0.5321 0.1027 0.5453Q0.1241 0.5584 0.1477 0.5729Q0.1712 0.5873 0.1947 0.6018H0.2007V0.4953ZM0.1586 0.4507V0.5120H0.3731L0.3644 0.4507Z","L":[0.141,0.1272,0.1173,0.1094,0.1031,0.0979,0.0939,0.0907,0.0882,0.0863,0.085,0.0842,0.0837,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0835,0.0749,0.0611,0.0473,0.0335,0.0197,0.0157,0.0275,0.0433,0.0587],"R":[0.2793,0.299,0.3165,0.3329,0.3487,0.3641,0.3792,0.3883,0.3883,0.218,0.2106,0.206,0.203,0.2014,0.2008,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.2007,0.3647,0.366,0.3674,0.3687,0.37,0.3713,0.3727,0.2007]},"e":{"adv":0.503,"path":"M0.2816 0.5230Q0.3375 0.5230 0.3782 0.5003Q0.4189 0.4776 0.4426 0.4339Q0.4662 0.3902 0.4708 0.3269H0.1374V0.3592H0.4094L0.3580 0.3377Q0.3536 0.3940 0.3422 0.4286Q0.3309 0.4632 0.3121 0.4793Q0.2934 0.4954 0.2660 0.4954Q0.2299 0.4954 0.2042 0.4742Q0.1784 0.4530 0.1648 0.4103Q0.1511 0.3676 0.1511 0.3032Q0.1511 0.2216 0.1718 0.1709Q0.1925 0.1202 0.2323 0.0970Q0.2721 0.0737 0.3296 0.0737Q0.3570 0.0737 0.3826 0.0808Q0.4082 0.0879 0.4312 0.1026Q0.4542 0.1173 0.4725 0.1401L0.4818 0.1331Q0.4495 0.0795 0.4170 0.0480Q0.3845 0.0164 0.3489 0.0027Q0.3132 -0.0110 0.2708 -0.0110Q0.2029 -0.0110 0.1494 0.0186Q0.0959 0.0483 0.0653 0.1058Q0.0347 0.1633 0.0347 0.2466Q0.0347 0.3212 0.0635 0.3841Q0.0923 0.4469 0.1476 0.4850Q0.2029 0.5230 0.2816 0.5230Z","L":[0.1798,0.1582,0.1414,0.1276,0.1157,0.1056,0.0966,0.0887,0.0816,0.0753,0.0696,0.0645,0.0599,0.0558,0.0522,0.049,0.0463,0.0439,0.0418,0.0399,0.0385,0.0373,0.0363,0.0356,0.0351,0.0348,0.0347,0.0349,0.0353,0.0359,0.0367,0.0378,0.0392,0.0409,0.0428,0.045,0.0475,0.0504,0.0536,0.0571,0.061,0.0652,0.0699,0.075,0.0807,0.0869,0.0938,0.1015,0.11,0.1194,0.13,0.1421,0.1559,0.1728,0.1949,0.2296],"R":[0.3537,0.3726,0.3873,0.3998,0.4107,0.4204,0.4293,0.4375,0.4451,0.4522,0.459,0.4654,0.4716,0.4775,0.4787,0.1849,0.1796,0.175,0.1711,0.1676,0.1647,0.1621,0.1599,0.158,0.1564,0.155,0.1539,0.153,0.1523,0.1518,0.1514,0.1512,0.1511,0.1512,0.1514,0.4704,0.4695,0.4683,0.4669,0.4652,0.4632,0.4608,0.458,0.4549,0.4512,0.4471,0.4423,0.4369,0.4307,0.4236,0.4153,0.4055,0.3938,0.3793,0.3599,0.329]},"r":{"adv":0.4275,"path":"M0.3690 0.5215Q0.3929 0.5215 0.4069 0.5075Q0.4209 0.4935 0.4209 0.4695Q0.4209 0.4401 0.4024 0.4210Q0.3839 0.4020 0.3562 0.4020Q0.3420 0.4020 0.3295 0.4050Q0.3169 0.4081 0.3038 0.4111Q0.2906 0.4142 0.2739 0.4142Q0.2593 0.4142 0.2467 0.4095Q0.2340 0.4049 0.2222 0.3965Q0.2103 0.3882 0.1976 0.3761L0.1975 0.3985Q0.2365 0.4406 0.2632 0.4653Q0.2899 0.4900 0.3084 0.5020Q0.3268 0.5141 0.3409 0.5178Q0.3550 0.5215 0.3690 0.5215ZM0.2071 0.4277V0.0296L0.2829 0.0141V0.0000H0.0239V0.0141L0.0897 0.0296V0.4162Q0.0832 0.4211 0.0744 0.4274Q0.0657 0.4337 0.0527 0.4432Q0.0398 0.4527 0.0213 0.4667V0.4772L0.2028 0.5274H0.2071Z","L":[0.0239,0.0239,0.0632,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0897,0.0779,0.065,0.0522,0.0396,0.0271,0.0213,0.0349,0.0687,0.1025,0.1362,0.17],"R":[0.2829,0.2829,0.2377,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2071,0.2105,0.2227,0.3802,0.3964,0.4059,0.4123,0.4166,0.4192,0.4206,0.4208,0.42,0.4176,0.4132,0.4053,0.3894]}},"sub":{"dx":-0.225,"gap":0.04,"size":0.12}},"tidepool":{"label":"Tidepool","font":"Archivo 700","bg":"#0F4C4A","ink":"#EAF3EF","p1":"#F2B84B","track":-0.035,"top":0.538,"bot":0.012,"ys":[0.0048,0.0144,0.024,0.0336,0.0432,0.0528,0.0624,0.0721,0.0817,0.0913,0.1009,0.1105,0.1201,0.1297,0.1393,0.1489,0.1585,0.1681,0.1777,0.1873,0.1969,0.2066,0.2162,0.2258,0.2354,0.245,0.2546,0.2642,0.2738,0.2834,0.293,0.3026,0.3122,0.3218,0.3314,0.3411,0.3507,0.3603,0.3699,0.3795,0.3891,0.3987,0.4083,0.4179,0.4275,0.4371,0.4467,0.4563,0.4659,0.4756,0.4852,0.4948,0.5044,0.514,0.5236,0.5332],"mark":{"s":0.6548,"va":-0.0546,"ml":-0.0144,"mr":-0.0144},"glyphs":{"y":{"adv":0.547,"path":"M0.1400 -0.1880Q0.1030 -0.1880 0.0785 -0.1825Q0.0540 -0.1770 0.0470 -0.1750V-0.0810H0.1080Q0.1330 -0.0810 0.1530 -0.0695Q0.1730 -0.0580 0.1880 -0.0395Q0.2030 -0.0210 0.2100 0.0000L0.0040 0.5260H0.1510L0.2410 0.2830Q0.2470 0.2660 0.2545 0.2405Q0.2620 0.2150 0.2700 0.1875Q0.2780 0.1600 0.2830 0.1390H0.2880Q0.2920 0.1530 0.2970 0.1720Q0.3020 0.1910 0.3075 0.2110Q0.3130 0.2310 0.3185 0.2495Q0.3240 0.2680 0.3280 0.2820L0.4030 0.5260H0.5430L0.3640 0.0250Q0.3490 -0.0190 0.3295 -0.0575Q0.3100 -0.0960 0.2840 -0.1255Q0.2580 -0.1550 0.2225 -0.1715Q0.1870 -0.1880 0.1400 -0.1880Z","L":[0.2081,0.2044,0.2006,0.1968,0.1931,0.1893,0.1855,0.1818,0.178,0.1743,0.1705,0.1667,0.163,0.1592,0.1554,0.1517,0.1479,0.1442,0.1404,0.1366,0.1329,0.1291,0.1253,0.1216,0.1178,0.1141,0.1103,0.1065,0.1028,0.099,0.0952,0.0915,0.0877,0.084,0.0802,0.0764,0.0727,0.0689,0.0651,0.0614,0.0576,0.0539,0.0501,0.0463,0.0426,0.0388,0.035,0.0313,0.0275,0.0238,0.02,0.0162,0.0125,0.0087,0.0049,null],"R":[0.3568,0.3603,0.3637,0.3671,0.3705,0.3739,0.3774,0.3808,0.3842,0.3877,0.3911,0.3945,0.398,0.4014,0.4048,0.4083,0.4117,0.4151,0.4186,0.422,0.4254,0.4289,0.4323,0.4357,0.4392,0.4426,0.446,0.4495,0.4529,0.4563,0.4598,0.4632,0.4666,0.4701,0.4735,0.4769,0.4804,0.4838,0.4872,0.4907,0.4941,0.4975,0.5009,0.5044,0.5078,0.5112,0.5147,0.5181,0.5215,0.525,0.5284,0.5318,0.5353,0.5387,0.5421,null]},"s":{"adv":0.556,"path":"M0.2770 -0.0120Q0.2220 -0.0120 0.1780 0.0000Q0.1340 0.0120 0.1030 0.0335Q0.0720 0.0550 0.0555 0.0850Q0.0390 0.1150 0.0390 0.1530Q0.0390 0.1570 0.0390 0.1610Q0.0390 0.1650 0.0400 0.1670H0.1740Q0.1740 0.1650 0.1740 0.1630Q0.1740 0.1610 0.1740 0.1590Q0.1750 0.1340 0.1900 0.1185Q0.2050 0.1030 0.2295 0.0960Q0.2540 0.0890 0.2810 0.0890Q0.3050 0.0890 0.3275 0.0935Q0.3500 0.0980 0.3655 0.1100Q0.3810 0.1220 0.3810 0.1410Q0.3810 0.1650 0.3615 0.1780Q0.3420 0.1910 0.3105 0.1990Q0.2790 0.2070 0.2420 0.2170Q0.2080 0.2250 0.1740 0.2355Q0.1400 0.2460 0.1125 0.2630Q0.0850 0.2800 0.0680 0.3075Q0.0510 0.3350 0.0510 0.3770Q0.0510 0.4180 0.0690 0.4485Q0.0870 0.4790 0.1185 0.4990Q0.1500 0.5190 0.1925 0.5285Q0.2350 0.5380 0.2840 0.5380Q0.3300 0.5380 0.3700 0.5285Q0.4100 0.5190 0.4400 0.5005Q0.4700 0.4820 0.4870 0.4545Q0.5040 0.4270 0.5040 0.3930Q0.5040 0.3860 0.5040 0.3800Q0.5040 0.3740 0.5030 0.3720H0.3700V0.3800Q0.3700 0.3980 0.3590 0.4105Q0.3480 0.4230 0.3275 0.4300Q0.3070 0.4370 0.2780 0.4370Q0.2580 0.4370 0.2415 0.4340Q0.2250 0.4310 0.2130 0.4250Q0.2010 0.4190 0.1945 0.4105Q0.1880 0.4020 0.1880 0.3900Q0.1880 0.3730 0.2025 0.3625Q0.2170 0.3520 0.2410 0.3450Q0.2650 0.3380 0.2940 0.3300Q0.3300 0.3200 0.3695 0.3105Q0.4090 0.3010 0.4430 0.2850Q0.4770 0.2690 0.4980 0.2395Q0.5190 0.2100 0.5190 0.1600Q0.5190 0.1120 0.5005 0.0790Q0.4820 0.0460 0.4490 0.0260Q0.4160 0.0060 0.3720 -0.0030Q0.3280 -0.0120 0.2770 -0.0120Z","L":[0.1621,0.1372,0.1181,0.1028,0.0903,0.0797,0.071,0.0636,0.0574,0.0523,0.0481,0.0449,0.0424,0.0407,0.0396,0.0391,0.039,0.3723,0.3619,0.3445,0.3181,0.2812,0.2451,0.2075,0.1744,0.1478,0.1273,0.1106,0.0974,0.0869,0.0783,0.0712,0.0653,0.0607,0.0573,0.0547,0.0529,0.0518,0.0511,0.051,0.0514,0.0524,0.0539,0.0562,0.0592,0.0631,0.068,0.074,0.0811,0.0896,0.0998,0.1122,0.1275,0.147,0.1736,0.2177],"R":[0.4019,0.4269,0.4456,0.4604,0.4721,0.4817,0.4897,0.4963,0.5019,0.5065,0.5101,0.5131,0.5153,0.5169,0.518,0.5187,0.519,0.5189,0.5183,0.5172,0.5156,0.5133,0.5102,0.5061,0.5007,0.4939,0.4855,0.4754,0.4628,0.4462,0.4246,0.3978,0.3623,0.3243,0.2888,0.2547,0.2246,0.2058,0.1947,0.504,0.504,0.5039,0.5031,0.5015,0.4991,0.4958,0.4914,0.4858,0.479,0.4708,0.4609,0.4486,0.4334,0.4141,0.388,0.3463]},"t":{"adv":0.342,"path":"M0.2210 -0.0120Q0.1710 -0.0120 0.1400 0.0060Q0.1090 0.0240 0.0950 0.0545Q0.0810 0.0850 0.0810 0.1220V0.4190H0.0160V0.5260H0.0860L0.1120 0.6760H0.2200V0.5260H0.3160V0.4190H0.2200V0.1450Q0.2200 0.1210 0.2310 0.1085Q0.2420 0.0960 0.2670 0.0960H0.3160V0.0040Q0.3040 0.0000 0.2880 -0.0035Q0.2720 -0.0070 0.2540 -0.0095Q0.2360 -0.0120 0.2210 -0.0120Z","L":[0.1422,0.1274,0.1163,0.1077,0.101,0.0958,0.0917,0.0883,0.0856,0.0836,0.0822,0.0814,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.081,0.016,0.016,0.016,0.016,0.016,0.016,0.016,0.016,0.016,0.016,0.016,0.0872],"R":[0.316,0.316,0.316,0.316,0.316,0.316,0.316,0.316,0.316,0.316,0.2413,0.2294,0.2241,0.2213,0.2202,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.22,0.316,0.316,0.316,0.316,0.316,0.316,0.316,0.316,0.316,0.316,0.316,0.22]},"e":{"adv":0.584,"path":"M0.3030 -0.0120Q0.2160 -0.0120 0.1570 0.0175Q0.0980 0.0470 0.0680 0.1080Q0.0380 0.1690 0.0380 0.2630Q0.0380 0.3580 0.0680 0.4185Q0.0980 0.4790 0.1565 0.5085Q0.2150 0.5380 0.3000 0.5380Q0.3800 0.5380 0.4350 0.5095Q0.4900 0.4810 0.5180 0.4215Q0.5460 0.3620 0.5460 0.2680V0.2320H0.1790Q0.1810 0.1860 0.1935 0.1540Q0.2060 0.1220 0.2325 0.1065Q0.2590 0.0910 0.3030 0.0910Q0.3270 0.0910 0.3465 0.0970Q0.3660 0.1030 0.3800 0.1150Q0.3940 0.1270 0.4020 0.1450Q0.4100 0.1630 0.4100 0.1860H0.5460Q0.5460 0.1360 0.5280 0.0990Q0.5100 0.0620 0.4780 0.0375Q0.4460 0.0130 0.4015 0.0005Q0.3570 -0.0120 0.3030 -0.0120ZM0.1810 0.3200H0.4030Q0.4030 0.3500 0.3955 0.3720Q0.3880 0.3940 0.3750 0.4080Q0.3620 0.4220 0.3435 0.4285Q0.3250 0.4350 0.3020 0.4350Q0.2640 0.4350 0.2385 0.4225Q0.2130 0.4100 0.1995 0.3845Q0.1860 0.3590 0.1810 0.3200Z","L":[0.1877,0.1636,0.1451,0.1302,0.1179,0.1074,0.0982,0.0903,0.0834,0.0772,0.0717,0.0669,0.0625,0.0587,0.0553,0.0524,0.0498,0.0474,0.0454,0.0437,0.0423,0.0411,0.0401,0.0393,0.0387,0.0383,0.0381,0.038,0.0381,0.0384,0.0388,0.0395,0.0403,0.0413,0.0426,0.0441,0.0458,0.0478,0.0502,0.0529,0.0559,0.0594,0.0633,0.0677,0.0728,0.0784,0.0847,0.092,0.1002,0.1096,0.1204,0.1334,0.1488,0.1683,0.1943,0.2359],"R":[0.4154,0.4395,0.4579,0.4727,0.485,0.4954,0.5042,0.5118,0.5184,0.524,0.5289,0.533,0.5364,0.5392,0.5415,0.5432,0.5445,0.5454,0.5459,0.1841,0.1824,0.1811,0.18,0.1793,0.546,0.546,0.546,0.546,0.5459,0.5458,0.5454,0.5449,0.5443,0.5434,0.5423,0.541,0.5394,0.5376,0.5355,0.5331,0.5304,0.5272,0.5236,0.5196,0.515,0.5098,0.5039,0.4973,0.4898,0.481,0.4708,0.4588,0.4442,0.4258,0.4009,0.3614]},"r":{"adv":0.38,"path":"M0.0640 0.0000V0.5260H0.1790L0.1900 0.4440H0.1970Q0.2070 0.4700 0.2230 0.4915Q0.2390 0.5130 0.2630 0.5260Q0.2870 0.5390 0.3190 0.5390Q0.3360 0.5390 0.3500 0.5355Q0.3640 0.5320 0.3710 0.5290V0.4030H0.3280Q0.2970 0.4030 0.2735 0.3945Q0.2500 0.3860 0.2340 0.3680Q0.2180 0.3500 0.2105 0.3240Q0.2030 0.2980 0.2030 0.2630V0.0000Z","L":[0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.064,0.2798],"R":[0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.203,0.2032,0.2037,0.2046,0.2058,0.2076,0.2099,0.2129,0.2167,0.2216,0.2278,0.2357,0.2462,0.2611,0.2878,0.371,0.371,0.371,0.371,0.371,0.371,0.371,0.371,0.371,0.371,0.371,0.371,0.371,0.3586]}},"sub":{"dx":-0.176,"gap":0.04,"size":0.12}}};
+  var ORDER = ['y', 's', 't', 'e', 'r'], PAIRS = ['Oy', 'ys', 'st', 'te', 'er'];
+  var DEPTH = .13;   // white space deeper than this (open counters, the r's arm) counts as this deep
+  var NS = 'http://www.w3.org/2000/svg';
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- geometry ----------
+  function markEdge(m, x, y) { // right edge of the disc at height y, or null
+    var r = .42 * m.s, cx = x + .5 * m.s, cy = m.va + .485 * m.s, d = y - cy;
+    return Math.abs(d) > r ? null : cx + Math.sqrt(r * r - d * d);
+  }
+  function gapAt(rx, lx) { // clamped white space on one scanline
+    if (rx === null || lx === null) return DEPTH;
+    return Math.max(-DEPTH, Math.min(DEPTH, lx - rx));
+  }
+  function rightEdges(d, item) {
+    return d.ys.map(function (y, k) {
+      if (item.ch === 'O') return markEdge(d.mark, item.x, y);
+      var v = d.glyphs[item.ch].R[k]; return v === null ? null : item.x + v;
+    });
+  }
+  function effGap(d, R, ch, pen) {
+    var L = d.glyphs[ch].L, t = 0;
+    for (var k = 0; k < R.length; k++) t += gapAt(R[k], L[k] === null ? null : pen + L[k]);
+    return t / R.length;
+  }
+  function solve(d, R, ch, target) { // pen position that gives this effective gap
+    var lo = -1, hi = 4;
+    for (var i = 0; i < 50; i++) { var mid = (lo + hi) / 2; if (effGap(d, R, ch, mid) < target) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
+  function layout(pal, st, mode, withNudges) {
+    var d = DATA[pal], m = d.mark, items = [{ ch: 'O', x: m.ml }], pen = m.ml + m.s + m.mr, gaps = [];
+    for (var i = 0; i < ORDER.length; i++) {
+      var ch = ORDER[i], prev = items[items.length - 1], R = rightEdges(d, prev);
+      var x = mode === 'even' ? solve(d, R, ch, st.target / 1000) : pen;
+      if (withNudges) x += (st.nudges[PAIRS[i]] || 0) / 1000;
+      items.push({ ch: ch, x: x });
+      gaps.push({ pair: PAIRS[i], eff: effGap(d, R, ch, x), R: R, L: d.glyphs[ch].L.map(function (v) { return v === null ? null : x + v; }) });
+      pen = x + d.glyphs[ch].adv + (mode === 'even' ? 0 : d.track);
+    }
+    var yi = items[1];
+    return { items: items, gaps: gaps, end: items[5].x + d.glyphs.r.adv, yEnd: yi.x + d.glyphs.y.adv };
+  }
+
+  // ---------- drawing ----------
+  function el(tag, attrs, parent) { var n = document.createElementNS(NS, tag); for (var k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; }
+  function draw(svg, pal, st, mode, opts) {
+    var d = DATA[pal], lay = layout(pal, st, mode, opts.nudges);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var x0 = Math.min(lay.items[0].x, lay.yEnd + st.sub.dx / 1000) - .04, x1 = lay.end + .04;
+    var yTop = opts.labels ? -.86 : -.76, yBot = opts.sub ? .32 : .27;
+    svg.setAttribute('viewBox', [x0 * 1000, yTop * 1000, (x1 - x0) * 1000, (yBot - yTop) * 1000].map(function (v) { return v.toFixed(1); }).join(' '));
+    if (opts.shade) {
+      var shade = pal === 'nacre' ? 'rgba(140,85,114,.13)' : 'rgba(242,184,75,.17)', edge = pal === 'nacre' ? 'rgba(140,85,114,.55)' : 'rgba(242,184,75,.6)';
+      lay.gaps.forEach(function (g) {
+        var left = [], right = [];
+        d.ys.forEach(function (y, k) {
+          var r = g.R[k], l = g.L[k]; if (l === null) return;
+          var a = r === null ? l - DEPTH : Math.max(r, l - DEPTH); if (a >= l) a = l;
+          left.push([a, y]); right.push([l, y]);
+        });
+        if (!left.length) return;
+        var pts = left.concat(right.reverse()).map(function (p) { return (p[0] * 1000).toFixed(1) + ',' + (-p[1] * 1000).toFixed(1); }).join(' ');
+        el('polygon', { points: pts, fill: shade, stroke: edge, 'stroke-width': '3', 'stroke-dasharray': '10 8' }, svg);
+      });
+    }
+    var m = d.mark, u = el('use', { href: '#omark', x: (lay.items[0].x * 1000).toFixed(1), y: (-(m.va + m.s) * 1000).toFixed(1), width: (m.s * 1000).toFixed(1), height: (m.s * 1000).toFixed(1) }, svg);
+    u.setAttribute('style', 'color:' + d.ink + ';fill:' + d.ink + ';--p1:' + d.p1);
+    for (var i = 1; i < lay.items.length; i++) {
+      var it = lay.items[i];
+      el('path', { d: d.glyphs[it.ch].path, transform: 'translate(' + (it.x * 1000).toFixed(1) + ' 0) scale(1000 -1000)', fill: d.ink }, svg);
+    }
+    if (opts.sub) {
+      var t = el('text', { x: ((lay.yEnd + st.sub.dx / 1000) * 1000).toFixed(1), y: ((st.sub.gap / 1000 + .723 * st.sub.size / 1000) * 1000).toFixed(1),
+        'font-size': st.sub.size.toFixed(1), fill: d.ink, 'font-family': 'Archivo, Helvetica Neue, Arial, sans-serif', 'font-weight': '500', 'letter-spacing': (st.sub.size * .02).toFixed(2) }, svg);
+      t.textContent = 'therapeutics';
+    }
+    if (opts.labels) {
+      var mean = lay.gaps.reduce(function (a, g) { return a + g.eff; }, 0) / lay.gaps.length;
+      lay.gaps.forEach(function (g, i) {
+        var xs = g.L.filter(function (v) { return v !== null; }), cx = xs.reduce(function (a, v) { return a + v; }, 0) / xs.length - g.eff / 2;
+        var dev = (g.eff - mean) / mean, col = Math.abs(dev) < .06 ? d.ink : dev > 0 ? (pal === 'nacre' ? '#A0661D' : '#F2B84B') : (pal === 'nacre' ? '#2F6688' : '#9FD3F0');
+        var tx = el('text', { x: (cx * 1000).toFixed(1), y: '-790', 'text-anchor': 'middle', 'font-size': '42', 'font-family': 'IBM Plex Mono, Menlo, monospace', fill: col }, svg);
+        tx.textContent = Math.round(g.eff * 1000);
+        el('line', { x1: (cx * 1000).toFixed(1), x2: (cx * 1000).toFixed(1), y1: '-765', y2: '-725', stroke: col, 'stroke-width': '3' }, svg);
+      });
+    }
+    return lay;
+  }
+
+  // ---------- state ----------
+  var defaults = {}, state = { active: 'nacre', shade: true, note: '' };
+  function siteMean(pal) {
+    var lay = layout(pal, { nudges: {} }, 'site', false);
+    return lay.gaps.reduce(function (a, g) { return a + g.eff; }, 0) / lay.gaps.length;
+  }
+  Object.keys(DATA).forEach(function (pal) {
+    var d = DATA[pal];
+    defaults[pal] = { mode: 'even', target: Math.round(siteMean(pal) * 1000 * .82), nudges: { Oy: 0, ys: 0, st: 0, te: 0, er: 0 },
+      sub: { dx: Math.round(d.sub.dx * 1000), gap: Math.round(d.sub.gap * 1000), size: Math.round(d.sub.size * 1000) } };
+    state[pal] = JSON.parse(JSON.stringify(defaults[pal]));
+  });
+  function cur() { return state[state.active]; }
+
+  // ---------- controls ----------
+  var nudgeBox = $('nudges');
+  PAIRS.forEach(function (p) {
+    var name = p === 'Oy' ? 'O y' : p[0] + ' ' + p[1];
+    var row = document.createElement('div'); row.className = 'row';
+    row.innerHTML = '<label for="n' + p + '">' + name + '</label><input type="range" id="n' + p + '" min="-80" max="80" step="1"><output id="n' + p + 'V" for="n' + p + '"></output>';
+    nudgeBox.appendChild(row);
+    row.querySelector('input').addEventListener('input', function (e) { cur().nudges[p] = +e.target.value; render(); });
+  });
+  document.querySelectorAll('[data-pal]').forEach(function (b) { b.addEventListener('click', function () { state.active = b.dataset.pal; render(); }); });
+  document.querySelectorAll('[data-mode]').forEach(function (b) { b.addEventListener('click', function () { cur().mode = b.dataset.mode; render(); }); });
+  $('target').addEventListener('input', function (e) { cur().target = +e.target.value; render(); });
+  $('shade').addEventListener('change', function (e) { state.shade = e.target.checked; render(); });
+  [['subDx', 'dx'], ['subGap', 'gap'], ['subSize', 'size']].forEach(function (p) { $(p[0]).addEventListener('input', function (e) { cur().sub[p[1]] = +e.target.value; render(); }); });
+  $('note').addEventListener('input', function (e) { state.note = e.target.value; });
+  $('reset').addEventListener('click', function () { state[state.active] = JSON.parse(JSON.stringify(defaults[state.active])); render(); say('Reset ' + DATA[state.active].label + ' to the optically even starting point.'); });
+
+  function fmt(v) { return (v > 0 ? '+' : '') + v; }
+  function render() {
+    var pal = state.active, d = DATA[pal], st = cur();
+    $('palN').setAttribute('aria-pressed', String(pal === 'nacre')); $('palT').setAttribute('aria-pressed', String(pal === 'tidepool'));
+    $('modeSite').setAttribute('aria-pressed', String(st.mode === 'site')); $('modeEven').setAttribute('aria-pressed', String(st.mode === 'even'));
+    $('target').value = st.target; $('targetV').textContent = st.target; $('target').disabled = st.mode !== 'even';
+    $('targetHint').textContent = st.mode === 'even' ? 'Target width for every gap. Lower is tighter.' : 'Switch to Optically even to set one width for every gap.';
+    $('shade').checked = state.shade;
+    var stage = $('stage'); stage.style.background = d.bg; stage.style.color = d.ink;
+    $('stageLab').textContent = d.label + ' · ' + d.font; $('modeLab').textContent = st.mode === 'even' ? 'Optically even' : 'As on the site';
+    var lay = draw($('spec'), pal, st, st.mode, { nudges: true, shade: state.shade, labels: true, sub: true });
+    PAIRS.forEach(function (p, i) {
+      $('n' + p).value = st.nudges[p] || 0;
+      $('n' + p + 'V').innerHTML = fmt(st.nudges[p] || 0) + '<span class="gapv">gap ' + Math.round(lay.gaps[i].eff * 1000) + '</span>';
+    });
+    [['subDx', 'dx'], ['subGap', 'gap'], ['subSize', 'size']].forEach(function (p) { $(p[0]).value = st.sub[p[1]]; $(p[0] + 'V').textContent = st.sub[p[1]]; });
+    var site = layout(pal, st, 'site', false), effs = lay.gaps.map(function (g) { return g.eff * 1000; }), seff = site.gaps.map(function (g) { return g.eff * 1000; });
+    var spread = function (a) { return Math.round(Math.max.apply(null, a) - Math.min.apply(null, a)); };
+    var mean = function (a) { return Math.round(a.reduce(function (x, y) { return x + y; }, 0) / a.length); };
+    $('stats').innerHTML = '<span>Average gap <b>' + mean(effs) + '</b> (site ' + mean(seff) + ')</span><span>Spread <b>' + spread(effs) + '</b> (site ' + spread(seff) + ')</span><span>Width <b>' + ((lay.end - lay.items[0].x) / (site.end - site.items[0].x) * 100).toFixed(1) + '%</b> of the site wordmark</span>';
+    // side by side
+    var cmp = $('compare'); cmp.innerHTML = '';
+    [['As on the site', 'font spacing', 'site', false], ['Optically even', 'gap ' + st.target + ', no nudges', 'even', false], ['Your setting', st.mode === 'even' ? 'even + nudges' : 'site + nudges', st.mode, true]].forEach(function (r) {
+      var box = document.createElement('div'); box.className = 'cmp'; box.style.background = d.bg; box.style.color = d.ink;
+      box.innerHTML = '<div class="lab">' + r[0] + '<span>' + r[1] + '</span></div>';
+      var s = document.createElementNS(NS, 'svg'); s.setAttribute('role', 'img'); s.setAttribute('aria-label', r[0]); box.appendChild(s); cmp.appendChild(box);
+      draw(s, pal, st, r[2], { nudges: r[3], shade: false, labels: false, sub: true });
+    });
+    // working sizes
+    var sz = $('sizes'); sz.innerHTML = ''; sz.style.background = d.bg; sz.style.color = d.ink;
+    [[34, 'Header, 34px tall'], [20, 'Small, 20px'], [64, 'Footer detail, 64px']].forEach(function (r) {
+      var f = document.createElement('figure'), s = document.createElementNS(NS, 'svg');
+      f.appendChild(s); var c = document.createElement('figcaption'); c.textContent = r[1]; f.appendChild(c); sz.appendChild(f);
+      draw(s, pal, st, st.mode, { nudges: true, shade: false, labels: false, sub: r[0] >= 60 });
+      s.style.height = r[0] + 'px'; s.style.width = 'auto'; s.setAttribute('role', 'img'); s.setAttribute('aria-label', 'Wordmark at ' + r[1]);
+    });
+  }
+
+  function say(t) { $('status').textContent = t; }
+  function payload() {
+    var out = { note: state.note, savedAt: new Date().toISOString() };
+    Object.keys(DATA).forEach(function (pal) {
+      var lay = layout(pal, state[pal], state[pal].mode, true);
+      out[pal] = JSON.parse(JSON.stringify(state[pal]));
+      // resolved positions in font units, so the result can be applied without re-solving
+      out[pal].positions = lay.items.map(function (it) { return { ch: it.ch, x: Math.round(it.x * 10000) / 10 }; });
+      out[pal].gaps = lay.gaps.map(function (g) { return Math.round(g.eff * 1000); });
+    });
+    return out;
+  }
+  function load(saved) {
+    if (!saved) return;
+    Object.keys(DATA).forEach(function (pal) {
+      var s = saved[pal]; if (!s) return;
+      state[pal] = { mode: s.mode === 'site' ? 'site' : 'even', target: +s.target || defaults[pal].target,
+        nudges: Object.assign({}, defaults[pal].nudges, s.nudges || {}), sub: Object.assign({}, defaults[pal].sub, s.sub || {}) };
+    });
+    if (typeof saved.note === 'string') { state.note = saved.note; $('note').value = saved.note; }
+  }
+  $('copy').addEventListener('click', function () {
+    var text = JSON.stringify(payload(), null, 2);
+    try { navigator.clipboard.writeText(text).then(function () { say('Copied. Paste it into the chat with Claude.'); }, function () { say('Copy is blocked here. Save instead.'); }); }
+    catch (e) { say('Copy is blocked here. Save instead.'); }
+  });
+
+  render();
+
+  // ---------- shared store: the saved settings, which Claude reads back ----------
+  var ref = null;
+  $('save').disabled = true; say('Connecting…');
+  if (window.claude && window.claude.use) {
+    window.claude.use('db').then(function (db) {
+      if (!db) { $('save').hidden = true; say('Saving is not available in this view. Use Copy settings.'); return; }
+      ref = db.doc('logotype/settings');
+      ref.get().then(function (snap) {
+        if (snap.exists) { load(snap.data()); render(); var t = snap.data().savedAt; say(t ? 'Loaded the settings saved ' + new Date(t).toLocaleString() + '.' : 'Loaded the saved settings.'); }
+        else say('Nothing saved yet. Adjust the spacing, then Save for Claude.');
+        $('save').disabled = false;
+      }, function () { $('save').disabled = false; say('Could not load saved settings. You can still save.'); });
+    });
+  } else { $('save').hidden = true; say('Saving is not available in this view. Use Copy settings.'); }
+  $('save').addEventListener('click', function () {
+    if (!ref) return;
+    $('save').disabled = true; say('Saving…');
+    ref.set(payload()).then(function () { say('Saved ' + new Date().toLocaleTimeString() + '. Tell Claude to apply it.'); $('save').disabled = false; },
+      function (e) { say(e && e.code === 'invalid_argument' ? 'You do not have permission to save here.' : 'Saving failed. Try again in a moment.'); $('save').disabled = false; });
+  });
+})();
+</script>
