@@ -953,7 +953,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
     head.classList.remove('hide'); mark.classList.remove('hide');
     body.classList.add('mark-ease'); clearTimeout(easeT);
     easeT = setTimeout(function () { body.classList.remove('mark-ease'); }, 850);
-    updateMark(window.scrollY, window.innerWidth, window.innerHeight);
+    updateMark(window.scrollY, window.innerWidth, window.innerHeight, true);
     menuBtn.setAttribute('aria-expanded', String(open));
     menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   }
@@ -978,6 +978,8 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
     // the height includes the descender and the hanging "therapeutics", so the hero never crops them
     var sub = mark.querySelector('.wm-sub');
     markH = Math.max(mark.offsetHeight, sub ? sub.getBoundingClientRect().bottom - mark.getBoundingClientRect().top : 0);
+    markTop0 = window.innerHeight - markH - Math.max(20, g * .6);
+    if (arts) refreshArt(); // the hero pearl keeps clear of the wordmark's new top
     fits.forEach(function (el) { var cs = getComputedStyle(el.parentElement); fitEl(el, el.parentElement.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)); });
     lastY = -1;
   }
@@ -1030,17 +1032,34 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
   var lastY = -1, lastW = 0, lastStep = -1, lastMove = 0, idle = false;
 
   function lerp(a, b, t) { return a + (b - a) * t; }
-  function updateMark(y, vw, vh) {
+  // The wordmark glides from the hero to the header. Scroll sets a target; each frame the wordmark moves
+  // part of the way there, so wheel steps and jumps become one smooth glide. It shrinks at an even rate
+  // (geometric scale) on a gentle sine ease.
+  var markQ = -1, markT = 0, markLastT = 0, markTop0 = 0;
+  function updateMark(y, vw, vh, snap) {
+    markT = reduce || body.classList.contains('menu-open') ? 1 : clamp(y / (vh * .8), 0, 1);
+    if (snap || markQ < 0 || reduce) markQ = markT;
+    renderMark(vw, vh);
+  }
+  function renderMark(vw, vh) {
     var g = gutter();
     var left = Math.max(g, (vw - 1440) / 2 + g);
     var small = vw < 560 ? 108 : 150;
     var s = small / markW;
     var startY = vh - markH - Math.max(20, g * .6);
     var endY = (76 - small * markH / markW) / 2 + 2;
-    var q = reduce || body.classList.contains('menu-open') ? 1 : seg(y / (vh * .7), 0, 1);
-    mark.style.transform = 'translate3d(' + left + 'px,' + lerp(startY, endY, q) + 'px,0) scale(' + lerp(1, s, q) + ')';
+    markTop0 = startY;
+    var e = .5 - .5 * Math.cos(Math.PI * markQ);
+    mark.style.transform = 'translate3d(' + left + 'px,' + lerp(startY, endY, e).toFixed(2) + 'px,0) scale(' + Math.exp(Math.log(s) * e).toFixed(5) + ')';
     // "therapeutics" is too small to read once the wordmark is header-sized, so it fades out on the way
-    var so = (1 - clamp((q - .35) / .4, 0, 1)).toFixed(3); markSub.forEach(function (g) { g.style.opacity = so; });
+    var so = (1 - clamp((e - .25) / .4, 0, 1)).toFixed(3); markSub.forEach(function (n) { n.style.opacity = so; });
+  }
+  function stepMark(now, vw, vh) {
+    var dt = Math.min(64, now - (markLastT || now)); markLastT = now;
+    if (markQ === markT) return;
+    markQ += (markT - markQ) * (1 - Math.exp(-dt / 120));
+    if (Math.abs(markT - markQ) < .0004) markQ = markT;
+    renderMark(vw, vh);
   }
   function updateHeader(y, dy, vh) {
     if (body.classList.contains('menu-open')) { head.classList.remove('hide'); mark.classList.remove('hide'); return; }
@@ -1135,6 +1154,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
       updateExpand(vh);
       lastY = y;
     }
+    stepMark(now, vw, vh);
     requestAnimationFrame(frame);
   }
 
@@ -1203,6 +1223,11 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
     function draw() {
       ctx.clearRect(0, 0, w, h); if (!w || !h) return;
       var cx = w * opts.cx, cy = h * opts.cy, R = Math.min(w, h) * opts.scale, N = opts.rings, P = 160;
+      if (opts.clearOf) {
+        // keep the pearl, its sway and its pointer drift above the top of the hero wordmark
+        var lim = opts.clearOf() - (canvas.getBoundingClientRect().top + window.scrollY), pr0 = R * .19;
+        if (lim > 0) cy = Math.max(Math.min(cy, lim - pr0 * 1.2 - 40), 90 + pr0);
+      }
       mx += (tx - mx) * .05; my += (ty - my) * .05;
       for (var i = 0; i < N; i++) {
         var k = i / (N - 1), rr = R * (.22 + k * .84), ox = mx * (1 - k) * 30, oy = my * (1 - k) * 30;
@@ -1243,7 +1268,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
   var savedTheme = store('oyster-theme');
   if (savedTheme === 'light' || savedTheme === 'dark') root.setAttribute('data-theme', savedTheme);
   var wide = window.innerWidth > 900;
-  arts.push(makeArt(document.getElementById('heroArt'), { pearl: true, track: true, cx: wide ? .68 : .6, cy: wide ? .44 : .62, scale: wide ? .46 : .5, rings: 30 }));
+  arts.push(makeArt(document.getElementById('heroArt'), { pearl: true, track: true, clearOf: function () { return markTop0; }, cx: wide ? .68 : .6, cy: wide ? .44 : .62, scale: wide ? .46 : .5, rings: 30 }));
   arts.push(makeArt(document.getElementById('xArt'), { pearl: true, track: true, cx: .72, cy: .42, scale: .5, rings: 22 }));
   var saved = store('oyster-palette');
   applyPalette(PALETTES[saved] ? saved : 'nacre');
