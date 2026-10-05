@@ -31,7 +31,9 @@
   // the intro plays on a dark stage: on a light palette, Nacre's own ink mauve, with the logotype drawn light and the
   // shells' outline softened to a rim that reads on the dark; it turns to the site's colours as the logo lands.
   // A dark palette (Tidepool) keeps its own ground and colours.
-  const LIGHTSITE = getComputedStyle(html).colorScheme !== 'dark';
+  // light or dark site, judged from the brightness of the page colour itself (colorScheme is unreliable on some
+  // Android browsers); only a dark palette keeps its own ground
+  const paperC = new THREE.Color(css('--paper') || '#EFE6E1'), LIGHTSITE = (paperC.r + paperC.g + paperC.b) / 3 > .45;
   const STAGE = LIGHTSITE ? ['#3B2F42', '#241C29'] : PAL[pal].sky[0], LOGO0 = LIGHTSITE ? css('--paper') : INK, LINE = LIGHTSITE ? '#806A86' : INK;
   ov.style.setProperty('--intro-a', STAGE[0]); ov.style.setProperty('--intro-b', STAGE[1]);
   const mixHex = (a, b, x) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), x).getHexString();
