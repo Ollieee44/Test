@@ -1,45 +1,45 @@
 {
-  "_note": "Alternative palettes to explore against Nacre and Tidepool. Same token set as references/palette.md: page tokens (css), 3D story colours (story), wallpaper outline fills (wall) and the team monogram ink (mono). build_palettes.py turns these into palettes.html.",
+  "_note": "Palettes from the brand analysis (Sept v2), options E, F, M and N, added beside Nacre and Tidepool. 'doc' is the option's four colours as given; everything else is derived from them (tints for the 3D story, lifted greys for muted text where the doc grey is too dark to read). build_palettes.py turns these into palettes.html.",
   "palettes": [
     {
-      "id": "shell", "name": "Shell", "dark": false,
-      "idea": "The inside of the shell: cool silver-grey nacre, slate ink, a steel-blue accent. Calmer and more clinical than Nacre; the gold clasp stays.",
-      "css": { "ink": "#1F2A33", "muted": "#56636D", "accent": "#3B6683", "paper": "#E7EAEA", "band": "#F1F3F3", "pearl": "#A3B8C6", "clasp": "#C38E26", "line": "rgba(31, 42, 51, .16)", "card": "rgba(255, 255, 255, .6)" },
-      "mono": "#1F2A33",
-      "story": { "ring": "#3B6683", "ink": "#1F2A33", "brd4": "#C7DAE5", "vhl": "#E2DAC6", "elob": "#E5E8E7", "eloc": "#D8DEDD", "warhead": "#4F7FA0", "e3lig": "#9C8352",
-        "linker": "#3B6683", "brk": "#1F2A33", "ub": "#A3B8C6", "pearl3d": "#F5F7F8", "clasp": "#C38E26", "e2": "#D2DCE2", "prot": "#A5AFB6", "wall": "#DAE2E6", "flash": "#3B6683",
-        "sky": [["#F3F5F5", "#DBE1E3"], ["#F0F1EF", "#DCDCD6"], ["#EDF0F4", "#D2DAE4"]] },
-      "wall": { "a": "#A3B8C6", "b": "#C9B88F", "ink": "#1F2A33" }
+      "id": "pearlink", "name": "Pearl & Ink", "option": "E", "dark": true, "doc": ["#1D1A22", "#EDE8E0", "#D8B98A", "#6E6477"],
+      "idea": "Near-black warmed with champagne: premium and serious without the navy. The pearl is the one bright thing.",
+      "css": { "ink": "#EDE8E0", "muted": "#B3ACB8", "accent": "#D8B98A", "paper": "#1D1A22", "band": "#18151D", "pearl": "#EDE8E0", "clasp": "#D8B98A", "line": "rgba(237, 232, 224, .16)", "card": "rgba(255, 255, 255, .05)" },
+      "mono": "#1D1A22",
+      "story": { "ring": "#120F16", "ink": "#120F16", "brd4": "#E6D3B3", "vhl": "#C4BCCB", "elob": "#3A3541", "eloc": "#322E39", "warhead": "#C9A877", "e3lig": "#8E8399",
+        "linker": "#EDE8E0", "brk": "#D8B98A", "ub": "#E6D3B3", "pearl3d": "#F6F2EC", "clasp": "#D8B98A", "e2": "#A79FB0", "prot": "#4E4857", "wall": "#2C2833", "flash": "#D8B98A",
+        "sky": [["#2B2731", "#1D1A22"], ["#2D2830", "#1A171F"], ["#26232F", "#16131B"]] },
+      "wall": { "a": "#D8B98A", "b": "#9A90A5", "ink": "#EDE8E0" }
     },
     {
-      "id": "saltmarsh", "name": "Saltmarsh", "dark": false,
-      "idea": "Where oysters are farmed: warm sand paper, deep kelp-green ink and accent, with a terracotta clasp. Earthier and warmer; reads less 'beauty brand' than Nacre.",
-      "css": { "ink": "#1D2A23", "muted": "#59645C", "accent": "#3C6A55", "paper": "#EDE7DA", "band": "#F5F1E7", "pearl": "#C6B189", "clasp": "#D2603A", "line": "rgba(29, 42, 35, .16)", "card": "rgba(255, 255, 255, .5)" },
-      "mono": "#1D2A23",
-      "story": { "ring": "#3C6A55", "ink": "#1D2A23", "brd4": "#EAD8B0", "vhl": "#BCD5C4", "elob": "#E6E1D4", "eloc": "#D9D3C3", "warhead": "#BE8738", "e3lig": "#3C6A55",
-        "linker": "#3C6A55", "brk": "#1D2A23", "ub": "#C6B189", "pearl3d": "#FAF6EC", "clasp": "#D2603A", "e2": "#CCDFD1", "prot": "#B3B19B", "wall": "#E1D8C3", "flash": "#3C6A55",
-        "sky": [["#F5F0E4", "#E3D8C6"], ["#F3EBDE", "#E5D3BE"], ["#EEEDE1", "#D6DCCB"]] },
-      "wall": { "a": "#C6B189", "b": "#99BDA6", "ink": "#1D2A23" }
+      "id": "shellcoral", "name": "Shell Coral", "option": "F", "dark": false, "doc": ["#E26D5A", "#2A1410", "#F3E3CF", "#2F6B5E"],
+      "idea": "Friendliest option in the set: coral and sand with a sea-green counterpoint. Sand is the page, coral the clasp, sea-green the accent.",
+      "css": { "ink": "#2A1410", "muted": "#6B5446", "accent": "#2F6B5E", "paper": "#F3E3CF", "band": "#F8EDDF", "pearl": "#E26D5A", "clasp": "#E26D5A", "line": "rgba(42, 20, 16, .16)", "card": "rgba(255, 255, 255, .5)" },
+      "mono": "#2A1410",
+      "story": { "ring": "#2F6B5E", "ink": "#2A1410", "brd4": "#F2B9A9", "vhl": "#B9D3C8", "elob": "#EEE2D3", "eloc": "#E3D5C4", "warhead": "#D9826F", "e3lig": "#2F6B5E",
+        "linker": "#2F6B5E", "brk": "#2A1410", "ub": "#F0A08F", "pearl3d": "#FFF8EF", "clasp": "#E26D5A", "e2": "#C9DDD4", "prot": "#B7A595", "wall": "#EBD9C4", "flash": "#2F6B5E",
+        "sky": [["#F8EDE0", "#EAD5BE"], ["#F7E8DA", "#EDCDB8"], ["#F1EADF", "#DCD9C8"]] },
+      "wall": { "a": "#E26D5A", "b": "#7FAE9F", "ink": "#2A1410" }
     },
     {
-      "id": "abyss", "name": "Abyss", "dark": true,
-      "idea": "Deep water at night: ink-navy ground with pink and periwinkle nacre, gold clasp. The most 'biotech' of the set and the strongest contrast for the 3D story.",
-      "css": { "ink": "#ECEEF5", "muted": "#A8B2CA", "accent": "#BBA6E6", "paper": "#111A2E", "band": "#0D1526", "pearl": "#E6CFE6", "clasp": "#F2B84B", "line": "rgba(236, 238, 245, .16)", "card": "rgba(255, 255, 255, .05)" },
-      "mono": "#0A1020",
-      "story": { "ring": "#0A1020", "ink": "#0A1020", "brd4": "#E8C2D6", "vhl": "#A9B9EA", "elob": "#34416B", "eloc": "#2C385D", "warhead": "#E79BC1", "e3lig": "#8FA3F1",
-        "linker": "#ECEEF5", "brk": "#F2B84B", "ub": "#E6CFE6", "pearl3d": "#F4F2FA", "clasp": "#F2B84B", "e2": "#8F9CD2", "prot": "#4A567F", "wall": "#263151", "flash": "#F2B84B",
-        "sky": [["#202C4A", "#111A2E"], ["#252B47", "#0F1628"], ["#1B2443", "#0B1122"]] },
-      "wall": { "a": "#E8C2D6", "b": "#A9B9EA", "ink": "#ECEEF5" }
+      "id": "abyssmint", "name": "Abyss & Mint", "option": "M", "dark": true, "doc": ["#0E2B2A", "#9FF0D0", "#E9F5F0", "#3E7A70"],
+      "idea": "Deep-sea black-green with a cool mint signal. Scientific and calm, with a quietly modern edge.",
+      "css": { "ink": "#E9F5F0", "muted": "#A9C9C0", "accent": "#9FF0D0", "paper": "#0E2B2A", "band": "#0B2423", "pearl": "#9FF0D0", "clasp": "#9FF0D0", "line": "rgba(233, 245, 240, .16)", "card": "rgba(255, 255, 255, .05)" },
+      "mono": "#0E2B2A",
+      "story": { "ring": "#061A19", "ink": "#061A19", "brd4": "#D6EDE5", "vhl": "#8FC0B4", "elob": "#2C5A55", "eloc": "#254F4B", "warhead": "#B7D8CF", "e3lig": "#5E9A8F",
+        "linker": "#E9F5F0", "brk": "#9FF0D0", "ub": "#B8F3DD", "pearl3d": "#F0FAF6", "clasp": "#9FF0D0", "e2": "#7DAFA4", "prot": "#3E7A70", "wall": "#1E4A47", "flash": "#9FF0D0",
+        "sky": [["#1A403E", "#0E2B2A"], ["#1B3D3B", "#0C2726"], ["#163A3A", "#0A2221"]] },
+      "wall": { "a": "#9FF0D0", "b": "#6FA89C", "ink": "#E9F5F0" }
     },
     {
-      "id": "blackpearl", "name": "Black Pearl", "dark": true,
-      "idea": "Tahitian black pearl: near-black aubergine, rose and lilac lustre, a bright gold clasp. Nacre's own colours turned to night; the most premium of the set.",
-      "css": { "ink": "#F2ECEF", "muted": "#BEB0B9", "accent": "#DDA9C1", "paper": "#18121B", "band": "#130E16", "pearl": "#C99BB0", "clasp": "#E4B24A", "line": "rgba(242, 236, 239, .16)", "card": "rgba(255, 255, 255, .05)" },
-      "mono": "#0C080E",
-      "story": { "ring": "#0C080E", "ink": "#0C080E", "brd4": "#EAC6D6", "vhl": "#CABEE2", "elob": "#3B2F41", "eloc": "#332838", "warhead": "#CB7BA0", "e3lig": "#9D87CB",
-        "linker": "#F2ECEF", "brk": "#E4B24A", "ub": "#DDA9C1", "pearl3d": "#F7F1F4", "clasp": "#E4B24A", "e2": "#B5A7D0", "prot": "#5B4C60", "wall": "#2D2432", "flash": "#E4B24A",
-        "sky": [["#2B2131", "#18121B"], ["#2E2029", "#160F18"], ["#241F32", "#120E17"]] },
-      "wall": { "a": "#DDA9C1", "b": "#B5A7D0", "ink": "#F2ECEF" }
+      "id": "charcoalviolet", "name": "Charcoal & Violet", "option": "N", "dark": true, "doc": ["#1A1820", "#7B5CFF", "#EEEAF6", "#4A4458"],
+      "idea": "Ultraviolet on charcoal: an unowned hue that signals the brain and the new, without looking playful. Small text uses a lighter violet so it stays readable.",
+      "css": { "ink": "#EEEAF6", "muted": "#ADA6BD", "accent": "#A08BFF", "paper": "#1A1820", "band": "#16141B", "pearl": "#7B5CFF", "clasp": "#7B5CFF", "line": "rgba(238, 234, 246, .16)", "card": "rgba(255, 255, 255, .05)" },
+      "mono": "#1A1820",
+      "story": { "ring": "#0F0E14", "ink": "#0F0E14", "brd4": "#D9D0FF", "vhl": "#9A93AC", "elob": "#3A3546", "eloc": "#322E3D", "warhead": "#A08BFF", "e3lig": "#8A84A0",
+        "linker": "#EEEAF6", "brk": "#7B5CFF", "ub": "#C4B6FF", "pearl3d": "#F6F4FB", "clasp": "#7B5CFF", "e2": "#9D97B2", "prot": "#4A4458", "wall": "#2A2733", "flash": "#7B5CFF",
+        "sky": [["#2A2733", "#1A1820"], ["#2B2632", "#17151D"], ["#25223A", "#14121B"]] },
+      "wall": { "a": "#A08BFF", "b": "#8A84A0", "ink": "#EEEAF6" }
     }
   ]
 }
