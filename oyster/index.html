@@ -1261,24 +1261,34 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
     // with room for its bob and pointer drift. Measured on resize and refresh, not every frame.
     var spotCache = null, spotKey = '';
     function pearlSpot(pr) {
-      var cr = canvas.getBoundingClientRect(), key = [Math.round(cr.width), Math.round(cr.height), Math.round(pr)].join('x');
+      var cr = canvas.getBoundingClientRect(), els = opts.avoid();
+      // re-measure whenever the canvas or any of the text moves or reflows (font swaps, resizes, the panel growing)
+      var key = [cr.width, cr.height, pr].concat(els.map(function (el) { var r = el.getBoundingClientRect(); return [r.left - cr.left, r.top - cr.top, r.width, r.height].join(','); }))
+        .map(function (v) { return typeof v === 'number' ? Math.round(v) : v; }).join('|');
       if (key === spotKey) return spotCache;
       var boxes = [];
-      opts.avoid().forEach(function (el) {
+      els.forEach(function (el) {
         var rg = document.createRange(); rg.selectNodeContents(el);
         [].forEach.call(rg.getClientRects(), function (r) { if (r.width && r.height) boxes.push([r.left - cr.left, r.top - cr.top, r.right - cr.left, r.bottom - cr.top]); });
       });
-      var clear = pr * 1.25 + 40, best = null, bestD = Infinity, x0 = w * opts.cx, y0 = h * opts.cy;
-      for (var gy = 0; gy <= 24; gy++) for (var gx = 0; gx <= 24; gx++) {
-        var x = clear + (w - 2 * clear) * gx / 24, y = clear + (h - 2 * clear) * gy / 24, ok = true;
-        for (var i = 0; i < boxes.length && ok; i++) {
-          var b = boxes[i], dx = Math.max(b[0] - x, 0, x - b[2]), dy = Math.max(b[1] - y, 0, y - b[3]);
-          if (dx * dx + dy * dy < clear * clear) ok = false;
-        }
-        var d = (x - x0) * (x - x0) + (y - y0) * (y - y0);
-        if (ok && d < bestD) { bestD = d; best = [x, y]; }
+      function gap(x, y) { // distance from a point to the nearest line of text
+        var m = Infinity;
+        for (var i = 0; i < boxes.length; i++) { var b = boxes[i], dx = Math.max(b[0] - x, 0, x - b[2]), dy = Math.max(b[1] - y, 0, y - b[3]); m = Math.min(m, Math.sqrt(dx * dx + dy * dy)); }
+        return m;
       }
-      spotKey = key; spotCache = best; return best;
+      var x0 = w * opts.cx, y0 = h * opts.cy, edge = pr + 12, best = null, far = null, farG = -1;
+      // the clear spot nearest the default, with room for the bob and pointer drift; failing that, a little less room
+      [pr * 1.25 + 40, pr * 1.1 + 22, pr + 8].some(function (clear) {
+        var bestD = Infinity;
+        for (var gy = 0; gy <= 30; gy++) for (var gx = 0; gx <= 30; gx++) {
+          var x = edge + (w - 2 * edge) * gx / 30, y = edge + (h - 2 * edge) * gy / 30, g = gap(x, y);
+          if (g > farG) { farG = g; far = [x, y]; }
+          var d = (x - x0) * (x - x0) + (y - y0) * (y - y0);
+          if (g >= clear && d < bestD) { bestD = d; best = [x, y]; }
+        }
+        return !!best;
+      });
+      spotKey = key; spotCache = best || far; return spotCache;   // never fall back to a spot behind the text
     }
     function loop() { if (visible && !reduce) { t += .016; draw(); } requestAnimationFrame(loop); }
     new ResizeObserver(size).observe(canvas);
