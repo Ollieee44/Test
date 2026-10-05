@@ -100,5 +100,10 @@ out['linker'] = {'beads': (X[path] - origin).round(2).tolist(), 'oxygen': [tmpl.
                  'ends': {'warhead': (X[m[0]] - origin).round(2).tolist(), 'e3lig': (X[m[-1]] - origin).round(2).tolist()}}
 out['centres'] = {k: (prot[k].mean(0) - origin).round(2).tolist() for k in prot}
 out['centres'].update({k: (X[[i for i in part if part[i] == k]].mean(0) - origin).round(2).tolist() for k in ('warhead', 'e3lig')})
+# ubiquitin (PDB 1UBQ), centred on itself, for the tags the E2 hands to the target
+ub = np.array([[float(l[30:38]), float(l[38:46]), float(l[46:54])] for l in open(D + 'data/1ubq.pdb') if l.startswith('ATOM')])
+v, f = surface(ub, sigma=2.2, level=.18, spacing=1.2)
+out['parts']['ub'] = pack(v, f, ub.mean(0))
+print('ub', len(ub), 'atoms ->', len(v), 'verts')
 json.dump(out, open(D + 'data/meshes.json', 'w'), separators=(',', ':'))
 print('meshes.json', os.path.getsize(D + 'data/meshes.json') // 1024, 'KB')
