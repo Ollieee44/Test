@@ -2,44 +2,260 @@
   "_note": "Palettes from the brand analysis (Sept v2), options E, F, M and N, added beside Nacre and Tidepool. 'doc' is the option's four colours as given; everything else is derived from them (tints for the 3D story, lifted greys for muted text where the doc grey is too dark to read). build_palettes.py turns these into palettes.html.",
   "palettes": [
     {
-      "id": "pearlink", "name": "Pearl & Ink", "option": "E", "dark": true, "doc": ["#1D1A22", "#EDE8E0", "#D8B98A", "#6E6477"],
+      "id": "pearlink",
+      "name": "Pearl & Ink",
+      "option": "E",
+      "dark": true,
+      "doc": [
+        "#1D1A22",
+        "#EDE8E0",
+        "#D8B98A",
+        "#6E6477"
+      ],
       "idea": "Near-black warmed with champagne: premium and serious without the navy. The pearl is the one bright thing.",
-      "css": { "ink": "#EDE8E0", "muted": "#B3ACB8", "accent": "#D8B98A", "paper": "#1D1A22", "band": "#18151D", "pearl": "#EDE8E0", "clasp": "#D8B98A", "line": "rgba(237, 232, 224, .16)", "card": "rgba(255, 255, 255, .05)" },
+      "css": {
+        "ink": "#EDE8E0",
+        "muted": "#B3ACB8",
+        "accent": "#D8B98A",
+        "paper": "#1D1A22",
+        "band": "#18151D",
+        "pearl": "#EDE8E0",
+        "clasp": "#D8B98A",
+        "line": "rgba(237, 232, 224, .16)",
+        "card": "rgba(255, 255, 255, .05)"
+      },
       "mono": "#1D1A22",
-      "story": { "ring": "#120F16", "ink": "#120F16", "brd4": "#E6D3B3", "vhl": "#C4BCCB", "elob": "#3A3541", "eloc": "#322E39", "warhead": "#C9A877", "e3lig": "#8E8399",
-        "linker": "#EDE8E0", "brk": "#D8B98A", "ub": "#E6D3B3", "pearl3d": "#F6F2EC", "clasp": "#D8B98A", "e2": "#A79FB0", "prot": "#4E4857", "wall": "#2C2833", "flash": "#D8B98A",
-        "sky": [["#2B2731", "#1D1A22"], ["#2D2830", "#1A171F"], ["#26232F", "#16131B"]] },
-      "wall": { "a": "#D8B98A", "b": "#9A90A5", "ink": "#EDE8E0" }
+      "story": {
+        "ring": "#120F16",
+        "ink": "#120F16",
+        "brd4": "#E6D3B3",
+        "vhl": "#C4BCCB",
+        "elob": "#3A3541",
+        "eloc": "#322E39",
+        "warhead": "#C9A877",
+        "e3lig": "#8E8399",
+        "linker": "#EDE8E0",
+        "brk": "#D8B98A",
+        "ub": "#E6D3B3",
+        "pearl3d": "#F6F2EC",
+        "clasp": "#D8B98A",
+        "e2": "#A79FB0",
+        "prot": "#4E4857",
+        "wall": "#2C2833",
+        "flash": "#D8B98A",
+        "sky": [
+          [
+            "#2B2731",
+            "#1D1A22"
+          ],
+          [
+            "#2D2830",
+            "#1A171F"
+          ],
+          [
+            "#26232F",
+            "#16131B"
+          ]
+        ],
+        "cell": "#3A3446"
+      },
+      "wall": {
+        "a": "#D8B98A",
+        "b": "#9A90A5",
+        "ink": "#EDE8E0"
+      }
     },
     {
-      "id": "shellcoral", "name": "Shell Coral", "option": "F", "dark": false, "doc": ["#E26D5A", "#2A1410", "#F3E3CF", "#2F6B5E"],
+      "id": "shellcoral",
+      "name": "Shell Coral",
+      "option": "F",
+      "dark": false,
+      "doc": [
+        "#E26D5A",
+        "#2A1410",
+        "#F3E3CF",
+        "#2F6B5E"
+      ],
       "idea": "Friendliest option in the set: coral and sand with a sea-green counterpoint. Sand is the page, coral the clasp, sea-green the accent.",
-      "css": { "ink": "#2A1410", "muted": "#6B5446", "accent": "#2F6B5E", "paper": "#F3E3CF", "band": "#F8EDDF", "pearl": "#E26D5A", "clasp": "#E26D5A", "line": "rgba(42, 20, 16, .16)", "card": "rgba(255, 255, 255, .5)" },
+      "css": {
+        "ink": "#2A1410",
+        "muted": "#6B5446",
+        "accent": "#2F6B5E",
+        "paper": "#F3E3CF",
+        "band": "#F8EDDF",
+        "pearl": "#E26D5A",
+        "clasp": "#E26D5A",
+        "line": "rgba(42, 20, 16, .16)",
+        "card": "rgba(255, 255, 255, .5)"
+      },
       "mono": "#2A1410",
-      "story": { "ring": "#2F6B5E", "ink": "#2A1410", "brd4": "#F2B9A9", "vhl": "#B9D3C8", "elob": "#EEE2D3", "eloc": "#E3D5C4", "warhead": "#D9826F", "e3lig": "#2F6B5E",
-        "linker": "#2F6B5E", "brk": "#2A1410", "ub": "#F0A08F", "pearl3d": "#FFF8EF", "clasp": "#E26D5A", "e2": "#C9DDD4", "prot": "#B7A595", "wall": "#EBD9C4", "flash": "#2F6B5E",
-        "sky": [["#F8EDE0", "#EAD5BE"], ["#F7E8DA", "#EDCDB8"], ["#F1EADF", "#DCD9C8"]] },
-      "wall": { "a": "#E26D5A", "b": "#7FAE9F", "ink": "#2A1410" }
+      "story": {
+        "ring": "#2F6B5E",
+        "ink": "#2A1410",
+        "brd4": "#F2B9A9",
+        "vhl": "#B9D3C8",
+        "elob": "#EEE2D3",
+        "eloc": "#E3D5C4",
+        "warhead": "#D9826F",
+        "e3lig": "#2F6B5E",
+        "linker": "#2F6B5E",
+        "brk": "#2A1410",
+        "ub": "#F0A08F",
+        "pearl3d": "#FFF8EF",
+        "clasp": "#E26D5A",
+        "e2": "#C9DDD4",
+        "prot": "#B7A595",
+        "wall": "#EBD9C4",
+        "flash": "#2F6B5E",
+        "sky": [
+          [
+            "#F8EDE0",
+            "#EAD5BE"
+          ],
+          [
+            "#F7E8DA",
+            "#EDCDB8"
+          ],
+          [
+            "#F1EADF",
+            "#DCD9C8"
+          ]
+        ],
+        "cell": "#C8D9CF"
+      },
+      "wall": {
+        "a": "#E26D5A",
+        "b": "#7FAE9F",
+        "ink": "#2A1410"
+      }
     },
     {
-      "id": "abyssmint", "name": "Abyss & Mint", "option": "M", "dark": true, "doc": ["#0E2B2A", "#9FF0D0", "#E9F5F0", "#3E7A70"],
+      "id": "abyssmint",
+      "name": "Abyss & Mint",
+      "option": "M",
+      "dark": true,
+      "doc": [
+        "#0E2B2A",
+        "#9FF0D0",
+        "#E9F5F0",
+        "#3E7A70"
+      ],
       "idea": "Deep-sea black-green with a cool mint signal. Scientific and calm, with a quietly modern edge.",
-      "css": { "ink": "#E9F5F0", "muted": "#A9C9C0", "accent": "#9FF0D0", "paper": "#0E2B2A", "band": "#0B2423", "pearl": "#9FF0D0", "clasp": "#9FF0D0", "line": "rgba(233, 245, 240, .16)", "card": "rgba(255, 255, 255, .05)" },
+      "css": {
+        "ink": "#E9F5F0",
+        "muted": "#A9C9C0",
+        "accent": "#9FF0D0",
+        "paper": "#0E2B2A",
+        "band": "#0B2423",
+        "pearl": "#9FF0D0",
+        "clasp": "#9FF0D0",
+        "line": "rgba(233, 245, 240, .16)",
+        "card": "rgba(255, 255, 255, .05)"
+      },
       "mono": "#0E2B2A",
-      "story": { "ring": "#061A19", "ink": "#061A19", "brd4": "#D6EDE5", "vhl": "#8FC0B4", "elob": "#2C5A55", "eloc": "#254F4B", "warhead": "#B7D8CF", "e3lig": "#5E9A8F",
-        "linker": "#E9F5F0", "brk": "#9FF0D0", "ub": "#B8F3DD", "pearl3d": "#F0FAF6", "clasp": "#9FF0D0", "e2": "#7DAFA4", "prot": "#3E7A70", "wall": "#1E4A47", "flash": "#9FF0D0",
-        "sky": [["#1A403E", "#0E2B2A"], ["#1B3D3B", "#0C2726"], ["#163A3A", "#0A2221"]] },
-      "wall": { "a": "#9FF0D0", "b": "#6FA89C", "ink": "#E9F5F0" }
+      "story": {
+        "ring": "#061A19",
+        "ink": "#061A19",
+        "brd4": "#D6EDE5",
+        "vhl": "#8FC0B4",
+        "elob": "#2C5A55",
+        "eloc": "#254F4B",
+        "warhead": "#B7D8CF",
+        "e3lig": "#5E9A8F",
+        "linker": "#E9F5F0",
+        "brk": "#9FF0D0",
+        "ub": "#B8F3DD",
+        "pearl3d": "#F0FAF6",
+        "clasp": "#9FF0D0",
+        "e2": "#7DAFA4",
+        "prot": "#3E7A70",
+        "wall": "#1E4A47",
+        "flash": "#9FF0D0",
+        "sky": [
+          [
+            "#1A403E",
+            "#0E2B2A"
+          ],
+          [
+            "#1B3D3B",
+            "#0C2726"
+          ],
+          [
+            "#163A3A",
+            "#0A2221"
+          ]
+        ],
+        "cell": "#1F524D"
+      },
+      "wall": {
+        "a": "#9FF0D0",
+        "b": "#6FA89C",
+        "ink": "#E9F5F0"
+      }
     },
     {
-      "id": "charcoalviolet", "name": "Charcoal & Violet", "option": "N", "dark": true, "doc": ["#1A1820", "#7B5CFF", "#EEEAF6", "#4A4458"],
+      "id": "charcoalviolet",
+      "name": "Charcoal & Violet",
+      "option": "N",
+      "dark": true,
+      "doc": [
+        "#1A1820",
+        "#7B5CFF",
+        "#EEEAF6",
+        "#4A4458"
+      ],
       "idea": "Ultraviolet on charcoal: an unowned hue that signals the brain and the new, without looking playful. Small text uses a lighter violet so it stays readable.",
-      "css": { "ink": "#EEEAF6", "muted": "#ADA6BD", "accent": "#A08BFF", "paper": "#1A1820", "band": "#16141B", "pearl": "#7B5CFF", "clasp": "#7B5CFF", "line": "rgba(238, 234, 246, .16)", "card": "rgba(255, 255, 255, .05)" },
+      "css": {
+        "ink": "#EEEAF6",
+        "muted": "#ADA6BD",
+        "accent": "#A08BFF",
+        "paper": "#1A1820",
+        "band": "#16141B",
+        "pearl": "#7B5CFF",
+        "clasp": "#7B5CFF",
+        "line": "rgba(238, 234, 246, .16)",
+        "card": "rgba(255, 255, 255, .05)"
+      },
       "mono": "#1A1820",
-      "story": { "ring": "#0F0E14", "ink": "#0F0E14", "brd4": "#D9D0FF", "vhl": "#9A93AC", "elob": "#3A3546", "eloc": "#322E3D", "warhead": "#A08BFF", "e3lig": "#8A84A0",
-        "linker": "#EEEAF6", "brk": "#7B5CFF", "ub": "#C4B6FF", "pearl3d": "#F6F4FB", "clasp": "#7B5CFF", "e2": "#9D97B2", "prot": "#4A4458", "wall": "#2A2733", "flash": "#7B5CFF",
-        "sky": [["#2A2733", "#1A1820"], ["#2B2632", "#17151D"], ["#25223A", "#14121B"]] },
-      "wall": { "a": "#A08BFF", "b": "#8A84A0", "ink": "#EEEAF6" }
+      "story": {
+        "ring": "#0F0E14",
+        "ink": "#0F0E14",
+        "brd4": "#D9D0FF",
+        "vhl": "#9A93AC",
+        "elob": "#3A3546",
+        "eloc": "#322E3D",
+        "warhead": "#A08BFF",
+        "e3lig": "#8A84A0",
+        "linker": "#EEEAF6",
+        "brk": "#7B5CFF",
+        "ub": "#C4B6FF",
+        "pearl3d": "#F6F4FB",
+        "clasp": "#7B5CFF",
+        "e2": "#9D97B2",
+        "prot": "#4A4458",
+        "wall": "#2A2733",
+        "flash": "#7B5CFF",
+        "sky": [
+          [
+            "#2A2733",
+            "#1A1820"
+          ],
+          [
+            "#2B2632",
+            "#17151D"
+          ],
+          [
+            "#25223A",
+            "#14121B"
+          ]
+        ],
+        "cell": "#322D44"
+      },
+      "wall": {
+        "a": "#A08BFF",
+        "b": "#8A84A0",
+        "ink": "#EEEAF6"
+      }
     }
   ]
 }

@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#EFE6E1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
 <style>
-/* Layout: one pinned full-screen 3D stage that scroll scrubs through six beats, a short line of copy
+/* Layout: one pinned full-screen 3D stage that scroll scrubs through seven beats, a short line of copy
    for each beat on the left, a beat rail at the bottom, and an end card. Desktop first. The stage
    is the brand world in either palette, so it sets its own colours rather than following the theme. */
 :root {
@@ -35,7 +35,7 @@ body { color: var(--ink); font: 400 16px/1.55 var(--sans); -webkit-font-smoothin
 .beat .k { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
 .beat h1, .beat h2 { font: 500 clamp(30px, 3.2vw, 50px)/1.04 var(--serif); letter-spacing: -.015em; margin: 14px 0 0; text-wrap: balance; }
 .beat p { margin: 16px 0 0; color: var(--muted); font-size: clamp(15px, 1.15vw, 18px); max-width: 34ch; }
-.rail { position: absolute; left: clamp(16px, 3vw, 40px); right: clamp(16px, 3vw, 40px); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: 3fr 3fr 4fr 4fr 3fr 3fr; gap: 6px; z-index: 3; }
+.rail { position: absolute; left: clamp(16px, 3vw, 40px); right: clamp(16px, 3vw, 40px); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: 3fr 3fr 4fr 4fr 4fr 3fr 3fr; gap: 6px; z-index: 3; }
 .rail div { display: grid; gap: 8px; }
 .rail span { font: 500 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rail i { display: block; height: 2px; background: var(--line); position: relative; overflow: hidden; }
@@ -74,8 +74,8 @@ a, button { touch-action: manipulation; }
 .rail span { grid-column: 1 / -1; }
 .rail div::before { content: ""; width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; border: 1.5px solid color-mix(in srgb, var(--ink) 45%, transparent); background: transparent; transition: background-color .3s, border-color .3s, box-shadow .3s; }
 .rail div.on::before { background: #fff; border-color: var(--ink); }
-.rail div:nth-child(4)::before { width: 14px; height: 14px; }
-.rail div:nth-child(4).on::before { background: var(--clasp); box-shadow: 0 0 0 5px color-mix(in srgb, var(--clasp) 28%, transparent); }
+.rail div:nth-child(5)::before { width: 14px; height: 14px; }
+.rail div:nth-child(5).on::before { background: var(--clasp); box-shadow: 0 0 0 5px color-mix(in srgb, var(--clasp) 28%, transparent); }
 .rail i { height: 2px; }
 
 /* the clasp glyph: two pearls and their bond, used as the mark on every section label */
@@ -184,7 +184,7 @@ h2 { font: 500 clamp(34px, 4vw, 60px)/1.04 var(--serif); letter-spacing: -.018em
 @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
 
 /* the story: shorter, with a clear cue to scroll and a way past it */
-.story { height: 600vh; }
+.story { height: 680vh; }
 .hint { display: grid; justify-items: center; gap: 10px; bottom: 76px; font-size: 12px; color: var(--ink); }
 .hint i { width: 22px; height: 34px; border: 1.5px solid var(--ink); border-radius: 12px; position: relative; }
 .hint i::after { content: ""; position: absolute; left: 50%; top: 7px; width: 4px; height: 7px; margin-left: -2px; border-radius: 2px; background: var(--clasp); animation: wheel 1.8s ease-in-out infinite; }
@@ -200,7 +200,7 @@ h2 { font: 500 clamp(34px, 4vw, 60px)/1.04 var(--serif); letter-spacing: -.018em
 /* phones: a portrait cut of the story. The scene is framed above the copy (see the camera in the
    story script), the copy sits on a soft card low on the screen, and the rail keeps only its pearls */
 @media (max-width: 760px) {
-  .story { height: 520vh; }
+  .story { height: 590vh; }
   .head { gap: 12px; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; }
   .head .wm { height: 32px; }
   .pal button { padding: 7px 10px; }
@@ -232,14 +232,15 @@ body { background: transparent; }
         <div class="beat"><span class="k">01 &middot; The size problem</span><h1>Protein degraders, made small enough to reach the brain.</h1><p>Degraders remove disease-causing proteins instead of blocking them. Most are too large to be taken by mouth or to enter the brain.</p></div>
         <div class="beat"><span class="k">02 &middot; Split</span><h2>One degrader, two small halves.</h2><p>A reversible linker lets a <span translate="no">SELFTAC&reg;</span> molecule travel as two small molecules.</p></div>
         <div class="beat"><span class="k">03 &middot; The barrier</span><h2>Through the cells, not between them.</h2><p>Tight junctions seal the brain&rsquo;s capillaries. Each half is small enough to pass through the endothelial cells themselves.</p></div>
-        <div class="beat"><span class="k">04 &middot; Rebuilt</span><h2>Inside the neuron, the halves click back together.</h2><p>One end holds the target protein, the other an E3 ligase.</p></div>
-        <div class="beat"><span class="k">05 &middot; Cleared</span><h2>Tagged, then destroyed.</h2><p>An E2 enzyme hands ubiquitin onto the target, and the proteasome breaks it down.</p></div>
-        <div class="beat"><span class="k">06 &middot; Again</span><h2>Then it does it again.</h2><p>The degrader is not used up. It lets go and catches the next one.</p></div>
+        <div class="beat"><span class="k">04 &middot; Into the neuron</span><h2>Then across one more membrane, into the neuron.</h2><p>Still small, each half slips through the cell membrane on its own, into the neuron that makes the target protein.</p></div>
+        <div class="beat"><span class="k">05 &middot; Rebuilt</span><h2>Inside the neuron, the halves click back together.</h2><p>One end holds the target protein, the other an E3 ligase.</p></div>
+        <div class="beat"><span class="k">06 &middot; Cleared</span><h2>Tagged, then destroyed.</h2><p>An E2 enzyme hands ubiquitin onto the target, and the proteasome breaks it down.</p></div>
+        <div class="beat"><span class="k">07 &middot; Again</span><h2>Then it does it again.</h2><p>The degrader is not used up. It lets go and catches the next one.</p></div>
       </div>
       <div class="end" id="end"><svg class="lt" translate="no" role="img" aria-label="Oyster Therapeutics" xmlns="http://www.w3.org/2000/svg" viewBox="21.8 -613.8 2441.0 857.3"><defs><mask id="ltMask" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#fff"/><g fill="#000" transform="translate(51.5 50) scale(0.76) translate(-50.5 -47.5)"><path d="M10 60C10 58 12 57 14 57H84C90 57 93 60 92 64C88 80 70 90 48 90C27 90 11 78 10 60Z"/><path transform="rotate(-24 12 53)" d="M12 53C12 51 13 50 15 50H84C90 50 93 47 91 44C85 34 66 29 46 30C27 31 13 40 12 53Z"/></g><circle cx="60.24" cy="53.42" r="10.26" fill="#000"/></mask></defs><g fill="currentColor"><g transform="translate(-17.1 -583.4) scale(6.3571)"><g transform="translate(-1.5 1.5)"><circle cx="51.5" cy="50" r="42" mask="url(#ltMask)"/><circle cx="60.24" cy="53.42" r="7.22" style="fill:var(--pearl)"/></g></g><path d="M722.0 222.4 599.2 -47.2 105.6 952.4 -15.6 991.6V1024.0H503.2V991.0L366.2 956.4ZM262.2 -463.0Q195.2 -463.0 151.4 -428.2Q107.6 -393.4 107.6 -327.8Q107.6 -297.4 118.0 -276.9Q128.4 -256.4 144.3 -245.9Q160.2 -235.4 174.4 -235.4Q186.4 -235.4 207.9 -247.0Q229.4 -258.6 261.2 -270.3Q293.0 -282.0 334.0 -282.0Q382.8 -282.0 418.8 -269.4Q454.8 -256.8 484.1 -222.5Q513.4 -188.2 541.2 -124.0L613.0 42.8L674.4 190.4L932.4 962.0L792.2 991.0V1024.0H1137.6V991.0L1015.4 962.4L602.4 -128.6Q553.8 -256.0 502.4 -328.8Q451.0 -401.6 392.4 -432.3Q333.8 -463.0 262.2 -463.0Z" transform="translate(488.1 0.0) scale(0.5000 -0.5000)"/><path d="M474.4 1046.0Q547.4 1046.0 605.0 1032.1Q662.6 1018.2 723.0 990.4L757.2 714.8H726.0L586.2 987.4L668.2 898.2Q613.8 953.4 566.9 975.9Q520.0 998.4 457.6 998.4Q370.4 998.4 323.4 961.0Q276.4 923.6 276.4 851.4Q276.4 812.0 292.9 778.8Q309.4 745.6 360.8 713.1Q412.2 680.6 518.6 641.8Q597.6 613.4 650.4 578.7Q703.2 544.0 733.9 503.4Q764.6 462.8 777.5 415.3Q790.4 367.8 790.4 312.8Q790.4 214.0 736.0 138.4Q681.6 62.8 590.4 20.4Q499.2 -22.0 386.4 -22.0Q303.0 -22.0 238.8 -7.0Q174.6 8.0 120.0 36.6L63.8 353.4H99.4L272.8 29.4L219.4 83.8Q246.0 64.8 275.4 52.3Q304.8 39.8 336.3 33.4Q367.8 27.0 399.4 27.0Q484.4 27.0 549.3 74.4Q614.2 121.8 614.2 218.0Q614.2 254.8 602.1 285.5Q590.0 316.2 561.8 343.4Q533.6 370.6 485.3 396.2Q437.0 421.8 363.6 447.2Q266.2 481.8 208.8 525.7Q151.4 569.6 126.7 625.4Q102.0 681.2 102.0 750.4Q102.0 843.8 152.6 909.8Q203.2 975.8 287.7 1010.9Q372.2 1046.0 474.4 1046.0Z" transform="translate(949.8 0.0) scale(0.5000 -0.5000)"/><path d="M401.4 275.8Q401.4 204.2 446.1 168.2Q490.8 132.2 568.4 132.2Q613.0 132.2 662.0 139.8Q711.0 147.4 776.6 166.0V132.8Q679.8 71.8 617.3 38.1Q554.8 4.4 508.4 -9.2Q462.0 -22.8 412.4 -22.8Q345.0 -22.8 289.5 5.3Q234.0 33.4 200.5 93.8Q167.0 154.2 167.0 251.0V875.6L31.4 967.4V984.6Q41.8 991.6 67.0 1006.4Q92.2 1021.2 127.4 1042.7Q162.6 1064.2 205.4 1090.5Q248.2 1116.8 295.3 1145.7Q342.4 1174.6 389.4 1203.6H401.4V990.6ZM317.2 901.4V1024.0H746.2L728.8 901.4Z" transform="translate(1330.1 0.0) scale(0.5000 -0.5000)"/><path d="M563.2 1046.0Q675.0 1046.0 756.4 1000.6Q837.8 955.2 885.1 867.8Q932.4 780.4 941.6 653.8H274.8V718.4H818.8L716.0 675.4Q707.2 788.0 684.5 857.2Q661.8 926.4 624.3 958.6Q586.8 990.8 532.0 990.8Q459.8 990.8 408.3 948.4Q356.8 906.0 329.5 820.6Q302.2 735.2 302.2 606.4Q302.2 443.2 343.6 341.8Q385.0 240.4 464.6 193.9Q544.2 147.4 659.2 147.4Q714.0 147.4 765.2 161.6Q816.4 175.8 862.4 205.2Q908.4 234.6 945.0 280.2L963.6 266.2Q899.0 159.0 834.0 95.9Q769.0 32.8 697.7 5.4Q626.4 -22.0 541.6 -22.0Q405.8 -22.0 298.8 37.3Q191.8 96.6 130.6 211.6Q69.4 326.6 69.4 493.2Q69.4 642.4 127.0 768.1Q184.6 893.8 295.2 969.9Q405.8 1046.0 563.2 1046.0Z" transform="translate(1596.9 0.0) scale(0.5000 -0.5000)"/><path d="M738.0 1043.0Q785.8 1043.0 813.8 1015.0Q841.8 987.0 841.8 939.0Q841.8 880.2 804.8 842.1Q767.8 804.0 712.4 804.0Q684.0 804.0 658.9 810.1Q633.8 816.2 607.5 822.3Q581.2 828.4 547.8 828.4Q518.6 828.4 493.3 819.1Q468.0 809.8 444.3 793.1Q420.6 776.4 395.2 752.2L395.0 797.0Q473.0 881.2 526.4 930.6Q579.8 980.0 616.7 1004.1Q653.6 1028.2 681.8 1035.6Q710.0 1043.0 738.0 1043.0ZM414.2 855.4V59.2L565.8 28.2V0.0H47.8V28.2L179.4 59.2V832.4Q166.4 842.2 148.9 854.8Q131.4 867.4 105.5 886.4Q79.6 905.4 42.6 933.4V954.4L405.6 1054.8H414.2Z" transform="translate(2029.9 0.0) scale(0.5000 -0.5000)"/><path d="M198.0 -12.0Q153.0 -12.0 127.5 5.5Q102.0 23.0 91.5 50.5Q81.0 78.0 81.0 109.0V440.0H15.0V526.0H83.0L102.0 673.0H185.0V526.0H280.0V440.0H185.0V121.0Q185.0 98.0 195.0 86.0Q205.0 74.0 228.0 74.0H280.0V4.0Q270.0 0.0 255.5 -3.5Q241.0 -7.0 226.0 -9.5Q211.0 -12.0 198.0 -12.0Z" transform="translate(820.1 123.8) scale(0.1200 -0.1200)"/><path d="M67.0 0.0V723.0H171.0V463.0H178.0Q197.0 487.0 221.0 503.5Q245.0 520.0 275.0 529.0Q305.0 538.0 341.0 538.0Q391.0 538.0 429.0 520.5Q467.0 503.0 488.5 464.0Q510.0 425.0 510.0 359.0V0.0H406.0V343.0Q406.0 373.0 398.5 393.0Q391.0 413.0 377.0 425.0Q363.0 437.0 344.0 442.0Q325.0 447.0 302.0 447.0Q266.0 447.0 236.5 430.0Q207.0 413.0 189.0 382.0Q171.0 351.0 171.0 308.0V0.0Z" transform="translate(859.1 123.8) scale(0.1200 -0.1200)"/><path d="M285.0 -12.0Q204.0 -12.0 149.5 17.5Q95.0 47.0 67.0 108.0Q39.0 169.0 39.0 263.0Q39.0 358.0 67.0 418.5Q95.0 479.0 150.0 508.5Q205.0 538.0 287.0 538.0Q362.0 538.0 412.5 509.5Q463.0 481.0 489.0 423.0Q515.0 365.0 515.0 277.0V237.0H146.0Q148.0 181.0 163.0 143.5Q178.0 106.0 208.5 88.5Q239.0 71.0 286.0 71.0Q315.0 71.0 338.0 78.5Q361.0 86.0 377.0 100.5Q393.0 115.0 402.0 135.5Q411.0 156.0 411.0 182.0H513.0Q513.0 135.0 497.0 99.0Q481.0 63.0 450.5 38.5Q420.0 14.0 378.0 1.0Q336.0 -12.0 285.0 -12.0ZM148.0 313.0H406.0Q406.0 352.0 397.5 378.5Q389.0 405.0 373.0 422.0Q357.0 439.0 335.0 446.5Q313.0 454.0 285.0 454.0Q243.0 454.0 213.5 439.0Q184.0 424.0 168.0 392.5Q152.0 361.0 148.0 313.0Z" transform="translate(930.3 123.8) scale(0.1200 -0.1200)"/><path d="M67.0 0.0V526.0H153.0L162.0 441.0H168.0Q177.0 466.0 191.5 488.0Q206.0 510.0 229.5 524.0Q253.0 538.0 287.0 538.0Q303.0 538.0 315.5 535.0Q328.0 532.0 335.0 530.0V432.0H300.0Q268.0 432.0 243.5 422.0Q219.0 412.0 202.5 392.5Q186.0 373.0 178.5 345.0Q171.0 317.0 171.0 282.0V0.0Z" transform="translate(999.1 123.8) scale(0.1200 -0.1200)"/><path d="M200.0 -12.0Q175.0 -12.0 146.0 -6.0Q117.0 0.0 91.5 16.0Q66.0 32.0 50.0 60.5Q34.0 89.0 34.0 135.0Q34.0 189.0 59.0 224.0Q84.0 259.0 129.0 279.0Q174.0 299.0 236.5 307.0Q299.0 315.0 373.0 315.0V367.0Q373.0 393.0 364.5 413.0Q356.0 433.0 333.5 444.0Q311.0 455.0 269.0 455.0Q227.0 455.0 203.5 444.5Q180.0 434.0 170.5 418.5Q161.0 403.0 161.0 385.0V370.0H61.0Q60.0 375.0 60.0 380.0Q60.0 385.0 60.0 392.0Q60.0 439.0 86.5 471.5Q113.0 504.0 161.0 521.0Q209.0 538.0 272.0 538.0Q340.0 538.0 385.5 518.5Q431.0 499.0 454.0 463.0Q477.0 427.0 477.0 376.0V109.0Q477.0 90.0 486.5 82.0Q496.0 74.0 509.0 74.0H545.0V4.0Q533.0 -1.0 515.0 -6.0Q497.0 -11.0 473.0 -11.0Q446.0 -11.0 427.5 -1.5Q409.0 8.0 397.5 25.5Q386.0 43.0 382.0 65.0H376.0Q358.0 42.0 332.5 24.5Q307.0 7.0 274.0 -2.5Q241.0 -12.0 200.0 -12.0ZM229.0 74.0Q260.0 74.0 286.5 83.5Q313.0 93.0 332.0 110.5Q351.0 128.0 362.0 152.5Q373.0 177.0 373.0 206.0V241.0Q304.0 241.0 252.0 233.0Q200.0 225.0 171.0 203.5Q142.0 182.0 142.0 144.0Q142.0 121.0 152.0 105.5Q162.0 90.0 182.0 82.0Q202.0 74.0 229.0 74.0Z" transform="translate(1043.1 123.8) scale(0.1200 -0.1200)"/><path d="M67.0 -173.0V526.0H152.0L161.0 454.0H168.0Q195.0 496.0 237.0 517.0Q279.0 538.0 331.0 538.0Q396.0 538.0 442.5 509.0Q489.0 480.0 514.0 419.0Q539.0 358.0 539.0 261.0Q539.0 167.0 513.5 106.5Q488.0 46.0 442.0 17.0Q396.0 -12.0 336.0 -12.0Q301.0 -12.0 271.0 -4.0Q241.0 4.0 217.5 21.0Q194.0 38.0 177.0 64.0H171.0V-173.0ZM300.0 78.0Q347.0 78.0 376.0 96.5Q405.0 115.0 418.5 154.0Q432.0 193.0 432.0 253.0V271.0Q432.0 334.0 418.0 373.0Q404.0 412.0 375.5 430.0Q347.0 448.0 302.0 448.0Q256.0 448.0 227.0 427.5Q198.0 407.0 184.5 367.0Q171.0 327.0 171.0 270.0V256.0Q171.0 209.0 180.0 175.0Q189.0 141.0 206.0 119.5Q223.0 98.0 247.0 88.0Q271.0 78.0 300.0 78.0Z" transform="translate(1111.5 123.8) scale(0.1200 -0.1200)"/><path d="M285.0 -12.0Q204.0 -12.0 149.5 17.5Q95.0 47.0 67.0 108.0Q39.0 169.0 39.0 263.0Q39.0 358.0 67.0 418.5Q95.0 479.0 150.0 508.5Q205.0 538.0 287.0 538.0Q362.0 538.0 412.5 509.5Q463.0 481.0 489.0 423.0Q515.0 365.0 515.0 277.0V237.0H146.0Q148.0 181.0 163.0 143.5Q178.0 106.0 208.5 88.5Q239.0 71.0 286.0 71.0Q315.0 71.0 338.0 78.5Q361.0 86.0 377.0 100.5Q393.0 115.0 402.0 135.5Q411.0 156.0 411.0 182.0H513.0Q513.0 135.0 497.0 99.0Q481.0 63.0 450.5 38.5Q420.0 14.0 378.0 1.0Q336.0 -12.0 285.0 -12.0ZM148.0 313.0H406.0Q406.0 352.0 397.5 378.5Q389.0 405.0 373.0 422.0Q357.0 439.0 335.0 446.5Q313.0 454.0 285.0 454.0Q243.0 454.0 213.5 439.0Q184.0 424.0 168.0 392.5Q152.0 361.0 148.0 313.0Z" transform="translate(1183.3 123.8) scale(0.1200 -0.1200)"/><path d="M232.0 -12.0Q156.0 -12.0 109.0 28.5Q62.0 69.0 62.0 167.0V526.0H166.0V183.0Q166.0 153.0 173.5 133.0Q181.0 113.0 195.0 101.0Q209.0 89.0 228.0 84.0Q247.0 79.0 270.0 79.0Q306.0 79.0 335.5 96.5Q365.0 114.0 383.0 145.5Q401.0 177.0 401.0 218.0V526.0H505.0V0.0H420.0L411.0 75.0H404.0Q385.0 46.0 359.0 27.0Q333.0 8.0 301.5 -2.0Q270.0 -12.0 232.0 -12.0Z" transform="translate(1252.2 123.8) scale(0.1200 -0.1200)"/><path d="M198.0 -12.0Q153.0 -12.0 127.5 5.5Q102.0 23.0 91.5 50.5Q81.0 78.0 81.0 109.0V440.0H15.0V526.0H83.0L102.0 673.0H185.0V526.0H280.0V440.0H185.0V121.0Q185.0 98.0 195.0 86.0Q205.0 74.0 228.0 74.0H280.0V4.0Q270.0 0.0 255.5 -3.5Q241.0 -7.0 226.0 -9.5Q211.0 -12.0 198.0 -12.0Z" transform="translate(1323.3 123.8) scale(0.1200 -0.1200)"/><path d="M67.0 617.0V723.0H171.0V617.0ZM67.0 0.0V526.0H171.0V0.0Z" transform="translate(1362.3 123.8) scale(0.1200 -0.1200)"/><path d="M276.0 -12.0Q197.0 -12.0 144.0 17.5Q91.0 47.0 64.5 108.0Q38.0 169.0 38.0 263.0Q38.0 357.0 65.0 417.5Q92.0 478.0 145.5 508.0Q199.0 538.0 277.0 538.0Q331.0 538.0 371.0 524.5Q411.0 511.0 439.0 484.5Q467.0 458.0 480.5 419.0Q494.0 380.0 494.0 330.0H389.0Q389.0 372.0 377.0 399.0Q365.0 426.0 340.0 439.5Q315.0 453.0 275.0 453.0Q233.0 453.0 204.0 433.5Q175.0 414.0 160.0 374.5Q145.0 335.0 145.0 271.0V254.0Q145.0 193.0 159.5 152.5Q174.0 112.0 203.5 92.5Q233.0 73.0 279.0 73.0Q319.0 73.0 343.5 87.5Q368.0 102.0 380.5 129.5Q393.0 157.0 393.0 196.0H494.0Q494.0 149.0 480.5 111.0Q467.0 73.0 439.5 45.5Q412.0 18.0 371.0 3.0Q330.0 -12.0 276.0 -12.0Z" transform="translate(1393.2 123.8) scale(0.1200 -0.1200)"/><path d="M261.0 -12.0Q206.0 -12.0 164.0 0.0Q122.0 12.0 94.0 33.0Q66.0 54.0 51.5 83.5Q37.0 113.0 37.0 149.0Q37.0 154.0 37.5 158.0Q38.0 162.0 38.0 165.0H141.0Q141.0 162.0 141.0 159.5Q141.0 157.0 141.0 154.0Q141.0 123.0 158.0 104.5Q175.0 86.0 203.5 78.5Q232.0 71.0 266.0 71.0Q296.0 71.0 321.5 78.5Q347.0 86.0 363.5 101.0Q380.0 116.0 380.0 139.0Q380.0 169.0 359.0 185.0Q338.0 201.0 304.0 210.5Q270.0 220.0 233.0 231.0Q200.0 240.0 167.5 250.5Q135.0 261.0 109.0 278.0Q83.0 295.0 67.0 321.0Q51.0 347.0 51.0 386.0Q51.0 423.0 67.0 451.0Q83.0 479.0 111.5 498.0Q140.0 517.0 179.5 527.0Q219.0 537.0 266.0 537.0Q315.0 537.0 353.0 526.5Q391.0 516.0 417.5 497.0Q444.0 478.0 458.0 451.5Q472.0 425.0 472.0 395.0Q472.0 389.0 471.5 382.5Q471.0 376.0 471.0 374.0H369.0V383.0Q369.0 403.0 358.0 419.0Q347.0 435.0 323.5 445.0Q300.0 455.0 261.0 455.0Q235.0 455.0 215.0 450.5Q195.0 446.0 182.0 438.0Q169.0 430.0 162.5 419.0Q156.0 408.0 156.0 394.0Q156.0 371.0 172.5 358.5Q189.0 346.0 216.0 337.5Q243.0 329.0 274.0 319.0Q310.0 309.0 347.0 298.5Q384.0 288.0 415.5 272.0Q447.0 256.0 466.5 228.0Q486.0 200.0 486.0 153.0Q486.0 110.0 469.0 78.0Q452.0 46.0 421.5 26.5Q391.0 7.0 350.0 -2.5Q309.0 -12.0 261.0 -12.0Z" transform="translate(1459.5 123.8) scale(0.1200 -0.1200)"/></g></svg><p>Oral, brain-penetrant protein degraders.</p><a href="#vision">Discover Oyster</a></div>
       <div class="hint" id="hint"><span>Scroll to see how <span translate="no">SELFTAC&reg;</span> works</span><i aria-hidden="true"></i></div><a class="skip" id="skip" href="#vision">Skip to Oyster<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v10M3 8l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       <div class="rail" id="rail" aria-hidden="true">
-        <div><span>Degrader</span><i><b></b></i></div><div><span>Split</span><i><b></b></i></div><div><span>Barrier</span><i><b></b></i></div>
+        <div><span>Degrader</span><i><b></b></i></div><div><span>Split</span><i><b></b></i></div><div><span>Barrier</span><i><b></b></i></div><div><span>Neuron</span><i><b></b></i></div>
         <div><span>Rebuilt</span><i><b></b></i></div><div><span>Cleared</span><i><b></b></i></div><div><span>Again</span><i><b></b></i></div>
       </div>
     </div>
@@ -362,10 +363,10 @@ const root = document.documentElement, stage = document.getElementById('stage'),
 // ---------- palettes ----------
 const PAL = {
   nacre: { ring: '#8C5572', ink: '#2B2230', brd4: '#E7C9D6', vhl: '#D6CBE6', elob: '#E8DEDB', eloc: '#DDD2D4', warhead: '#B4678B', e3lig: '#8A73B2',
-    linker: '#8C5572', brk: '#2B2230', ub: '#C99BB0', pearl3d: '#F6EEF1', clasp: '#D9A443', e2: '#CDBFDF', prot: '#B9A9B6', wall: '#EADADF', flash: '#8C5572',
+    linker: '#8C5572', brk: '#2B2230', ub: '#C99BB0', pearl3d: '#F6EEF1', clasp: '#D9A443', e2: '#CDBFDF', prot: '#B9A9B6', wall: '#EADADF', cell: '#D8C6E2', flash: '#8C5572',
     sky: [['#F6EEEC', '#E3D3D8'], ['#F4E7E6', '#E6CBD0'], ['#EFE6EE', '#D9CCE2']] },
   tidepool: { ring: '#06302E', ink: '#06302E', brd4: '#F5D89A', vhl: '#9FD6C6', elob: '#3E7D78', eloc: '#346F6B', warhead: '#F2B84B', e3lig: '#5FC2A6',
-    linker: '#EAF3EF', brk: '#F2B84B', ub: '#F7C873', pearl3d: '#EAF3EF', clasp: '#F27D62', e2: '#8CC9B8', prot: '#4F8C86', wall: '#2E6E69', flash: '#F2B84B',
+    linker: '#EAF3EF', brk: '#F2B84B', ub: '#F7C873', pearl3d: '#EAF3EF', clasp: '#F27D62', e2: '#8CC9B8', prot: '#4F8C86', wall: '#2E6E69', cell: '#3F7F86', flash: '#F2B84B',
     sky: [['#1B6763', '#0F4C4A'], ['#1D615D', '#0E4543'], ['#155A57', '#0A3836']] },
 };
 let pal = 'nacre';
@@ -443,6 +444,11 @@ const wall = new THREE.Group(); scene.add(wall);
 for (let i = -1; i <= 1; i++) { const mat = cmat('wall', 2.4); mat.transparent = true; mat.depthWrite = false; mats.push(mat);
   const b = new THREE.Mesh(new RoundedBoxGeometry(118, 16, 96, 6, 7), mat); b.position.x = i * 120; addOutline(b, .5).material.transparent = true; wall.add(b); }
 wall.position.y = -52;
+// the neuron: a large cell body below the barrier; its membrane is drawn as a bilayer of two faint shells
+const CELL_TOP = -82, CELL_R = 140;
+const cell = new THREE.Group(); scene.add(cell); cell.position.set(0, CELL_TOP - CELL_R, 0);
+for (const [rad, a] of [[CELL_R, 1], [CELL_R - 6, .6]]) { const mat = cmat('cell', 2.6, new THREE.Vector3(0, CELL_R, 0)); mat.transparent = true; mat.depthWrite = false; mat.userData.a = a; mats.push(mat);
+  const m = new THREE.Mesh(new THREE.SphereGeometry(rad, 96, 64, 0, Math.PI * 2, 0, 1.25), mat); addOutline(m, .5).material.transparent = true; cell.add(m); }
 
 // ---------- the degrader: two soft outlined halves joined by a string of pearls ----------
 // Each half is a smooth outline traced along its bonds: it reads as a small molecule without showing
@@ -613,7 +619,11 @@ const bump = (p, a, b) => { const t = clamp((p - a) / (b - a), 0, 1); return Mat
 const Yn = -112;                      // neuron level
 const GAP = 12;                       // each side is pulled out this far so the degrader shows in the complex
 const SPREAD = 7;                     // the degrader alone is shown slightly opened so its linker reads
-const BEATS = [[0, .15], [.15, .3], [.3, .5], [.5, .7], [.7, .85], [.85, 1]];
+const BEATS = [[0, .13], [.13, .26], [.26, .4], [.4, .6], [.6, .767], [.767, .883], [.883, 1]];
+// the original six-beat timeline runs on q; the neuron beat holds it at .46 (halves just under the
+// barrier) for 40%-58% of the scroll while the halves cross the neuron's membrane
+const HOLD = [.4, .58], QH = .46;
+const warp = p => p < HOLD[0] ? p * QH / HOLD[0] : p < HOLD[1] ? QH : QH + (p - HOLD[1]) * (1 - QH) / (1 - HOLD[1]);
 // target on BRD4 for the ubiquitin chain: its upper surface, on the side facing VHL
 const ubSpot = (() => { const g = P.brd4.children[0].geometry, pos = g.attributes.position, v = new THREE.Vector3(); let best = null, bs = -1e9;
   for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyQuaternion(Q); const s = v.y + .5 * v.x; if (s > bs) { bs = s; best = v.clone(); } } return best; })();
@@ -622,16 +632,20 @@ const vhlTop = (() => { const g = P.vhl.children[0].geometry, pos = g.attributes
 const PROT_AT = new THREE.Vector3(-118, Yn - 62, 0);
 const degC = S('warhead').add(S('e3lig')).multiplyScalar(.5);
 
-function frame(p) {
+function frame(p0) {
+  const p = warp(p0), c = clamp((p0 - HOLD[0]) / (HOLD[1] - HOLD[0]), 0, 1);   // c: progress through the neuron beat
   // the two halves: joined, split, sinking through the wall (pausing at each membrane), rejoined in the neuron
   const hx = kf(p, [[.15, SPREAD], [.27, 22], [.5, 22], [.58, 22], [.66, GAP], [1, GAP]]);
-  const hy = kf(p, [[.3, 0], [.36, -42], [.39, -43], [.43, -60], [.46, -62], [.52, Yn], [1, Yn]]);
+  // below the barrier they settle on the neuron, pause in its membrane, and pass inside; the extra depth
+  // eases away as they finish sinking to the neuron level
+  const dip = kf(c, [[0, 0], [.3, -20], [.45, -22], [.75, -30], [1, -30]]) * (1 - clamp((p - QH) / (.52 - QH), 0, 1));
+  const hy = kf(p, [[.3, 0], [.36, -42], [.39, -43], [.43, -60], [.46, -62], [.52, Yn], [1, Yn]]) + dip;
   const joined = kf(p, [[.16, 1], [.2, 0], [.6, 0], [.665, 1]]);
   const oW = new THREE.Vector3(-hx, hy, 0), oE = new THREE.Vector3(hx, hy, 0);
   // tumble the free halves a little while they travel, each about its own centre; settle before they rebind
   const free = kf(p, [[.17, 0], [.24, 1], [.56, 1], [.64, 0]]);
-  const rW = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * .35 * Math.sin(p * 18), free * .5 * Math.sin(p * 11), 0));
-  const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(p * 15), free * .45 * Math.cos(p * 13), 0));
+  const rW = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * .35 * Math.sin(p0 * 18), free * .5 * Math.sin(p0 * 11), 0));
+  const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(p0 * 15), free * .45 * Math.cos(p0 * 13), 0));
   const brk = mol.update(oW, oE, rW, rE, joined);
   // the bond clicking shut
   const fx = bump(p, .655, .69); flash.position.copy(brk); flash.scale.setScalar(1 + 3 * clamp((p - .655) / .035, 0, 1)); flash.material.opacity = fx * .9; flash.visible = fx > .01;
@@ -662,17 +676,22 @@ function frame(p) {
   // a second target arrives for the same degrader
   const b2 = kf(p, [[.86, -70], [.95, -GAP]]), b2y = kf(p, [[.86, Yn - 170], [.95, Yn]]); P.brd4b.position.set(b2, b2y, 0); P.brd4b.visible = p > .86;
   // the barrier, seen from just above as the halves sink through it
-  const wa = kf(p, [[.27, 0], [.32, 1], [.5, 1], [.55, 0]]); wall.visible = wa > .01;
+  const wa = kf(p, [[.27, 0], [.32, 1], [.5, 1], [.55, 0]]) * (1 - c); wall.visible = wa > .01;
   wall.children.forEach(b => { b.material.uniforms.alpha.value = .42 * wa; b.children[0].material.uniforms.alpha.value = .35 * wa; });
+  // the neuron rises into view under the barrier, glows softly as the halves pass its membrane, and fades
+  // once they are inside
+  const ca = kf(p0, [[.36, 0], [.44, 1], [.6, 1], [.66, 0]]), cg = bump(c, .45, .75); cell.visible = ca > .01;
+  cell.children.forEach(m => { m.material.uniforms.alpha.value = .5 * m.material.userData.a * ca; m.material.uniforms.glow.value = .25 * cg; m.children[0].material.uniforms.alpha.value = .3 * ca; });
   // camera: close on the degrader, back for the split, down with the halves, wide on the complex, across to the proteasome, out for the end
   const D0 = degC.toArray(), D1 = [degC.x, Yn + 10, degC.z];
   const T = kf(p, [[0, D0], [.3, D0], [.5, D1], [.7, [0, Yn, 0]], [.8, [-40, Yn - 18, 0]], [.88, [-40, Yn - 18, 0]], [.95, [0, Yn, 0]]]);
   // portrait screens have no room beside the copy: pull back until the subject fits the width
   const narrow = camera.aspect < .9, fitW = narrow ? Math.max(1, 1.1 / camera.aspect) : 1;
   const dist = fitW * kf(p, [[0, 100], [.15, 112], [.28, 160], [.36, 190], [.5, 175], [.68, 255], [.8, 320], [.9, 300], [1, 430]]);
-  const az = kf(p, [[0, -.35], [.15, .25], [.3, .1], [.5, -.2], [.7, .12], [.85, -.1], [1, .2]]) + (reduce ? 0 : .04 * Math.sin(p * 9));
-  const el = kf(p, [[0, .12], [.28, .2], [.36, .62], [.46, .48], [.55, .14], [1, .1]]);
-  const tgt = V(T);
+  const hc = Math.sin(Math.PI * c);
+  const az = kf(p, [[0, -.35], [.15, .25], [.3, .1], [.5, -.2], [.7, .12], [.85, -.1], [1, .2]]) + (reduce ? 0 : .04 * Math.sin(p0 * 9)) + .18 * hc;
+  const el = kf(p, [[0, .12], [.28, .2], [.36, .62], [.46, .48], [.55, .14], [1, .1]]) - .08 * hc;
+  const tgt = V(T); tgt.y -= 14 * hc;
   camera.position.set(tgt.x + dist * Math.sin(az) * Math.cos(el), tgt.y + dist * Math.sin(el), tgt.z + dist * Math.cos(az) * Math.cos(el));
   camera.lookAt(tgt);
   // compose to the right of the copy: slide the camera sideways so the subject sits right of centre,
@@ -684,14 +703,14 @@ function frame(p) {
   } else camera.position.addScaledVector(right, -.16 * dist * settle);
   camera.updateMatrixWorld();
   // ground colour: blood, barrier, neuron
-  const sky = PAL[pal].sky, k1 = clamp((p - .28) / .08, 0, 1), k2 = clamp((p - .48) / .08, 0, 1);
+  const sky = PAL[pal].sky, k1 = clamp((p - .28) / .08, 0, 1), k2 = clamp((p0 - .42) / .1, 0, 1);
   const mix = (a, b, t) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), t).getHexString();
   stage.style.setProperty('--sky-a', mix(mix(sky[0][0], sky[1][0], k1), sky[2][0], k2)); stage.style.setProperty('--sky-b', mix(mix(sky[0][1], sky[1][1], k1), sky[2][1], k2));
   // copy, rail, end card
   document.querySelectorAll('.beat').forEach((b, i) => { const [a, z] = BEATS[i];
-    const o = i === 5 ? clamp((p - a) / .03, 0, 1) * (1 - clamp((p - .93) / .03, 0, 1)) : i === 0 ? clamp((z - p) / .03, 0, 1) : clamp(Math.min((p - a) / .03, (z - p) / .03), 0, 1);   // the first line is there from the start
+    const o = i === BEATS.length - 1 ? clamp((p0 - a) / .03, 0, 1) * (1 - clamp((p - .93) / .03, 0, 1)) : i === 0 ? clamp((z - p0) / .03, 0, 1) : clamp(Math.min((p0 - a) / .03, (z - p0) / .03), 0, 1);   // the first line is there from the start
     b.style.opacity = o.toFixed(3); b.style.transform = 'translateY(calc(-50% + ' + ((1 - o) * 16).toFixed(1) + 'px))'; });
-  document.querySelectorAll('.rail b').forEach((b, i) => { b.style.setProperty('--f', clamp((p - BEATS[i][0]) / (BEATS[i][1] - BEATS[i][0]), 0, 1).toFixed(3)); b.closest('.rail > div').classList.toggle('on', p >= BEATS[i][0]); });
+  document.querySelectorAll('.rail b').forEach((b, i) => { b.style.setProperty('--f', clamp((p0 - BEATS[i][0]) / (BEATS[i][1] - BEATS[i][0]), 0, 1).toFixed(3)); b.closest('.rail > div').classList.toggle('on', p0 >= BEATS[i][0]); });
   const endO = clamp((p - .955) / .035, 0, 1); const end = document.getElementById('end'); end.style.opacity = endO; end.style.pointerEvents = endO > .9 ? 'auto' : 'none';
   document.getElementById('copy').style.opacity = 1 - endO;
   canvas.style.opacity = (1 - .88 * endO).toFixed(3);
