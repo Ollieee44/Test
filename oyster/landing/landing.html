@@ -401,7 +401,7 @@ const CAM = (() => {
 let spin = 0;
 
 function frame(p0) {
-  const p = warp(p0), c = clamp((p0 - HOLD[0]) / (HOLD[1] - HOLD[0]), 0, 1);   // c: progress through the neuron beat
+  const p = warp(p0);
   // the two halves: joined, split, sinking through the wall (pausing at each membrane), rejoined in the neuron
   const hx = kf(p, [[.15, SPREAD], [.27, 22], [.5, 22], [.58, 22], [.66, GAP], [1, GAP]]);
   // one continuous sink on the scroll: slowing inside the barrier cells and again in the neuron's membrane
@@ -442,12 +442,13 @@ function frame(p0) {
   // a second target arrives for the same degrader
   const b2 = kf(p, [[.86, -70], [.95, -GAP]]), b2y = kf(p, [[.86, Yn - 170], [.95, Yn]]); P.brd4b.position.set(b2, b2y, 0); P.brd4b.visible = p > .86;
   // the barrier, seen from just above as the halves sink through it
-  const wa = kf(p, [[.27, 0], [.32, 1], [.5, 1], [.55, 0]]) * (1 - ease(clamp(c / .35, 0, 1))); wall.visible = wa > .01;
+  // the barrier fades out, the neuron fades in and the ground turns to the neuron's, all together (38-44%),
+  // so everything has settled before the halves reach the membrane
+  const wa = kf(p, [[.27, 0], [.32, 1]]) * (1 - ease(clamp((p0 - .38) / .06, 0, 1))); wall.visible = wa > .01;
   wall.children.forEach(b => { b.material.uniforms.alpha.value = .42 * wa; b.children[0].material.uniforms.alpha.value = .35 * wa; });
-  // the neuron rises into view under the barrier, glows softly as the halves pass its membrane, and fades
-  // once they are inside
-  const ca = kf(p0, [[.36, 0], [.44, 1], [.57, 1], [.64, 0]]), cg = bump(c, .45, .75); cell.visible = ca > .01;
-  cell.children.forEach(m => { m.material.uniforms.alpha.value = .5 * m.material.userData.a * ca; m.material.uniforms.glow.value = .25 * cg; m.children[0].material.uniforms.alpha.value = .3 * ca; });
+  // the neuron rises into view under the barrier and fades once the halves are inside
+  const ca = kf(p0, [[.37, 0], [.44, 1], [.57, 1], [.64, 0]]); cell.visible = ca > .01;
+  cell.children.forEach(m => { m.material.uniforms.alpha.value = .5 * m.material.userData.a * ca; m.children[0].material.uniforms.alpha.value = .3 * ca; });
   // camera: close on the degrader, back for the split, down with the halves, wide on the complex, across to the proteasome, out for the end
   // portrait screens have no room beside the copy: pull back until the subject fits the width
   const narrow = camera.aspect < .9, fitW = narrow ? Math.max(1, 1.1 / camera.aspect) : 1;
@@ -463,7 +464,7 @@ function frame(p0) {
   } else camera.position.addScaledVector(right, -.16 * dist * settle);
   camera.updateMatrixWorld();
   // ground colour: blood, barrier, neuron
-  const sky = PAL[pal].sky, k1 = clamp((p - .28) / .08, 0, 1), k2 = clamp((p0 - .42) / .1, 0, 1);
+  const sky = PAL[pal].sky, k1 = clamp((p - .28) / .08, 0, 1), k2 = ease(clamp((p0 - .37) / .07, 0, 1));
   const mix = (a, b, t) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), t).getHexString();
   stage.style.setProperty('--sky-a', mix(mix(sky[0][0], sky[1][0], k1), sky[2][0], k2)); stage.style.setProperty('--sky-b', mix(mix(sky[0][1], sky[1][1], k1), sky[2][1], k2));
   // copy, rail, end card

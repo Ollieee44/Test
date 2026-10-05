@@ -33,7 +33,7 @@
         "elob": "#3A3541",
         "eloc": "#322E39",
         "warhead": "#C9A877",
-        "e3lig": "#8E8399",
+        "e3lig": "#968CA0",
         "linker": "#EDE8E0",
         "brk": "#D8B98A",
         "ub": "#E6D3B3",
@@ -41,7 +41,7 @@
         "clasp": "#D8B98A",
         "e2": "#A79FB0",
         "prot": "#4E4857",
-        "wall": "#2C2833",
+        "wall": "#555057",
         "flash": "#D8B98A",
         "sky": [
           [
@@ -57,7 +57,7 @@
             "#16131B"
           ]
         ],
-        "cell": "#3A3446"
+        "cell": "#605A66"
       },
       "wall": {
         "a": "#D8B98A",
@@ -96,7 +96,7 @@
         "vhl": "#B9D3C8",
         "elob": "#EEE2D3",
         "eloc": "#E3D5C4",
-        "warhead": "#D9826F",
+        "warhead": "#B16959",
         "e3lig": "#2F6B5E",
         "linker": "#2F6B5E",
         "brk": "#2A1410",
@@ -105,7 +105,7 @@
         "clasp": "#E26D5A",
         "e2": "#C9DDD4",
         "prot": "#B7A595",
-        "wall": "#EBD9C4",
+        "wall": "#E9D7C2",
         "flash": "#2F6B5E",
         "sky": [
           [
@@ -121,7 +121,7 @@
             "#DCD9C8"
           ]
         ],
-        "cell": "#C8D9CF"
+        "cell": "#BFCDC4"
       },
       "wall": {
         "a": "#E26D5A",
@@ -161,7 +161,7 @@
         "elob": "#2C5A55",
         "eloc": "#254F4B",
         "warhead": "#B7D8CF",
-        "e3lig": "#5E9A8F",
+        "e3lig": "#70A59B",
         "linker": "#E9F5F0",
         "brk": "#9FF0D0",
         "ub": "#B8F3DD",
@@ -169,7 +169,7 @@
         "clasp": "#9FF0D0",
         "e2": "#7DAFA4",
         "prot": "#3E7A70",
-        "wall": "#1E4A47",
+        "wall": "#325B58",
         "flash": "#9FF0D0",
         "sky": [
           [
@@ -185,7 +185,7 @@
             "#0A2221"
           ]
         ],
-        "cell": "#1F524D"
+        "cell": "#3B6964"
       },
       "wall": {
         "a": "#9FF0D0",
@@ -225,7 +225,7 @@
         "elob": "#3A3546",
         "eloc": "#322E3D",
         "warhead": "#A08BFF",
-        "e3lig": "#8A84A0",
+        "e3lig": "#928DA7",
         "linker": "#EEEAF6",
         "brk": "#7B5CFF",
         "ub": "#C4B6FF",
@@ -233,7 +233,7 @@
         "clasp": "#7B5CFF",
         "e2": "#9D97B2",
         "prot": "#4A4458",
-        "wall": "#2A2733",
+        "wall": "#53505C",
         "flash": "#7B5CFF",
         "sky": [
           [
@@ -249,7 +249,7 @@
             "#14121B"
           ]
         ],
-        "cell": "#322D44"
+        "cell": "#5F5A6F"
       },
       "wall": {
         "a": "#A08BFF",
