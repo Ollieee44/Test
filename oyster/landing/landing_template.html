@@ -275,7 +275,7 @@ function frame(p) {
   document.querySelectorAll('.beat').forEach((b, i) => { const [a, z] = BEATS[i];
     const o = i === 5 ? clamp((p - a) / .03, 0, 1) * (1 - clamp((p - .93) / .03, 0, 1)) : clamp(Math.min((p - a) / .03, (z - p) / .03), 0, 1);
     b.style.opacity = o.toFixed(3); b.style.transform = 'translateY(calc(-50% + ' + ((1 - o) * 16).toFixed(1) + 'px))'; });
-  document.querySelectorAll('.rail b').forEach((b, i) => b.style.setProperty('--f', clamp((p - BEATS[i][0]) / (BEATS[i][1] - BEATS[i][0]), 0, 1).toFixed(3)));
+  document.querySelectorAll('.rail b').forEach((b, i) => { b.style.setProperty('--f', clamp((p - BEATS[i][0]) / (BEATS[i][1] - BEATS[i][0]), 0, 1).toFixed(3)); b.closest('.rail > div').classList.toggle('on', p >= BEATS[i][0]); });
   const endO = clamp((p - .955) / .035, 0, 1); const end = document.getElementById('end'); end.style.opacity = endO; end.style.pointerEvents = endO > .9 ? 'auto' : 'none';
   document.getElementById('copy').style.opacity = 1 - endO;
   canvas.style.opacity = (1 - .88 * endO).toFixed(3);
@@ -291,7 +291,8 @@ addEventListener('resize', resize); resize(); applyPalette();
 function loop(t) {
   const dt = Math.min(.1, (t - last) / 1000); last = t;
   const goal = hold ? prog : target(); prog += (goal - prog) * (reduce ? 1 : 1 - Math.exp(-dt / .12)); if (Math.abs(goal - prog) < 1e-5) prog = goal;
-  frame(prog); if (renderer) renderer.render(scene, camera);
+  // skip the work while the story is scrolled out of view
+  if (story.getBoundingClientRect().bottom > 0) { frame(prog); if (renderer) renderer.render(scene, camera); }
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
