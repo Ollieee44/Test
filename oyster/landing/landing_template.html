@@ -257,7 +257,9 @@ function frame(p) {
   // camera: close on the degrader, back for the split, down with the halves, wide on the complex, across to the proteasome, out for the end
   const D0 = degC.toArray(), D1 = [degC.x, Yn + 10, degC.z];
   const T = kf(p, [[0, D0], [.3, D0], [.5, D1], [.7, [0, Yn, 0]], [.8, [-40, Yn - 18, 0]], [.88, [-40, Yn - 18, 0]], [.95, [0, Yn, 0]]]);
-  const dist = kf(p, [[0, 100], [.15, 112], [.28, 160], [.36, 190], [.5, 175], [.68, 255], [.8, 320], [.9, 300], [1, 430]]);
+  // portrait screens have no room beside the copy: pull back until the subject fits the width
+  const narrow = camera.aspect < .9, fitW = narrow ? Math.max(1, 1.1 / camera.aspect) : 1;
+  const dist = fitW * kf(p, [[0, 100], [.15, 112], [.28, 160], [.36, 190], [.5, 175], [.68, 255], [.8, 320], [.9, 300], [1, 430]]);
   const az = kf(p, [[0, -.35], [.15, .25], [.3, .1], [.5, -.2], [.7, .12], [.85, -.1], [1, .2]]) + (reduce ? 0 : .04 * Math.sin(p * 9));
   const el = kf(p, [[0, .12], [.28, .2], [.36, .62], [.46, .48], [.55, .14], [1, .1]]);
   const tgt = V(T);
@@ -265,15 +267,19 @@ function frame(p) {
   camera.lookAt(tgt);
   // compose to the right of the copy: slide the camera sideways so the subject sits right of centre,
   // easing back to the middle for the end card
-  const side = (1 - clamp((p - .94) / .04, 0, 1)) * -.16 * dist, right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
-  camera.position.addScaledVector(right, side); camera.updateMatrixWorld();
+  const settle = 1 - clamp((p - .94) / .04, 0, 1), right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+  if (narrow) {   // portrait: centre the subject and lift it above the copy, which sits low on the screen
+    const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+    camera.position.addScaledVector(up, -.07 * dist * settle);
+  } else camera.position.addScaledVector(right, -.16 * dist * settle);
+  camera.updateMatrixWorld();
   // ground colour: blood, barrier, neuron
   const sky = PAL[pal].sky, k1 = clamp((p - .28) / .08, 0, 1), k2 = clamp((p - .48) / .08, 0, 1);
   const mix = (a, b, t) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), t).getHexString();
   stage.style.setProperty('--sky-a', mix(mix(sky[0][0], sky[1][0], k1), sky[2][0], k2)); stage.style.setProperty('--sky-b', mix(mix(sky[0][1], sky[1][1], k1), sky[2][1], k2));
   // copy, rail, end card
   document.querySelectorAll('.beat').forEach((b, i) => { const [a, z] = BEATS[i];
-    const o = i === 5 ? clamp((p - a) / .03, 0, 1) * (1 - clamp((p - .93) / .03, 0, 1)) : clamp(Math.min((p - a) / .03, (z - p) / .03), 0, 1);
+    const o = i === 5 ? clamp((p - a) / .03, 0, 1) * (1 - clamp((p - .93) / .03, 0, 1)) : i === 0 ? clamp((z - p) / .03, 0, 1) : clamp(Math.min((p - a) / .03, (z - p) / .03), 0, 1);   // the first line is there from the start
     b.style.opacity = o.toFixed(3); b.style.transform = 'translateY(calc(-50% + ' + ((1 - o) * 16).toFixed(1) + 'px))'; });
   document.querySelectorAll('.rail b').forEach((b, i) => { b.style.setProperty('--f', clamp((p - BEATS[i][0]) / (BEATS[i][1] - BEATS[i][0]), 0, 1).toFixed(3)); b.closest('.rail > div').classList.toggle('on', p >= BEATS[i][0]); });
   const endO = clamp((p - .955) / .035, 0, 1); const end = document.getElementById('end'); end.style.opacity = endO; end.style.pointerEvents = endO > .9 ? 'auto' : 'none';

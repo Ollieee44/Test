@@ -1,7 +1,7 @@
 """Build the Oyster Therapeutics site (index.html): the scroll-driven SELFTAC story from
 ../landing/landing_template.html as the landing page, followed by the company sections from the main
-site (sections.html), styled by site.css and wired by site.js, with the contour wallpaper
-(contours.svg) and the brand logotype."""
+site (sections.html), styled by site.css and wired by site.js and wallpaper.js, with the brand
+logotype."""
 import os, re
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 L = D + '../landing/'
@@ -24,9 +24,10 @@ h = h.replace('<main>', '<canvas id="bgArt" aria-hidden="true"></canvas>\n<a cla
 # the stage keeps only the scene; the header now lives outside it
 h = re.sub(r'\s*<div class="bar-top">.*?</div>\s*</div>', '', h, count=1, flags=re.S)
 h = h.replace('<a href="#more">Discover SELFTAC&reg;</a>', '<a href="#vision">Discover Oyster</a>')
+h = h.replace('<div class="hint" id="hint">Scroll</div>', '<div class="hint" id="hint"><span>Scroll to see how SELFTAC&reg; works</span><i aria-hidden="true"></i></div>'
+              '<a class="skip" id="skip" href="#vision">Skip to Oyster<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v10M3 8l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>', 1)
 a = h.index('<section class="after"'); b = h.index('</section>', a) + len('</section>')
 sec = open(D + 'sections.html').read().replace('<!--CG-->', CG).replace('<!--ARROW-->', ARROW)
-sec = sec.replace('<!--CONTOURS-->', open(D + 'contours.svg').read())
 h = h[:a] + sec + h[b:]
 h = h.replace('</main>', '</main>', 1)
 h = h.replace('/*MOLECULE*/', open(L + 'js/molecule.js').read())

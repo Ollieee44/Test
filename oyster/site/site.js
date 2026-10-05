@@ -1,5 +1,5 @@
-// ---------- site: header state, section reveals, contour drift, copy button ----------
-const head = document.getElementById('head'), storyEl = document.getElementById('story');
+// ---------- site: header state, skip control, section reveals, copy button ----------
+const head = document.getElementById('head'), storyEl = document.getElementById('story'), skip = document.getElementById('skip');
 const navLinks = [...document.querySelectorAll('.head nav a')];
 const sections = navLinks.map(a => document.querySelector(a.getAttribute('href')));
 function onScroll() {
@@ -7,8 +7,9 @@ function onScroll() {
   head.classList.toggle('solid', past);
   let cur = -1; sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top < innerHeight * .4) cur = i; });
   navLinks.forEach((a, i) => a.setAttribute('aria-current', String(i === cur)));
-  if (!reduce) document.querySelectorAll('.contours').forEach(c => { const r = c.parentElement.getBoundingClientRect();
-    c.style.setProperty('--drift', ((r.top + r.height / 2 - innerHeight / 2) * -.12).toFixed(1) + 'px'); });
+  // the skip control stays until the story reaches its end card
+  const sr = storyEl.getBoundingClientRect(), sp = -sr.top / Math.max(1, sr.height - innerHeight);
+  skip.classList.toggle('gone', sp > .92);
 }
 addEventListener('scroll', onScroll, { passive: true }); onScroll();
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -10% 0px' });
