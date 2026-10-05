@@ -1,0 +1,109 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Deck asset exporter</title>
+<!-- Run headless by assets.js. Builds every part of the SELFTAC story with the website's own geometry
+     (meshes.json and molecule.js), then exports each as a .glb and renders still images of it. -->
+<script type="importmap">{ "imports": { "three": "http://local/three/build/three.module.js", "three/addons/": "http://local/three/examples/jsm/" } }</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+const DATA = await (await fetch('http://local/meshes.json')).json();
+const MOLECULE = await (await fetch('http://local/molecule.js')).text();
+const makeMolecule = new Function('THREE', MOLECULE + '\nreturn makeMolecule;')(THREE);
+
+function geom(p) {
+  const pb = Uint8Array.from(atob(p.pos), c => c.charCodeAt(0)), ib = Uint8Array.from(atob(p.idx), c => c.charCodeAt(0));
+  const q = new Int16Array(pb.buffer), pos = new Float32Array(q.length);
+  for (let i = 0; i < q.length; i++) pos[i] = q[i] / 100;
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setIndex(new THREE.BufferAttribute(p.idx32 ? new Uint32Array(ib.buffer) : new Uint16Array(ib.buffer), 1));
+  g.computeVertexNormals(); g.computeBoundingSphere(); return g;
+}
+const V = a => new THREE.Vector3(...a), C = DATA.centres;
+// the same turn as the website: target on the left, ligase on the right
+const Q = new THREE.Quaternion().setFromUnitVectors(V(C.brd4).sub(V(C.vhl)).normalize(), new THREE.Vector3(-1, 0, 0));
+
+// Nacre palette, as on the site
+const COL = { brd4: '#E7C9D6', vhl: '#D6CBE6', elob: '#E8DEDB', eloc: '#DDD2D4', warhead: '#B4678B', e3lig: '#8A73B2',
+  pearl: '#F6EEF1', strand: '#8C5572', clasp: '#D9A443', ub: '#C99BB0', e2: '#CDBFDF', prot: '#B9A9B6' };
+const mat = (k, rough = .7) => new THREE.MeshStandardMaterial({ color: new THREE.Color(COL[k]), roughness: rough, metalness: 0 });
+// a mesh baked into the screen frame (world space), so every part shares one coordinate system
+const baked = (g, m, matrix) => { const gg = g.clone(); if (gg.index === null) {} gg.applyMatrix4(matrix); gg.computeVertexNormals(); return new THREE.Mesh(gg, m); };
+const crystal = (k, key) => baked(geom(DATA.parts[k]), mat(key), new THREE.Matrix4().makeRotationFromQuaternion(Q));
+
+const parts = {};
+parts.brd4 = [crystal('brd4', 'brd4')];
+parts.vhlc = [crystal('vhl', 'vhl'), crystal('elob', 'elob'), crystal('eloc', 'eloc')];
+
+// the degrader, joined, in the website's resting pose; then cut into its two halves at the clasp
+const mol = makeMolecule(THREE, DATA, Q, geom, new THREE.Vector3(0, -1, .25));
+const I = new THREE.Quaternion(), Z = new THREE.Vector3();
+mol.update(Z, Z, I, I, 0);
+mol.group.updateMatrixWorld(true);
+const kids = mol.group.children.filter(o => o.isMesh && !o.isSprite && o.material && o.material.uniforms && o.material.uniforms.col);
+const heads = kids.filter(o => !o.isInstancedMesh && o.geometry.type === 'BufferGeometry');
+const inst = kids.filter(o => o.isInstancedMesh);
+const tubes = kids.filter(o => o.geometry.type === 'TubeGeometry');
+const [pearlsIM, claspIM] = inst;   // white pearls first, then the clasp pair
+const ball = new THREE.SphereGeometry(1, 32, 20), m4 = new THREE.Matrix4();
+const fromInst = (im, i, key, rough) => { im.getMatrixAt(i, m4); return baked(ball, mat(key, rough), m4); };
+const claspPos = [0, 1].map(i => { claspIM.getMatrixAt(i, m4); return new THREE.Vector3().setFromMatrixPosition(m4); });
+parts.halfA = [baked(heads[0].geometry, mat('warhead', .45), heads[0].matrixWorld), baked(tubes[0].geometry, mat('strand', .6), tubes[0].matrixWorld),
+  fromInst(pearlsIM, 0, 'pearl', .3), fromInst(pearlsIM, 1, 'pearl', .3), fromInst(claspIM, 0, 'clasp', .35)];
+parts.halfB = [baked(heads[1].geometry, mat('e3lig', .45), heads[1].matrixWorld), baked(tubes[1].geometry, mat('strand', .6), tubes[1].matrixWorld),
+  fromInst(pearlsIM, 2, 'pearl', .3), fromInst(pearlsIM, 3, 'pearl', .3), fromInst(claspIM, 1, 'clasp', .35)];
+// the reversible bond: a thick gold rod between the two clasp pearls
+{ const a = claspPos[0], b = claspPos[1], d = b.clone().sub(a), len = d.length();
+  const g = new THREE.CylinderGeometry(.8, .8, len, 24, 1, false);
+  const m = new THREE.Matrix4().compose(a.clone().add(b).multiplyScalar(.5), new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()), new THREE.Vector3(1, 1, 1));
+  parts.bond = [baked(g, mat('clasp', .35), m)]; }
+// ubiquitin tag, the E2 stand-in, and the proteasome stand-in (four stacked rings with a cap at each end)
+{ const ubG = geom(DATA.parts.ub); ubG.center();
+  parts.ub = [baked(ubG, mat('ub'), new THREE.Matrix4().makeScale(.42, .42, .42))];
+  parts.e2 = [baked(ubG, mat('e2'), new THREE.Matrix4().makeScale(.9, .75, .8))]; }
+parts.prot = [];
+for (let i = 0; i < 4; i++) parts.prot.push(baked(new THREE.TorusGeometry(10, 5.2, 24, 48), mat('prot'), new THREE.Matrix4().compose(new THREE.Vector3(-15 + i * 10, 0, 0), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 2, 0)), new THREE.Vector3(1, 1, 1))));
+for (const s of [-1, 1]) parts.prot.push(baked(new THREE.IcosahedronGeometry(11, 3), mat('prot'), new THREE.Matrix4().compose(new THREE.Vector3(s * 27, 0, 0), new THREE.Quaternion(), new THREE.Vector3(.55, 1.05, 1.05))));
+
+// centre each part on its bounding sphere; remember where that centre sits in the shared frame
+const info = {};
+for (const k in parts) {
+  const grp = new THREE.Group(); parts[k].forEach(m => grp.add(m));
+  const box = new THREE.Box3().setFromObject(grp), sph = box.getBoundingSphere(new THREE.Sphere());
+  parts[k].forEach(m => m.geometry.translate(-sph.center.x, -sph.center.y, -sph.center.z));
+  const g2 = new THREE.Group(); parts[k].forEach(m => g2.add(m));
+  info[k] = { centre: sph.center.toArray(), radius: sph.radius, group: g2 };
+}
+// spots used to place the tags and the E2: BRD4's upper face toward VHL, and the top of VHL
+function extreme(meshes, score) { let best = null, bs = -1e9; const v = new THREE.Vector3();
+  for (const m of meshes) { const p = m.geometry.attributes.position; for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); const s = score(v); if (s > bs) { bs = s; best = v.clone(); } } } return best; }
+const ubSpot = extreme(parts.brd4, v => v.y + .5 * v.x).add(V(info.brd4.centre));
+const vhlTop = extreme(parts.vhlc.slice(0, 1), v => v.y - .4 * v.x).add(V(info.vhlc.centre));
+
+// ---------- API used by assets.js ----------
+const exporter = new GLTFExporter();
+window.API = {
+  info: () => Object.fromEntries(Object.entries(info).map(([k, v]) => [k, { centre: v.centre, radius: v.radius }])),
+  spots: () => ({ ubSpot: ubSpot.toArray(), vhlTop: vhlTop.toArray(), clasp: claspPos.map(p => p.toArray()) }),
+  glb: k => new Promise((res, rej) => exporter.parse(info[k].group, buf => {
+    const b = new Uint8Array(buf); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000)); res(btoa(s));
+  }, rej, { binary: true })),
+  // a still of one part, turned by the slide's scene rotation (pitch about x after yaw about y),
+  // framed to its bounding sphere: the image PowerPoint shows until it renders the model itself
+  still: (k, yaw, pitch, px = 640) => {
+    const r = info[k].radius / .89, cam = new THREE.OrthographicCamera(-r, r, r, -r, .1, 4 * r + 10);
+    cam.position.set(0, 0, 2 * r + 5); cam.lookAt(0, 0, 0);
+    const scene = new THREE.Scene();
+    scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+    const d1 = new THREE.DirectionalLight(0xffffff, 1.6); d1.position.set(.4, .8, .7); scene.add(d1);
+    const d2 = new THREE.DirectionalLight(0xffffff, .5); d2.position.set(-.6, -.2, .4); scene.add(d2);
+    const holder = new THREE.Group(); holder.add(info[k].group); holder.rotation.set(pitch, yaw, 0, 'XYZ'); scene.add(holder);
+    const cv = document.createElement('canvas'); cv.width = cv.height = px;
+    const rr = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    rr.setClearColor(0, 0); rr.render(scene, cam);
+    const url = cv.toDataURL('image/png'); rr.dispose(); holder.remove(info[k].group); return url;
+  },
+};
+window.READY = true;
+</script>
