@@ -179,7 +179,7 @@ for (const k in parts) {
 }
 /*MOLECULE*/
 // the degrader lives in the crystal frame inside the turned world group
-const mol = makeMolecule(THREE, DATA, new THREE.Quaternion(), geom, new THREE.Vector3(0, -1, .6).applyQuaternion(world.quaternion.clone().invert())); world.add(mol.group);
+const mol = makeMolecule(THREE, DATA, new THREE.Quaternion(), geom, new THREE.Vector3(0, -1, .25).applyQuaternion(world.quaternion.clone().invert())); world.add(mol.group);
 const noTurn = new THREE.Quaternion();
 const proteins = ['brd4', 'vhl', 'elob', 'eloc'].map(k => meshes[k]);
 

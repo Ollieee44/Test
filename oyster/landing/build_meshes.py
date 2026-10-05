@@ -90,10 +90,10 @@ for fr in Chem.GetMolFrags(sub.GetMol()):
 path = [i for i in m[1:-1] if tmpl.GetAtomWithIdx(i).GetSymbol() != 'O' or tmpl.GetAtomWithIdx(i).GetDegree() == 2]
 mid = len(path) // 2
 
-# the degrader, drawn generically: each half is a soft outline traced along its bonds (a smooth tube
+# the degrader, drawn generically: each half is an outline traced along its bonds (a smooth tube
 # skeleton, so it reads as a small molecule without showing atoms), and the linker is a curve from the
 # warhead's attachment atom to the E3 ligand's, which the page dresses as a string of beads.
-def skeleton(idx, s=.72, r=1.0, spacing=.25):
+def skeleton(idx, s=.34, r=.5, spacing=.14):
     ids = set(idx); P = X[idx]
     segs = [(X[b.GetBeginAtomIdx()], X[b.GetEndAtomIdx()]) for b in tmpl.GetBonds()
             if b.GetBeginAtomIdx() in ids and b.GetEndAtomIdx() in ids]
@@ -110,7 +110,7 @@ def skeleton(idx, s=.72, r=1.0, spacing=.25):
     for a_, b_, c_ in fc:
         nb[a_] |= {b_, c_}; nb[b_] |= {a_, c_}; nb[c_] |= {a_, b_}
     nb = [np.fromiter(x, int) for x in nb]
-    for it in range(16):
+    for it in range(30):
         lam = .5 if it % 2 == 0 else -.53
         v = v + lam * (np.array([v[n].mean(0) for n in nb]) - v)
     return v, fc

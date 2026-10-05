@@ -170,7 +170,7 @@ for (let i = -1; i <= 1; i++) { const mat = cmat('wall', 2.4); mat.transparent =
 wall.position.y = -52;
 
 /*MOLECULE*/
-const mol = makeMolecule(THREE, DATA, Q, geom, new THREE.Vector3(0, -1, .6)); scene.add(mol.group);
+const mol = makeMolecule(THREE, DATA, Q, geom, new THREE.Vector3(0, -1, .25)); scene.add(mol.group);
 const flash = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.1, 48), new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide })); scene.add(flash);
 
 // ---------- colours ----------

@@ -59,7 +59,7 @@ function makeMolecule(THREE, D, Q, geom, bow) {
 
   // the two halves: crystal-frame meshes turned by Q, then by each half's own turn about its centre
   const heads = ['warhead', 'e3lig'].map(k => {
-    const g = geom(D.parts[k]), m = new THREE.Mesh(g, mat(k, .45));
+    const g = geom(D.parts[k]), m = new THREE.Mesh(g, mat(k, .3));
     m.add(outline(m)); group.add(m); g.computeBoundingSphere();
     return { mesh: m, c: g.boundingSphere.center.clone().applyQuaternion(Q) };
   });
@@ -80,7 +80,7 @@ function makeMolecule(THREE, D, Q, geom, bow) {
   let u0 = 0, u1 = 1;
   while (u0 < .4 && inside(heads[0].mesh, curve0.getPointAt(u0))) u0 += .01;
   while (u1 > .6 && inside(heads[1].mesh, curve0.getPointAt(u1))) u1 -= .01;
-  const uMid = (u0 + u1) / 2, uOf = k => u0 + (u1 - u0) * (k + (k >= BRK ? 1 : 0) + .6) / (NB + 1.2);   // a double gap at the break
+  const uMid = (u0 + u1) / 2, uOf = k => u0 + (u1 - u0) * (k + (k >= BRK ? .25 : 0) + .6) / (NB + .45);   // a slightly wider gap at the break
   const pw = new THREE.Vector3(), pe = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s3 = new THREE.Vector3();
   const R = { pearl: 1.1, strand: .36, bond: .55 };
   // a point on the linker at fraction u, with each half's rigid move applied and blended across
