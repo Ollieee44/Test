@@ -1073,8 +1073,10 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
     const fly = k(t, T.fly), fe = fly * fly * (3 - 2 * fly) * .4 + fly * fly * fly * .6, op = ease(k(t, T.open)), rc = ease(k(t, T.recede));
     let D = logLerp(Dc * 9, Dc, fe); D = logLerp(D, Dm, op); D = logLerp(D, Dl, rc);
     hinge.rotation.z = lerp(CLOSED, OPEN, op);
-    // a three-quarter view while it flies, turning square on as it opens and recedes
-    const az = lerp(lerp(.55, .2, fe), 0, Math.max(op * .6, rc)), el = lerp(lerp(.38, .2, fe), 0, Math.max(op * .5, rc));
+    // mouth-on: it comes straight at the viewer and opens towards them, the lid lifting to show the pearl; as it
+    // recedes it turns a quarter round to the side view the logo uses, so it lands in the 'o'
+    const turn = ease(k(t, [T.recede[0] - 150, T.recede[1] - 100])), az = lerp(Math.PI / 2, 0, turn), el = lerp(.1, 0, turn);
+    D *= lerp(.62, 1, turn);   // the shell is narrower seen mouth-on, so come closer to fill the same width
     const tgt = CENTRE.clone().lerp(TL, rc);
     cam.position.set(tgt.x + D * Math.sin(az) * Math.cos(el), tgt.y + D * Math.sin(el), tgt.z + D * Math.cos(az) * Math.cos(el)); cam.lookAt(tgt);
     pearlMat.uniforms.glint.value = 1.3 * bump(t, 1500, 2200);
