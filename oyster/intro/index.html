@@ -972,7 +972,7 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   // one camera move (move): out of the distance, closest at about a third, then back and across into the 'o';
   // the lid opens through the closest point and the pan starts before the pull-back ends, so nothing stops
   const T = { fade: [0, 180], move: [0, 1900], merge: [1650, 1950],
-    letters: [1800, 2150], ther: [2000, 2300], glide: [2400, 2960], bg: [2540, 2960], site: 2680, end: 3000 };
+    letters: [1800, 2650], ther: [2250, 2650], glide: [2850, 3410], bg: [2990, 3410], site: 3130, end: 3450 };
   const k = (t, [a, b]) => clamp((t - a) / (b - a), 0, 1), eo = x => 1 - Math.pow(1 - x, 3);
   const lerp = (a, b, x) => a + (b - a) * x;
   const COL = ({ nacre: { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' }, tidepool: { out: '#6FA79D', inn: '#DDF0EA', ring: '#06302E' } })[pal] || { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' };
@@ -1086,7 +1086,7 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
     r3.domElement.style.opacity = (k(t, T.fade) * (1 - k(t, [T.merge[0] + 100, T.merge[1]]))).toFixed(3);
     // the rest of the word writes in from the left, 'therapeutics' rises in under it
     clipR.setAttribute('width', (2100 * ease(k(t, T.letters))).toFixed(1));
-    letters.style.opacity = k(t, [T.letters[0], T.letters[0] + 150]).toFixed(3);
+    letters.style.opacity = ease(k(t, [T.letters[0], T.letters[0] + 600])).toFixed(3);   // a soft fade as the letters sweep in
     const thIn = ease(k(t, T.ther)); ther.style.opacity = (thIn * (1 - k(t, [T.glide[0], T.glide[0] + 350]))).toFixed(3);
     ther.setAttribute('transform', `translate(0 ${(30 * (1 - thIn)).toFixed(1)})`);
     // the logotype then shrinks into the header wordmark (same drawing, same frame) as the story fades in under it
