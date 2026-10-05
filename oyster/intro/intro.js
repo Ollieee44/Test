@@ -73,7 +73,7 @@
         gl_FragColor = vec4(col * dif + vec3(sp) + mix(col, vec3(1.0), .5) * rim * .22, 1.0);
         #include <colorspace_fragment>
       }` });
-  const PEARL_R = 7.5, PEARL_AT = new THREE.Vector3(0, -14.5 + PEARL_R + .6, 4);
+  const PEARL_R = 9, PEARL_AT = new THREE.Vector3(0, -14.5 + PEARL_R + .6, 4);
   const pearl = new THREE.Mesh(new THREE.SphereGeometry(PEARL_R, 48, 32), pearlMat); pearl.position.copy(PEARL_AT); oyster.add(pearl);
   addOutline(pearl, .5).material.uniforms.color.value.set(INK);
   const CLOSED = 0, OPEN = 68 * Math.PI / 180;   // the lid lifts towards the viewer, about the hinge at the back
@@ -106,8 +106,8 @@
     // pearl carries straight through as the ink disc closes round the shell
     const s = 7.22 * 6.3571 * u / PEARL_R; Dl = H / (2 * TAN * s);
     const px = K.full[0] + (-17.1 + 6.3571 * (60.24 - 1.5) - VB[0]) * u, py = K.full[1] + (-583.4 + 6.3571 * (53.42 + 1.5) - VB[1]) * u;
-    const up = new THREE.Vector3(0, Math.cos(EL1), -Math.sin(EL1));
-    TL = PEARL_AT.clone().add(new THREE.Vector3(-(px - W / 2) / s, 0, 0)).addScaledVector(up, (py - H / 2) / s);
+    // it ends in side profile, as the logo draws it: camera level, looking along +x, so the hinge is on the left
+    TL = PEARL_AT.clone().add(new THREE.Vector3(0, 0, -(px - W / 2) / s)).add(new THREE.Vector3(0, (py - H / 2) / s, 0));
   }
   let L9 = 0, Lc = 0, Ll = 0;
   const setPath = () => { L9 = Math.log(Dc * 9); Lc = Math.log(Dc); Ll = Math.log(Dl); };
@@ -122,9 +122,10 @@
     const u = k(t, T.move), sm = x => x * x * x * (x * (6 * x - 15) + 10);
     const op = ease(clamp((u - .2) / .42, 0, 1)), rc = sm(clamp((u - .45) / 0.55, 0, 1));
     const D = Math.exp(u < .34 ? lerp(L9, Lc, 1 - Math.pow(1 - u / .34, 2.2)) : lerp(Lc, Ll, sm((u - .34) / .66)));
-    hinge.rotation.x = -lerp(lerp(CLOSED, OPEN, op), 32 * Math.PI / 180, rc);
+    hinge.rotation.x = -lerp(lerp(CLOSED, OPEN, op), 24 * Math.PI / 180, rc);   // settles to the logo's 24 degrees
     // straight ahead: it comes at the viewer front-on and its lid lifts towards them to show the pearl
-    const az = 0, el = lerp(EL0, EL1, Math.max(op, rc));
+    // as it pulls back it turns a quarter round to side profile and levels off, landing as the logo's mark
+    const rot = rc, az = lerp(0, -Math.PI / 2, rot), el = lerp(lerp(EL0, EL1, op), 0, rot);
     const tgt = CENTRE.clone().lerp(TL, rc);
     cam.position.set(tgt.x + D * Math.sin(az) * Math.cos(el), tgt.y + D * Math.sin(el), tgt.z + D * Math.cos(az) * Math.cos(el)); cam.lookAt(tgt);
     pearlMat.uniforms.glint.value = 1.3 * bump(u, .45, .9);
