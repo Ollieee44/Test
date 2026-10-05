@@ -206,6 +206,19 @@ function kf(p, keys) {
   }
   return keys[keys.length - 1][1];
 }
+// a smooth curve through keys [[t, v], ...]: the speed carries through each key instead of stopping there
+// (monotone cubic, Fritsch-Butland tangents, so it never overshoots a key); it eases in and out at its ends
+function curve(keys) {
+  const n = keys.length, x = keys.map(k => k[0]), y = keys.map(k => k[1]), h = [], d = [], m = new Array(n).fill(0);
+  for (let i = 0; i < n - 1; i++) { h[i] = x[i + 1] - x[i]; d[i] = (y[i + 1] - y[i]) / h[i]; }
+  for (let i = 1; i < n - 1; i++) if (d[i - 1] * d[i] > 0) { const w1 = 2 * h[i] + h[i - 1], w2 = h[i] + 2 * h[i - 1]; m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i]); }
+  return t => {
+    if (t <= x[0]) return y[0]; if (t >= x[n - 1]) return y[n - 1];
+    let i = 0; while (t > x[i + 1]) i++;
+    const u = (t - x[i]) / h[i], u2 = u * u, u3 = u2 * u;
+    return (2 * u3 - 3 * u2 + 1) * y[i] + (u3 - 2 * u2 + u) * h[i] * m[i] + (-2 * u3 + 3 * u2) * y[i + 1] + (u3 - u2) * h[i] * m[i + 1];
+  };
+}
 const bump = (p, a, b) => { const t = clamp((p - a) / (b - a), 0, 1); return Math.sin(Math.PI * t); };
 
 // ---------- the story ----------
@@ -230,22 +243,40 @@ const vhlTop = (() => { const g = P.vhl.children[0].geometry, pos = g.attributes
   for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyQuaternion(Q); const s = v.y - .4 * v.x; if (s > bs) { bs = s; best = v.clone(); } } return best; })();
 const PROT_AT = new THREE.Vector3(-118, Yn - 62, 0);
 const degC = S('warhead').add(S('e3lig')).multiplyScalar(.5);
+// the halves' depth against the scroll: the barrier is -44 to -60, the neuron's membrane at -82
+const HY = curve([[.255, 0], [.31, -40], [.345, -46], [.385, -62], [.42, -67], [.46, -80], [.5, -84], [.55, -94], [.62, Yn]]);
+// the camera: one smooth curve per setting, keyed on the scroll. Close on the degrader, back for the split,
+// over the barrier looking down, riding down with the halves through both membranes, round to the side
+// for the complex once the neuron has faded, across to the proteasome, and out for the end card.
+const CAM = (() => {
+  const fy = hy => degC.y + hy + (10 - degC.y) * clamp(hy / Yn, 0, 1);   // the camera's aim while it follows the halves
+  const ty = [[0, degC.y], [.255, degC.y]];
+  for (let t = .27; t < .615; t += .015) ty.push([t, fy(HY(t))]);
+  ty.push([.62, Yn + 10], [.76, Yn], [.84, Yn - 18], [.87, Yn - 17], [.95, Yn], [1, Yn]);
+  return {
+    tx: curve([[0, degC.x], [.62, degC.x], [.76, 0], [.84, -40], [.87, -38], [.95, 0], [1, 0]]),
+    ty: curve(ty),
+    tz: curve([[0, degC.z], [.62, degC.z], [.76, 0], [1, 0]]),
+    dist: curve([[0, 100], [.12, 112], [.24, 158], [.32, 188], [.4, 178], [.62, 176], [.74, 250], [.86, 320], [1, 430]]),
+    az: curve([[0, -.35], [.11, .27], [.2, .2], [.3, .08], [.4, -.2], [.62, -.27], [.76, .14], [.86, -.05], [1, .22]]),
+    el: curve([[0, .12], [.14, .18], [.25, .22], [.32, .6], [.4, .48], [.62, .46], [.75, .14], [1, .1]]),
+  };
+})();
+// the free halves tumble on a clock that runs while the page is scrolling and settles when it stops
+let spin = 0;
 
 function frame(p0) {
   const p = warp(p0), c = clamp((p0 - HOLD[0]) / (HOLD[1] - HOLD[0]), 0, 1);   // c: progress through the neuron beat
   // the two halves: joined, split, sinking through the wall (pausing at each membrane), rejoined in the neuron
   const hx = kf(p, [[.15, SPREAD], [.27, 22], [.5, 22], [.58, 22], [.66, GAP], [1, GAP]]);
-  // below the barrier they settle on the neuron, pause in its membrane, and pass inside; the extra depth
-  // eases away as they finish sinking to the neuron level
-  // (the extra depth fades on the same easing as the final sink, so the halves only ever move down)
-  const dip = kf(c, [[0, 0], [.3, -20], [.45, -22], [.75, -30], [1, -30]]) * (1 - ease(clamp((p - QH) / (.52 - QH), 0, 1)));
-  const hy = kf(p, [[.3, 0], [.36, -42], [.39, -43], [.43, -60], [.46, -62], [.52, Yn], [1, Yn]]) + dip;
+  // one continuous sink on the scroll: slowing inside the barrier cells and again in the neuron's membrane
+  const hy = HY(p0);
   const joined = kf(p, [[.16, 1], [.2, 0], [.6, 0], [.665, 1]]);
   const oW = new THREE.Vector3(-hx, hy, 0), oE = new THREE.Vector3(hx, hy, 0);
   // tumble the free halves a little while they travel, each about its own centre; settle before they rebind
   const free = kf(p, [[.17, 0], [.24, 1], [.56, 1], [.64, 0]]);
-  const rW = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * .35 * Math.sin(p0 * 18), free * .5 * Math.sin(p0 * 11), 0));
-  const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(p0 * 15), free * .45 * Math.cos(p0 * 13), 0));
+  const rW = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * .35 * Math.sin(spin * 1.3), free * .5 * Math.sin(spin * .9), 0));
+  const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(spin * 1.1), free * .45 * Math.cos(spin * 1.2), 0));
   const brk = mol.update(oW, oE, rW, rE, joined);
   // the bond clicking shut
   const fx = bump(p, .655, .69); flash.position.copy(brk); flash.scale.setScalar(1 + 3 * clamp((p - .655) / .035, 0, 1)); flash.material.opacity = fx * .9; flash.visible = fx > .01;
@@ -280,31 +311,17 @@ function frame(p0) {
   wall.children.forEach(b => { b.material.uniforms.alpha.value = .42 * wa; b.children[0].material.uniforms.alpha.value = .35 * wa; });
   // the neuron rises into view under the barrier, glows softly as the halves pass its membrane, and fades
   // once they are inside
-  const ca = kf(p0, [[.36, 0], [.44, 1], [.62, 1], [.68, 0]]), cg = bump(c, .45, .75); cell.visible = ca > .01;
+  const ca = kf(p0, [[.36, 0], [.44, 1], [.57, 1], [.64, 0]]), cg = bump(c, .45, .75); cell.visible = ca > .01;
   cell.children.forEach(m => { m.material.uniforms.alpha.value = .5 * m.material.userData.a * ca; m.material.uniforms.glow.value = .25 * cg; m.children[0].material.uniforms.alpha.value = .3 * ca; });
   // camera: close on the degrader, back for the split, down with the halves, wide on the complex, across to the proteasome, out for the end
-  const D0 = degC.toArray(), D1 = [degC.x, Yn + 10, degC.z];
-  const T = kf(p, [[0, D0], [.3, D0], [.5, D1], [.7, [0, Yn, 0]], [.8, [-40, Yn - 18, 0]], [.88, [-40, Yn - 18, 0]], [.95, [0, Yn, 0]]]);
-  // from the barrier through the neuron beat the camera rides down with the halves (so the neuron rises around them rather
-  // than sliding past), keeping the view it had over the barrier; it swings round to the complex only once
-  // the neuron has faded. j blends the follow in, k hands back to the original camera path.
-  const j = ease(clamp((p0 - .19) / .07, 0, 1)), k = ease(clamp((p0 - .65) / .14, 0, 1)), held = j * (1 - k);
-  const F = [degC.x, hy + degC.y + (10 - degC.y) * clamp(hy / Yn, 0, 1), degC.z];   // D0 before the descent, D1 at the neuron
   // portrait screens have no room beside the copy: pull back until the subject fits the width
   const narrow = camera.aspect < .9, fitW = narrow ? Math.max(1, 1.1 / camera.aspect) : 1;
-  const lerp = (a, b, t) => a + (b - a) * t, QF = warp(.41);   // QF: the old timeline where the follow is fully in
-  const distK = [[0, 100], [.15, 112], [.28, 160], [.36, 190], [.5, 175], [.68, 255], [.8, 320], [.9, 300], [1, 430]];
-  const azK = [[0, -.35], [.15, .25], [.3, .1], [.5, -.2], [.7, .12], [.85, -.1], [1, .2]], elK = [[0, .12], [.28, .2], [.36, .62], [.46, .48], [.55, .14], [1, .1]];
-  const qv = Math.min(p, QF + (p - QF) * (1 - held));   // the old timeline, held at QF while the camera follows
-  const dist = fitW * kf(qv, distK);
-  const az = kf(qv, azK) + (reduce ? 0 : .04 * Math.sin(p0 * 9));
-  const el = kf(qv, elK);
-  const tgt = V(T).lerp(V(F), held);
+  const tgt = new THREE.Vector3(CAM.tx(p0), CAM.ty(p0), CAM.tz(p0)), dist = fitW * CAM.dist(p0), az = CAM.az(p0), el = CAM.el(p0);
   camera.position.set(tgt.x + dist * Math.sin(az) * Math.cos(el), tgt.y + dist * Math.sin(el), tgt.z + dist * Math.cos(az) * Math.cos(el));
   camera.lookAt(tgt);
   // compose to the right of the copy: slide the camera sideways so the subject sits right of centre,
   // easing back to the middle for the end card
-  const settle = 1 - clamp((p - .94) / .04, 0, 1), right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+  const settle = 1 - ease(clamp((p0 - .88) / .11, 0, 1)), right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
   if (narrow) {   // portrait: centre the subject and lift it above the copy, which sits low on the screen
     const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
     camera.position.addScaledVector(up, -.07 * dist * settle);
@@ -331,13 +348,15 @@ function target() { const r = story.getBoundingClientRect(); return clamp(-r.top
 let goalNow = target(), storyOn = true;
 function measure() { goalNow = target(); storyOn = story.getBoundingClientRect().bottom > 0; }
 addEventListener('scroll', measure, { passive: true }); addEventListener('resize', measure);
-let prog = goalNow, last = performance.now(), hold = false;
+let prog = goalNow, last = performance.now(), hold = false, tumbleAct = 0;
 function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (renderer) { renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(w, h, false); } camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize(); applyPalette();
 function loop(t) {
   const dt = Math.min(.1, (t - last) / 1000); last = t;
   const goal = hold ? prog : goalNow; prog += (goal - prog) * (reduce ? 1 : 1 - Math.exp(-dt / .22)); if (Math.abs(goal - prog) < 1e-5) prog = goal;
   // skip the work while the story is scrolled out of view
+  // the tumble clock runs while the story is moving and winds down over about a second once it stops
+  const moving = Math.abs(goal - prog) > 2e-4 ? 1 : 0; tumbleAct += (moving - tumbleAct) * (1 - Math.exp(-dt / .45)); if (!reduce) spin += dt * tumbleAct * 1.1;
   if (storyOn) { frame(prog); if (renderer) renderer.render(scene, camera); }
   requestAnimationFrame(loop);
 }
