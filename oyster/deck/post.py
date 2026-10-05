@@ -55,7 +55,9 @@ def model3d(pic, glb_rid, info, turn):
         f'<p:xfrm>{xfrm}</p:xfrm>'
         '<a:graphic><a:graphicData uri="http://schemas.microsoft.com/office/drawing/2017/model3d">'
         f'<am3d:model3d r:embed="{glb_rid}">'
-        f'<am3d:spPr><a:xfrm>{xfrm}</a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></am3d:spPr>'
+        # no transform inside the model: the frame alone places it (an inner offset can be read as relative,
+        # which pushes the model off to the right)
+        '<am3d:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></am3d:spPr>'
         '<am3d:camera><am3d:pos x="0" y="0" z="73100523"/><am3d:up dx="0" dy="36000000" dz="0"/><am3d:lookAt x="0" y="0" z="0"/>'
         '<am3d:perspective fov="2700000"/></am3d:camera>'
         f'<am3d:trans><am3d:meterPerModelUnit n="{n}" d="1000000"/><am3d:preTrans dx="0" dy="0" dz="0"/>'
