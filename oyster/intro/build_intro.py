@@ -35,4 +35,8 @@ overlay = ('<script>document.documentElement.classList.add("intro")</script>\n'
 once('<canvas id="bgArt"', overlay + '<canvas id="bgArt"')
 once('\nwindow.__story = {', '\n' + open(D + 'intro.js').read() + '\nwindow.__story = {')
 open(D + 'index.html', 'w').write(h)
+# the same page opening in Tidepool, for comparison: the stage starts teal from the first frame
+t = h.replace('<script>document.documentElement.classList.add("intro")</script>',
+  '<script>document.documentElement.classList.add("intro"); window.__startPal = "tidepool";</script><style>.intro-ov .ibg { --intro-a: #0B3A38; --intro-b: #04201F; }</style>', 1)
+open(D + 'tidepool.html', 'w').write(t)
 print('intro/index.html', len(h) // 1024, 'KB')

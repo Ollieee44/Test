@@ -13,6 +13,7 @@
     setTimeout(() => html.classList.remove('intro-end'), 1200);
   };
   let r3 = null;
+  if (window.__startPal && window.__startPal !== pal) { const b = document.querySelector('.pal button[data-pal="' + window.__startPal + '"]'); if (b) b.click(); }
   if (reduce || !renderer || scrollY > 10) { finish(); return; }
   try { r3 = new THREE.WebGLRenderer({ canvas: document.getElementById('introGl'), antialias: true, alpha: true }); } catch (e) { finish(); return; }
 
@@ -25,7 +26,7 @@
     letters: [1800, 2650], ther: [2250, 2650], glide: [2850, 3410], bg: [2850, 3410], site: 3360, end: 3450 };
   const k = (t, [a, b]) => clamp((t - a) / (b - a), 0, 1), eo = x => 1 - Math.pow(1 - x, 3);
   const lerp = (a, b, x) => a + (b - a) * x;
-  const COL = ({ nacre: { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' }, tidepool: { out: '#6FA79D', inn: '#DDF0EA', ring: '#06302E' } })[pal] || { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' };
+  const COL = ({ nacre: { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' }, tidepool: { out: '#7DB8AC', inn: '#DCEFE8', ring: '#2F6F69' } })[pal] || { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' };
   const css = n => getComputedStyle(html).getPropertyValue(n).trim();
   const INK = css('--ink'), PEARL = css('--pearl');
   // the intro plays on a dark stage: on a light palette, Nacre's own ink mauve, with the logotype drawn light and the
@@ -34,7 +35,8 @@
   // light or dark site, judged from the brightness of the page colour itself (colorScheme is unreliable on some
   // Android browsers); only a dark palette keeps its own ground
   const paperC = new THREE.Color(css('--paper') || '#EFE6E1'), LIGHTSITE = (paperC.r + paperC.g + paperC.b) / 3 > .45;
-  const STAGE = LIGHTSITE ? ['#3B2F42', '#241C29'] : PAL[pal].sky[0], LOGO0 = LIGHTSITE ? css('--paper') : INK, LINE = LIGHTSITE ? '#806A86' : INK;
+  // a dark site gets a deeper stage of its own ground, so the lights still come up as the logo lands
+  const STAGE = LIGHTSITE ? ['#3B2F42', '#241C29'] : ['#0B3A38', '#04201F'], LOGO0 = LIGHTSITE ? css('--paper') : INK, LINE = LIGHTSITE ? '#806A86' : '#4E9A91';
   ov.style.setProperty('--intro-a', STAGE[0]); ov.style.setProperty('--intro-b', STAGE[1]);
   const mixHex = (a, b, x) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), x).getHexString();
 
