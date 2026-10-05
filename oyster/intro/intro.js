@@ -33,13 +33,13 @@
   // ---------- the oyster: two shallow, rounded valves, a cupped bowl and a flatter lid hinged at the back ----------
   // Each valve is a round, slightly wavy outline in the horizontal plane, domed into a shell with a dished
   // nacre inside; growth rings radiate from the hinge, as on a real shell.
-  const R0 = 40, ZS = 1, RIM = th => R0 * (1 + .018 * Math.sin(7 * th) + .008 * Math.sin(3 * th + 1));
+  const R0 = 40, ZS = 1, RIM = () => R0;
   const HZ = -R0 * ZS;   // the hinge, at the back
   function valve(outD, inD) {   // outD, inD: heights of the outer and inner surfaces at the centre (negative = downwards)
     const NR = 40, NT = 120, pos = [], outer = [], inner = [];
     for (const [d, list, flip] of [[outD, outer, outD > 0], [inD, inner, inD < 0]]) {   // faces wound to point out of the shell
       const base = pos.length / 3;
-      for (let i = 0; i <= NR; i++) { const r = i / NR, h = d * (1 - r * r);
+      for (let i = 0; i <= NR; i++) { const r = i / NR, h = d * Math.pow(1 - Math.pow(r, 2.4), .62);
         for (let j = 0; j < NT; j++) { const th = 2 * Math.PI * j / NT, R = RIM(th) * r; pos.push(R * Math.cos(th), h, R * Math.sin(th) * ZS); } }
       for (let i = 0; i < NR; i++) for (let j = 0; j < NT; j++) {
         const a = base + i * NT + j, b = base + i * NT + (j + 1) % NT, c = a + NT, e = b + NT;
@@ -52,19 +52,19 @@
   const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(22, 1, 1, 4000);
   const RING_AT = new THREE.Vector3(0, 0, HZ);
   function shellMesh(geo) {
-    const out = cmat('out', 3, RING_AT.clone()), inn = cmat('inn', 3, RING_AT.clone());
+    const out = cmat('out', 6, RING_AT.clone()), inn = cmat('inn', 6, RING_AT.clone());
     out.uniforms.col.value.set(COL.out); out.uniforms.ring.value.set(COL.ring);
     inn.uniforms.col.value.set(COL.inn); inn.uniforms.ring.value.set(COL.inn);   // the inside is smooth nacre: no growth lines
     const m = new THREE.Mesh(geo, [out, inn]);
     const og = new THREE.BufferGeometry(); og.setAttribute('position', geo.attributes.position); og.setAttribute('normal', geo.attributes.normal);
     og.setIndex(Array.from(geo.index.array.slice(0, geo.groups[0].count)));
-    const shellOnly = new THREE.Mesh(og); const o = addOutline(shellOnly, .6); shellOnly.remove(o); m.add(o);
+    const shellOnly = new THREE.Mesh(og); const o = addOutline(shellOnly, 1.5); shellOnly.remove(o); m.add(o);
     o.material.uniforms.color.value.set(INK); return m;
   }
   const oyster = new THREE.Group(); sc.add(oyster);
-  const lower = shellMesh(valve(-18, -14.5)); oyster.add(lower);
+  const lower = shellMesh(valve(-24, -19)); oyster.add(lower);
   const hinge = new THREE.Group(); hinge.position.set(0, 0, HZ); oyster.add(hinge);
-  const upper = shellMesh(valve(9, 6)); upper.position.set(0, 0, -HZ); hinge.add(upper);
+  const upper = shellMesh(valve(12, 8)); upper.position.set(0, 0, -HZ); hinge.add(upper);
   const pearlMat = new THREE.ShaderMaterial({ uniforms: { col: { value: new THREE.Color(PEARL) }, glint: { value: 0 } },
     vertexShader: `varying vec3 vN; varying vec3 vV; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vN = normalize(mat3(modelMatrix) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`,
     fragmentShader: `uniform vec3 col; uniform float glint; varying vec3 vN; varying vec3 vV;
@@ -73,9 +73,9 @@
         gl_FragColor = vec4(col * dif + vec3(sp) + mix(col, vec3(1.0), .5) * rim * .22, 1.0);
         #include <colorspace_fragment>
       }` });
-  const PEARL_R = 9, PEARL_AT = new THREE.Vector3(0, -14.5 + PEARL_R + .6, 4);
-  const pearl = new THREE.Mesh(new THREE.SphereGeometry(PEARL_R, 48, 32), pearlMat); pearl.position.copy(PEARL_AT); oyster.add(pearl);
-  addOutline(pearl, .5).material.uniforms.color.value.set(INK);
+  const PEARL_R = 9, PEARL_REST = new THREE.Vector3(0, -19 + PEARL_R + 3, 4), PEARL_AT = new THREE.Vector3(0, .53 * PEARL_R, 4);   // rest in the bowl; at the end it sits in the mouth, as in the logo
+  const pearl = new THREE.Mesh(new THREE.SphereGeometry(PEARL_R, 48, 32), pearlMat); pearl.position.copy(PEARL_REST); oyster.add(pearl);
+  addOutline(pearl, 1.1).material.uniforms.color.value.set(INK);
   const CLOSED = 0, OPEN = 68 * Math.PI / 180;   // the lid lifts towards the viewer, about the hinge at the back
 
   // ---------- the logotype: its 'o' is the same open oyster cut out of an ink disc ----------
@@ -122,6 +122,7 @@
     const u = k(t, T.move), sm = x => x * x * x * (x * (6 * x - 15) + 10);
     const op = ease(clamp((u - .2) / .42, 0, 1)), rc = sm(clamp((u - .45) / 0.55, 0, 1));
     const D = Math.exp(u < .34 ? lerp(L9, Lc, 1 - Math.pow(1 - u / .34, 2.2)) : lerp(Lc, Ll, sm((u - .34) / .66)));
+    pearl.position.lerpVectors(PEARL_REST, PEARL_AT, rc);   // lifted into the mouth as it turns to the logo's pose
     hinge.rotation.x = -lerp(lerp(CLOSED, OPEN, op), 24 * Math.PI / 180, rc);   // settles to the logo's 24 degrees
     // straight ahead: it comes at the viewer front-on and its lid lifts towards them to show the pearl
     // as it pulls back it turns a quarter round to side profile and levels off, landing as the logo's mark
