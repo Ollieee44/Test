@@ -1227,6 +1227,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
     function draw() {
       ctx.clearRect(0, 0, w, h); if (!w || !h) return;
       var cx = w * opts.cx, cy = h * opts.cy, R = Math.min(w, h) * opts.scale, N = opts.rings, P = 160;
+      if (opts.avoid) { var spot = pearlSpot(R * .19); if (spot) { cx = spot[0]; cy = spot[1]; } }
       if (opts.clearOf) {
         // keep the pearl, its sway and its pointer drift above the top of the hero wordmark
         var lim = opts.clearOf() - (canvas.getBoundingClientRect().top + window.scrollY), pr0 = R * .19;
@@ -1256,6 +1257,29 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, pr, 0, Math.PI * 2); ctx.fill();
       }
     }
+    // Find the clear spot nearest the default for the pearl: away from every line of text in opts.avoid,
+    // with room for its bob and pointer drift. Measured on resize and refresh, not every frame.
+    var spotCache = null, spotKey = '';
+    function pearlSpot(pr) {
+      var cr = canvas.getBoundingClientRect(), key = [Math.round(cr.width), Math.round(cr.height), Math.round(pr)].join('x');
+      if (key === spotKey) return spotCache;
+      var boxes = [];
+      opts.avoid().forEach(function (el) {
+        var rg = document.createRange(); rg.selectNodeContents(el);
+        [].forEach.call(rg.getClientRects(), function (r) { if (r.width && r.height) boxes.push([r.left - cr.left, r.top - cr.top, r.right - cr.left, r.bottom - cr.top]); });
+      });
+      var clear = pr * 1.25 + 40, best = null, bestD = Infinity, x0 = w * opts.cx, y0 = h * opts.cy;
+      for (var gy = 0; gy <= 24; gy++) for (var gx = 0; gx <= 24; gx++) {
+        var x = clear + (w - 2 * clear) * gx / 24, y = clear + (h - 2 * clear) * gy / 24, ok = true;
+        for (var i = 0; i < boxes.length && ok; i++) {
+          var b = boxes[i], dx = Math.max(b[0] - x, 0, x - b[2]), dy = Math.max(b[1] - y, 0, y - b[3]);
+          if (dx * dx + dy * dy < clear * clear) ok = false;
+        }
+        var d = (x - x0) * (x - x0) + (y - y0) * (y - y0);
+        if (ok && d < bestD) { bestD = d; best = [x, y]; }
+      }
+      spotKey = key; spotCache = best; return best;
+    }
     function loop() { if (visible && !reduce) { t += .016; draw(); } requestAnimationFrame(loop); }
     new ResizeObserver(size).observe(canvas);
     new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }).observe(canvas);
@@ -1264,7 +1288,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
       canvas.parentElement.addEventListener('pointerleave', function () { tx = 0; ty = 0; });
     }
     size(); if (!reduce) requestAnimationFrame(loop);
-    return { refresh: function () { colors = readColors(); draw(); } };
+    return { refresh: function () { colors = readColors(); spotKey = ''; draw(); } };
   }
   function refreshArt() { arts.forEach(function (a) { a.refresh(); }); }
 
@@ -1344,7 +1368,7 @@ body.idle { --amp: 1; transition: --amp 1.6s var(--ease), background-color .5s v
   var wide = window.innerWidth > 900;
   arts.push(makeArt(document.getElementById('heroArt'), { pearl: true, track: true, clearOf: function () { return markTop0; }, cx: wide ? .68 : .6, cy: wide ? .44 : .62, scale: wide ? .46 : .5, rings: 30 }));
   arts.push(makeBg(document.getElementById('bgArt')));
-  arts.push(makeArt(document.getElementById('xArt'), { pearl: true, track: true, cx: .72, cy: .42, scale: .5, rings: 22 }));
+  arts.push(makeArt(document.getElementById('xArt'), { pearl: true, track: true, avoid: function () { return [].slice.call(document.querySelectorAll('#xpanel .tag, #xpanel h2, #xpanel p')); }, cx: .72, cy: .42, scale: .5, rings: 22 }));
   var saved = store('oyster-palette');
   applyPalette(PALETTES[saved] ? saved : 'nacre');
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
