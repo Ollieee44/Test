@@ -57,7 +57,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <header>
     <span class="eyebrow">Oyster Therapeutics &middot; Landing page &middot; Step 1: look</span>
     <h1>SELFTAC in 3D</h1>
-    <p>The real shapes from PDB 5T35, smoothed into cartoon versions: BRD4 (the target) and VHL with Elongin B and C (the E3 ligase) as soft cartoon surfaces, and the degrader as chemical matter: every atom and bond of MZ1 from the crystal, with the linker bonded into both heads. Pick a look and a palette, drag to turn the model, and switch between the states the animation moves through.</p>
+    <p>The real shapes from PDB 5T35, smoothed into cartoon versions: BRD4 (the target) and VHL with Elongin B and C (the E3 ligase) as soft cartoon surfaces, and the degrader as two soft outlined halves joined by a string of pearls, the linker running into both heads. Pick a look and a palette, drag to turn the model, and switch between the states the animation moves through.</p>
   </header>
 
   <div class="bench">
@@ -80,14 +80,6 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         <div class="seg row" id="pals"><button type="button" data-pal="nacre" aria-pressed="true">Nacre</button><button type="button" data-pal="tidepool" aria-pressed="false">Tidepool</button></div>
       </div>
       <div class="grp">
-        <h3>Degrader</h3>
-        <div class="seg" id="mols">
-          <button type="button" data-mol="ball" aria-pressed="true">Ball and stick<span>Every atom and bond of MZ1, with double bonds drawn. Reads as chemistry at a glance.</span></button>
-          <button type="button" data-mol="space" aria-pressed="false">Space-filling<span>Overlapping atom spheres. Chunkier, still clearly a small molecule.</span></button>
-          <button type="button" data-mol="stick" aria-pressed="false">Sticks<span>Bonds only, like a skeletal formula in 3D. The lightest.</span></button>
-        </div>
-      </div>
-      <div class="grp">
         <h3>State</h3>
         <div class="seg" id="states">
           <button type="button" data-state="degrader" aria-pressed="false">Degrader<span>The molecule on its own, joined.</span></button>
@@ -103,7 +95,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <h2 id="sbH">The 20 seconds</h2>
     <p class="lede">A new landing page, desktop first. The sequence plays as you scroll: one screen-filling scene, with short lines of copy fading in beside it. Times are at an easy scrolling pace.</p>
     <div class="beats" id="beats"></div>
-    <p class="note">The degrader shown is MZ1, the molecule in the 5T35 crystal structure, standing in for a SELFTAC compound. The proteins are smoothed molecular surfaces of the real chains, with atomic detail removed on purpose; the degrader keeps its atoms so it reads as a small molecule, not another protein.</p>
+    <p class="note">The degrader shown is MZ1, the molecule in the 5T35 crystal structure, standing in for a SELFTAC compound. The proteins are smoothed molecular surfaces of the real chains, with atomic detail removed on purpose; the degrader is generic too: each half is a smooth outline traced along its bonds, glossy rather than contoured so it never reads as another protein.</p>
   </section>
 </div>
 
@@ -135,10 +127,10 @@ const DATA = JSON.parse(document.getElementById('meshes').textContent);
 const PAL = {
   nacre: { bg: 'radial-gradient(120% 120% at 70% 20%, #F7F1EF 0%, #EADDDD 55%, #DCCFDD 100%)', ink: '#2B2230', label: 'Nacre',
     brd4: '#E7C9D6', vhl: '#D6CBE6', elob: '#E8DEDB', eloc: '#DDD2D4', warhead: '#B4678B', e3lig: '#8A73B2', linker: '#8C5572', brk: '#2B2230', ring: '#8C5572',
-    linkC: '#F4EAEC', elN: '#6F78B4', elO: '#D9776C', elS: '#D8A941', elCl: '#7FAA8B' },
+    pearl3d: '#F6EEF1' },
   tidepool: { bg: 'radial-gradient(120% 120% at 70% 20%, #1B6763 0%, #0F4C4A 55%, #0A3836 100%)', ink: '#06302E', label: 'Tidepool',
     brd4: '#F5D89A', vhl: '#9FD6C6', elob: '#3E7D78', eloc: '#346F6B', warhead: '#F2B84B', e3lig: '#5FC2A6', linker: '#EAF3EF', brk: '#F2B84B', ring: '#0B3B39',
-    linkC: '#EAF3EF', elN: '#93B4F0', elO: '#F08A73', elS: '#F2D16B', elCl: '#B4E3BA' },
+    pearl3d: '#EAF3EF' },
 };
 const LOOK_LABEL = { clay: 'Clay and ink', contour: 'Nacre contours', pearl: 'Pearl' };
 const STATE_LABEL = { degrader: 'Degrader', split: 'Split', complex: 'Ternary complex' };
@@ -187,7 +179,7 @@ for (const k in parts) {
 }
 /*MOLECULE*/
 // the degrader lives in the crystal frame inside the turned world group
-const mol = makeMolecule(THREE, DATA.mol, new THREE.Quaternion()); world.add(mol.group);
+const mol = makeMolecule(THREE, DATA, new THREE.Quaternion(), geom, new THREE.Vector3(0, -1, .6).applyQuaternion(world.quaternion.clone().invert())); world.add(mol.group);
 const noTurn = new THREE.Quaternion();
 const proteins = ['brd4', 'vhl', 'elob', 'eloc'].map(k => meshes[k]);
 
@@ -217,7 +209,7 @@ const outlineMat = new THREE.ShaderMaterial({
   }`,
 });
 const outlines = [];
-world.traverse(o => { if (o.isMesh && !o.isInstancedMesh && o.userData.outline) {
+world.traverse(o => { if (o.isMesh && !o.userData.mol && o.userData.outline) {
   const om = new THREE.Mesh(o.geometry, outlineMat.clone()); om.userData.of = o; om.renderOrder = -1; o.add(om); outlines.push(om); } });
 
 function matFor(key, P) {
@@ -232,7 +224,7 @@ function applyLook() {
   stage.style.background = P.bg; stage.style.color = pal === 'nacre' ? '#2B2230' : '#EAF3EF';
   scene.environment = look === 'pearl' ? envTex : null;
   world.traverse(o => {
-    if (!o.isMesh || o.isInstancedMesh || o.userData.of) return;
+    if (!o.isMesh || o.userData.mol || o.userData.of) return;
     if (o.material) o.material.dispose();
     o.material = matFor(o.userData.key, P);
     if (look === 'contour' && o.material.uniforms) {
@@ -255,7 +247,7 @@ const fill = new THREE.DirectionalLight('#ffffff', .5); fill.position.set(-80, -
 // per state: separation of the two halves along the axis, protein visibility, camera distance
 // sep: distance between the two halves along the axis (the complex is opened slightly so the degrader
 // shows between target and ligase); joined: linker continuous (1) or broken at the reversible bond (0)
-const STATES = { degrader: { sep: 0, prot: 0, dist: 78, joined: 1 }, split: { sep: 40, prot: 1, dist: 300, joined: 0 }, complex: { sep: 24, prot: 1, dist: 245, joined: 1 } };
+const STATES = { degrader: { sep: 14, prot: 0, dist: 92, joined: 1 }, split: { sep: 40, prot: 1, dist: 300, joined: 0 }, complex: { sep: 24, prot: 1, dist: 245, joined: 1 } };
 const cur = Object.assign({}, STATES.complex), tgt = Object.assign({}, cur);
 function setState(s, jump) { state = s; Object.assign(tgt, STATES[s]); if (jump) Object.assign(cur, STATES[s]); document.getElementById('capL').textContent = STATE_LABEL[s]; }
 const degCentre = mol.centre.clone();
@@ -283,7 +275,6 @@ function wire(id, attr, fn) {
 wire('looks', 'look', v => { look = v; applyLook(); });
 wire('pals', 'pal', v => { pal = v; applyLook(); });
 wire('states', 'state', v => setState(v));
-wire('mols', 'mol', v => mol.setStyle(v));
 
 function resize() { const r = stage.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); }
 new ResizeObserver(resize).observe(stage);
@@ -291,5 +282,5 @@ camera.position.set(0, 30, 235); setState('complex'); applyLook(); resize();
 document.getElementById('loading').remove();
 let last = performance.now();
 renderer.setAnimationLoop(t => { const dt = Math.min(.05, (t - last) / 1000); last = t; frameState(dt); controls.update(); renderer.render(scene, camera); });
-window.__frames = { setLook: v => { look = v; applyLook(); }, setPal: v => { pal = v; applyLook(); }, setMol: v => mol.setStyle(v), setState: (s, j) => { setState(s, j); jumpNext = !!j; }, controls, camera };
+window.__frames = { setLook: v => { look = v; applyLook(); }, setPal: v => { pal = v; applyLook(); }, setState: (s, j) => { setState(s, j); jumpNext = !!j; }, controls, camera };
 </script>

@@ -87,10 +87,10 @@ const root = document.documentElement, stage = document.getElementById('stage'),
 // ---------- palettes ----------
 const PAL = {
   nacre: { ring: '#8C5572', ink: '#2B2230', brd4: '#E7C9D6', vhl: '#D6CBE6', elob: '#E8DEDB', eloc: '#DDD2D4', warhead: '#B4678B', e3lig: '#8A73B2',
-    linker: '#8C5572', brk: '#2B2230', ub: '#C99BB0', linkC: '#F4EAEC', elN: '#6F78B4', elO: '#D9776C', elS: '#D8A941', elCl: '#7FAA8B', e2: '#CDBFDF', prot: '#B9A9B6', wall: '#EADADF', flash: '#8C5572',
+    linker: '#8C5572', brk: '#2B2230', ub: '#C99BB0', pearl3d: '#F6EEF1', e2: '#CDBFDF', prot: '#B9A9B6', wall: '#EADADF', flash: '#8C5572',
     sky: [['#F6EEEC', '#E3D3D8'], ['#F4E7E6', '#E6CBD0'], ['#EFE6EE', '#D9CCE2']] },
   tidepool: { ring: '#06302E', ink: '#06302E', brd4: '#F5D89A', vhl: '#9FD6C6', elob: '#3E7D78', eloc: '#346F6B', warhead: '#F2B84B', e3lig: '#5FC2A6',
-    linker: '#EAF3EF', brk: '#F2B84B', ub: '#F7C873', linkC: '#EAF3EF', elN: '#93B4F0', elO: '#F08A73', elS: '#F2D16B', elCl: '#B4E3BA', e2: '#8CC9B8', prot: '#4F8C86', wall: '#2E6E69', flash: '#F2B84B',
+    linker: '#EAF3EF', brk: '#F2B84B', ub: '#F7C873', pearl3d: '#EAF3EF', e2: '#8CC9B8', prot: '#4F8C86', wall: '#2E6E69', flash: '#F2B84B',
     sky: [['#1B6763', '#0F4C4A'], ['#1D615D', '#0E4543'], ['#155A57', '#0A3836']] },
 };
 let pal = 'nacre';
@@ -170,7 +170,7 @@ for (let i = -1; i <= 1; i++) { const mat = cmat('wall', 2.4); mat.transparent =
 wall.position.y = -52;
 
 /*MOLECULE*/
-const mol = makeMolecule(THREE, DATA.mol, Q); scene.add(mol.group);
+const mol = makeMolecule(THREE, DATA, Q, geom, new THREE.Vector3(0, -1, .6)); scene.add(mol.group);
 const flash = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.1, 48), new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide })); scene.add(flash);
 
 // ---------- colours ----------
@@ -202,6 +202,7 @@ const bump = (p, a, b) => { const t = clamp((p - a) / (b - a), 0, 1); return Mat
 // its left and VHL to its right. Y is the depth of the scene: the halves sink through the barrier.
 const Yn = -112;                      // neuron level
 const GAP = 12;                       // each side is pulled out this far so the degrader shows in the complex
+const SPREAD = 7;                     // the degrader alone is shown slightly opened so its linker reads
 const BEATS = [[0, .15], [.15, .3], [.3, .5], [.5, .7], [.7, .85], [.85, 1]];
 // target on BRD4 for the ubiquitin chain: its upper surface, on the side facing VHL
 const ubSpot = (() => { const g = P.brd4.children[0].geometry, pos = g.attributes.position, v = new THREE.Vector3(); let best = null, bs = -1e9;
@@ -213,7 +214,7 @@ const degC = S('warhead').add(S('e3lig')).multiplyScalar(.5);
 
 function frame(p) {
   // the two halves: joined, split, sinking through the wall (pausing at each membrane), rejoined in the neuron
-  const hx = kf(p, [[.15, 0], [.27, 22], [.5, 22], [.58, 22], [.66, GAP], [1, GAP]]);
+  const hx = kf(p, [[.15, SPREAD], [.27, 22], [.5, 22], [.58, 22], [.66, GAP], [1, GAP]]);
   const hy = kf(p, [[.3, 0], [.36, -42], [.39, -43], [.43, -60], [.46, -62], [.52, Yn], [1, Yn]]);
   const joined = kf(p, [[.16, 1], [.2, 0], [.6, 0], [.665, 1]]);
   const oW = new THREE.Vector3(-hx, hy, 0), oE = new THREE.Vector3(hx, hy, 0);
@@ -256,7 +257,7 @@ function frame(p) {
   // camera: close on the degrader, back for the split, down with the halves, wide on the complex, across to the proteasome, out for the end
   const D0 = degC.toArray(), D1 = [degC.x, Yn + 10, degC.z];
   const T = kf(p, [[0, D0], [.3, D0], [.5, D1], [.7, [0, Yn, 0]], [.8, [-40, Yn - 18, 0]], [.88, [-40, Yn - 18, 0]], [.95, [0, Yn, 0]]]);
-  const dist = kf(p, [[0, 78], [.15, 92], [.28, 140], [.36, 190], [.5, 175], [.68, 255], [.8, 320], [.9, 300], [1, 430]]);
+  const dist = kf(p, [[0, 100], [.15, 112], [.28, 160], [.36, 190], [.5, 175], [.68, 255], [.8, 320], [.9, 300], [1, 430]]);
   const az = kf(p, [[0, -.35], [.15, .25], [.3, .1], [.5, -.2], [.7, .12], [.85, -.1], [1, .2]]) + (reduce ? 0 : .04 * Math.sin(p * 9));
   const el = kf(p, [[0, .12], [.28, .2], [.36, .62], [.46, .48], [.55, .14], [1, .1]]);
   const tgt = V(T);

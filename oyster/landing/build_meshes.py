@@ -2,9 +2,9 @@
 
 Each protein (BRD4 BD2, VHL, Elongin B, Elongin C) becomes a smooth, blobby molecular surface: atoms
 are splatted onto a grid, blurred with a wide Gaussian and contoured, so the real shape survives but
-the atomic detail does not. MZ1, the degrader, is kept as chemical matter: its
-crystal atoms and bonds, tagged by half (JQ1 warhead, PEG linker, VH032 E3 ligand) and with the
-reversible break bond marked, for a ball-and-stick model. Everything is centred on the complex and written to data/meshes.json with positions
+the atomic detail does not. MZ1, the degrader, is drawn generically: each half (JQ1
+warhead, VH032 E3 ligand) is a soft outline traced along its bonds, and the linker is the curve
+between their attachment atoms, which the page dresses as beads. Everything is centred on the complex and written to data/meshes.json with positions
 quantised to int16 and base64 encoded.
 """
 import base64, json, os
@@ -90,28 +90,37 @@ for fr in Chem.GetMolFrags(sub.GetMol()):
 path = [i for i in m[1:-1] if tmpl.GetAtomWithIdx(i).GetSymbol() != 'O' or tmpl.GetAtomWithIdx(i).GetDegree() == 2]
 mid = len(path) // 2
 
-# the degrader as chemical matter: every heavy atom from the crystal, with kekulised bond orders, so the
-# page can draw it as a ball-and-stick model whose linker is bonded straight into both heads.
-# side: which half an atom travels with once the molecule splits (0 warhead, 1 E3 ligand);
-# t: where a linker atom sits along the chain (0 at the warhead, 1 at the E3 ligand), used to stretch
-# the linker evenly when the joined molecule is pulled open.
-kek = Chem.Mol(tmpl); Chem.Kekulize(kek, clearAromaticFlags=True)
-side = [0 if part[i] == 'warhead' else 1 for i in range(tmpl.GetNumAtoms())]
-t = [float(s) for s in side]
-for k, i in enumerate(path):
-    side[i] = 0 if k < mid else 1; t[i] = (k + 1) / (len(path) + 1)
-for i in linker - set(path):                     # carbonyl oxygens ride with their carbon
-    j = [n.GetIdx() for n in tmpl.GetAtomWithIdx(i).GetNeighbors()][0]; side[i] = side[j]; t[i] = t[j]
-rings = [list(r) for r in tmpl.GetRingInfo().AtomRings()]
-bonds = []
-for b in kek.GetBonds():
-    a, c = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
-    rs = [k for k, r in enumerate(rings) if a in r and c in r]
-    bonds.append([a, c, int(b.GetBondTypeAsDouble()), min(rs, key=lambda k: len(rings[k])) if rs else -1])
-out['mol'] = {'xyz': (X - origin).round(3).tolist(), 'el': [a.GetSymbol() for a in tmpl.GetAtoms()],
-              'part': [part[i] for i in range(tmpl.GetNumAtoms())], 'side': side, 't': [round(x, 4) for x in t],
-              'bonds': bonds, 'rings': rings, 'brk': [path[mid - 1], path[mid]]}
-print('mol', len(X), 'atoms', len(bonds), 'bonds', 'break', out['mol']['brk'])
+# the degrader, drawn generically: each half is a soft outline traced along its bonds (a smooth tube
+# skeleton, so it reads as a small molecule without showing atoms), and the linker is a curve from the
+# warhead's attachment atom to the E3 ligand's, which the page dresses as a string of beads.
+def skeleton(idx, s=.72, r=1.0, spacing=.25):
+    ids = set(idx); P = X[idx]
+    segs = [(X[b.GetBeginAtomIdx()], X[b.GetEndAtomIdx()]) for b in tmpl.GetBonds()
+            if b.GetBeginAtomIdx() in ids and b.GetEndAtomIdx() in ids]
+    pad = r + 3 * s; lo = P.min(0) - pad; hi = P.max(0) + pad
+    axes = [np.arange(lo[k], hi[k] + spacing, spacing) for k in range(3)]
+    G = np.stack(np.meshgrid(*axes, indexing='ij'), -1)
+    f = np.zeros(G.shape[:3])
+    for A, B in segs:                            # Gaussian of the distance to each bond: a smooth union
+        d = B - A; t = np.clip(((G - A) @ d) / (d @ d), 0, 1)
+        q = A + t[..., None] * d; f += np.exp(-((G - q) ** 2).sum(-1) / (2 * s * s))
+    v, fc, _, _ = measure.marching_cubes(f, np.exp(-r * r / (2 * s * s)))
+    v = v * spacing + lo
+    nb = [set() for _ in range(len(v))]
+    for a_, b_, c_ in fc:
+        nb[a_] |= {b_, c_}; nb[b_] |= {a_, c_}; nb[c_] |= {a_, b_}
+    nb = [np.fromiter(x, int) for x in nb]
+    for it in range(16):
+        lam = .5 if it % 2 == 0 else -.53
+        v = v + lam * (np.array([v[n].mean(0) for n in nb]) - v)
+    return v, fc
+
+for name in ('warhead', 'e3lig'):
+    v, f = skeleton([i for i in part if part[i] == name])
+    out['parts'][name] = pack(v, f, origin)
+    print(name, '->', len(v), 'verts')
+curve = [m[0]] + path + [m[-1]]
+out['linker'] = {'curve': (X[curve] - origin).round(3).tolist()}
 out['centres'] = {k: (prot[k].mean(0) - origin).round(2).tolist() for k in prot}
 out['centres'].update({k: (X[[i for i in part if part[i] == k]].mean(0) - origin).round(2).tolist() for k in ('warhead', 'e3lig')})
 # ubiquitin (PDB 1UBQ), centred on itself, for the tags the E2 hands to the target
