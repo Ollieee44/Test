@@ -169,16 +169,22 @@ for (let i = 0; i < 4; i++) { const mat = cmat('prot', 1.2); mats.push(mat); con
   r.rotation.y = Math.PI / 2; r.position.x = -15 + i * 10; addOutline(r, .4); prot.add(r); }
 for (const s of [-1, 1]) { const mat = cmat('prot', 1.2); mats.push(mat); const c = new THREE.Mesh(new THREE.IcosahedronGeometry(11, 3), mat);
   c.scale.set(.55, 1.05, 1.05); c.position.x = s * 27; addOutline(c, .4); prot.add(c); }
+// the see-through membranes must not hide each other through the depth buffer, even when faded almost to
+// nothing (a near-invisible barrier outline was clipping the neuron), and they draw in a fixed order from the
+// bottom up: inner neuron shell, outer neuron shell, then the barrier on top
+function seeThrough(outline, mesh, order) {
+  outline.material.transparent = true; outline.material.depthWrite = false; outline.renderOrder = order; mesh.renderOrder = order + 1;
+}
 // the blood-brain barrier: three endothelial cells side by side, seen from just above
 const wall = new THREE.Group(); scene.add(wall);
 for (let i = -1; i <= 1; i++) { const mat = cmat('wall', 2.4); mat.transparent = true; mat.depthWrite = false; mats.push(mat);
-  const b = new THREE.Mesh(new RoundedBoxGeometry(118, 16, 96, 6, 7), mat); b.position.x = i * 120; addOutline(b, .5).material.transparent = true; wall.add(b); }
+  const b = new THREE.Mesh(new RoundedBoxGeometry(118, 16, 96, 6, 7), mat); b.position.x = i * 120; seeThrough(addOutline(b, .5), b, 5); wall.add(b); }
 wall.position.y = -52;
 // the neuron: a large cell body below the barrier; its membrane is drawn as a bilayer of two faint shells
 const CELL_TOP = -82, CELL_R = 140;
 const cell = new THREE.Group(); scene.add(cell); cell.position.set(0, CELL_TOP - CELL_R, 0);
 for (const [rad, a] of [[CELL_R, 1], [CELL_R - 6, .6]]) { const mat = cmat('cell', 2.6, new THREE.Vector3(0, CELL_R, 0)); mat.transparent = true; mat.depthWrite = false; mat.userData.a = a; mats.push(mat);
-  const m = new THREE.Mesh(new THREE.SphereGeometry(rad, 96, 64, 0, Math.PI * 2, 0, 1.25), mat); addOutline(m, .5).material.transparent = true; cell.add(m); }
+  const m = new THREE.Mesh(new THREE.SphereGeometry(rad, 96, 64, 0, Math.PI * 2, 0, 1.25), mat); seeThrough(addOutline(m, .5), m, rad < CELL_R ? 1 : 3); cell.add(m); }
 
 // ---------- the degrader: two soft outlined halves joined by a string of pearls ----------
 // Each half is a smooth outline traced along its bonds: it reads as a small molecule without showing
