@@ -7,6 +7,7 @@ def svg(name, cls, uid):
     s = s.replace('x-mInside', uid).replace('fill="#2B2230"', 'fill="currentColor"').replace('fill="#C99BB0"', 'style="fill:var(--pearl)"')
     return s.replace('<svg ', f'<svg class="{cls}" role="img" aria-label="Oyster Therapeutics" ', 1)
 html = open(D + 'landing_template.html').read()
+html = html.replace('/*MOLECULE*/', open(D + 'js/molecule.js').read())
 html = html.replace('/*MESHES*/', open(D + 'data/meshes.json').read())
 html = html.replace('<!--WORDMARK-->', svg('oyster-wordmark-nacre.svg', 'wm', 'wmMask'))
 html = html.replace('<!--LOGOTYPE-->', svg('oyster-logotype-nacre.svg', 'lt', 'ltMask'))

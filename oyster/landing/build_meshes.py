@@ -2,9 +2,9 @@
 
 Each protein (BRD4 BD2, VHL, Elongin B, Elongin C) becomes a smooth, blobby molecular surface: atoms
 are splatted onto a grid, blurred with a wide Gaussian and contoured, so the real shape survives but
-the atomic detail does not. MZ1, the degrader, is split the way the site draws it: two small blobby
-heads (the JQ1 warhead and the VH032 E3 ligand) joined by a chain of linker beads, with the break
-bond marked. Everything is centred on the complex and written to data/meshes.json with positions
+the atomic detail does not. MZ1, the degrader, is kept as chemical matter: its
+crystal atoms and bonds, tagged by half (JQ1 warhead, PEG linker, VH032 E3 ligand) and with the
+reversible break bond marked, for a ball-and-stick model. Everything is centred on the complex and written to data/meshes.json with positions
 quantised to int16 and base64 encoded.
 """
 import base64, json, os
@@ -90,14 +90,28 @@ for fr in Chem.GetMolFrags(sub.GetMol()):
 path = [i for i in m[1:-1] if tmpl.GetAtomWithIdx(i).GetSymbol() != 'O' or tmpl.GetAtomWithIdx(i).GetDegree() == 2]
 mid = len(path) // 2
 
-for name in ('warhead', 'e3lig'):
-    idx = [i for i in part if part[i] == name]
-    v, f = surface(X[idx], sigma=1.25, level=.2, spacing=.5, smooth=10)
-    out['parts'][name] = pack(v, f, origin)
-    print(name, len(idx), 'atoms ->', len(v), 'verts')
-out['linker'] = {'beads': (X[path] - origin).round(2).tolist(), 'oxygen': [tmpl.GetAtomWithIdx(i).GetSymbol() == 'O' for i in path],
-                 'break': [mid - 1, mid],
-                 'ends': {'warhead': (X[m[0]] - origin).round(2).tolist(), 'e3lig': (X[m[-1]] - origin).round(2).tolist()}}
+# the degrader as chemical matter: every heavy atom from the crystal, with kekulised bond orders, so the
+# page can draw it as a ball-and-stick model whose linker is bonded straight into both heads.
+# side: which half an atom travels with once the molecule splits (0 warhead, 1 E3 ligand);
+# t: where a linker atom sits along the chain (0 at the warhead, 1 at the E3 ligand), used to stretch
+# the linker evenly when the joined molecule is pulled open.
+kek = Chem.Mol(tmpl); Chem.Kekulize(kek, clearAromaticFlags=True)
+side = [0 if part[i] == 'warhead' else 1 for i in range(tmpl.GetNumAtoms())]
+t = [float(s) for s in side]
+for k, i in enumerate(path):
+    side[i] = 0 if k < mid else 1; t[i] = (k + 1) / (len(path) + 1)
+for i in linker - set(path):                     # carbonyl oxygens ride with their carbon
+    j = [n.GetIdx() for n in tmpl.GetAtomWithIdx(i).GetNeighbors()][0]; side[i] = side[j]; t[i] = t[j]
+rings = [list(r) for r in tmpl.GetRingInfo().AtomRings()]
+bonds = []
+for b in kek.GetBonds():
+    a, c = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
+    rs = [k for k, r in enumerate(rings) if a in r and c in r]
+    bonds.append([a, c, int(b.GetBondTypeAsDouble()), min(rs, key=lambda k: len(rings[k])) if rs else -1])
+out['mol'] = {'xyz': (X - origin).round(3).tolist(), 'el': [a.GetSymbol() for a in tmpl.GetAtoms()],
+              'part': [part[i] for i in range(tmpl.GetNumAtoms())], 'side': side, 't': [round(x, 4) for x in t],
+              'bonds': bonds, 'rings': rings, 'brk': [path[mid - 1], path[mid]]}
+print('mol', len(X), 'atoms', len(bonds), 'bonds', 'break', out['mol']['brk'])
 out['centres'] = {k: (prot[k].mean(0) - origin).round(2).tolist() for k in prot}
 out['centres'].update({k: (X[[i for i in part if part[i] == k]].mean(0) - origin).round(2).tolist() for k in ('warhead', 'e3lig')})
 # ubiquitin (PDB 1UBQ), centred on itself, for the tags the E2 hands to the target
