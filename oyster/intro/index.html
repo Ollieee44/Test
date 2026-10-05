@@ -969,8 +969,8 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   // timeline (ms): the closed oyster rushes out towards the viewer, pulls back as it opens on its pearl, then
   // recedes into the screen until it sits exactly in the logotype's 'o'; the ink disc closes round it, the word
   // writes in, and the logotype settles into the header
-  const T = { fade: [0, 250], fly: [0, 1000], open: [950, 1900], recede: [2000, 2750], merge: [2450, 2850],
-    letters: [2650, 3150], ther: [2950, 3350], glide: [3450, 4250], bg: [3650, 4250], site: 3850, end: 4300 };
+  const T = { fade: [0, 180], fly: [0, 700], open: [660, 1330], recede: [1400, 1920], merge: [1720, 1990],
+    letters: [1850, 2200], ther: [2060, 2340], glide: [2420, 2980], bg: [2560, 2980], site: 2700, end: 3010 };
   const k = (t, [a, b]) => clamp((t - a) / (b - a), 0, 1), eo = x => 1 - Math.pow(1 - x, 3);
   const lerp = (a, b, x) => a + (b - a) * x;
   const COL = ({ nacre: { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' }, tidepool: { out: '#6FA79D', inn: '#DDF0EA', ring: '#06302E' } })[pal] || { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' };
@@ -981,7 +981,7 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   // ---------- the oyster: two shallow, rounded valves, a cupped bowl and a flatter lid hinged at the back ----------
   // Each valve is a round, slightly wavy outline in the horizontal plane, domed into a shell with a dished
   // nacre inside; growth rings radiate from the hinge, as on a real shell.
-  const R0 = 40, ZS = .92, RIM = th => R0 * (1 + .035 * Math.sin(7 * th) + .02 * Math.sin(3 * th + 1));
+  const R0 = 40, ZS = 1, RIM = th => R0 * (1 + .018 * Math.sin(7 * th) + .008 * Math.sin(3 * th + 1));
   const HZ = -R0 * ZS;   // the hinge, at the back
   function valve(outD, inD) {   // outD, inD: heights of the outer and inner surfaces at the centre (negative = downwards)
     const NR = 40, NT = 120, pos = [], outer = [], inner = [];
@@ -1010,9 +1010,9 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
     o.material.uniforms.color.value.set(INK); return m;
   }
   const oyster = new THREE.Group(); sc.add(oyster);
-  const lower = shellMesh(valve(-15, -12)); oyster.add(lower);
+  const lower = shellMesh(valve(-18, -14.5)); oyster.add(lower);
   const hinge = new THREE.Group(); hinge.position.set(0, 0, HZ); oyster.add(hinge);
-  const upper = shellMesh(valve(7, 4.5)); upper.position.set(0, 0, -HZ); hinge.add(upper);
+  const upper = shellMesh(valve(9, 6)); upper.position.set(0, 0, -HZ); hinge.add(upper);
   const pearlMat = new THREE.ShaderMaterial({ uniforms: { col: { value: new THREE.Color(PEARL) }, glint: { value: 0 } },
     vertexShader: `varying vec3 vN; varying vec3 vV; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vN = normalize(mat3(modelMatrix) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`,
     fragmentShader: `uniform vec3 col; uniform float glint; varying vec3 vN; varying vec3 vV;
@@ -1021,7 +1021,7 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
         gl_FragColor = vec4(col * dif + vec3(sp) + mix(col, vec3(1.0), .5) * rim * .22, 1.0);
         #include <colorspace_fragment>
       }` });
-  const PEARL_R = 7.5, PEARL_AT = new THREE.Vector3(0, -12 + PEARL_R + .6, 4);
+  const PEARL_R = 7.5, PEARL_AT = new THREE.Vector3(0, -14.5 + PEARL_R + .6, 4);
   const pearl = new THREE.Mesh(new THREE.SphereGeometry(PEARL_R, 48, 32), pearlMat); pearl.position.copy(PEARL_AT); oyster.add(pearl);
   addOutline(pearl, .5).material.uniforms.color.value.set(INK);
   const CLOSED = 0, OPEN = 68 * Math.PI / 180;   // the lid lifts towards the viewer, about the hinge at the back
