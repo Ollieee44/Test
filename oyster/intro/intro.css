@@ -1,0 +1,19 @@
+/* ---------- intro: the oyster opens, its pearl becomes the 'o', and the logotype settles into the header ---------- */
+html.intro { overflow: hidden; }
+.intro-ov { position: fixed; inset: 0; z-index: 50; pointer-events: none; }
+.intro-ov .ibg { position: absolute; inset: 0; background: radial-gradient(130% 120% at 68% 28%, var(--intro-a, var(--paper)) 0%, var(--intro-b, var(--paper)) 100%); }
+.intro-ov canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; }
+.intro-ov .ipearl { position: absolute; left: 0; top: 0; width: 100px; height: 100px; margin: -50px 0 0 -50px; border-radius: 50%; opacity: 0; will-change: transform, opacity;
+  background: radial-gradient(circle at 36% 32%, rgba(255, 255, 255, .95) 0 5%, transparent 24%),
+    radial-gradient(circle at 42% 38%, color-mix(in srgb, var(--pearl) 60%, #fff), var(--pearl) 58%, color-mix(in srgb, var(--pearl) 78%, #000) 100%); }
+.intro-ov .ilogo { position: absolute; left: 0; top: 0; height: auto; color: var(--ink); transform-origin: 0 0; overflow: visible; will-change: transform; }
+.iskip { position: fixed; z-index: 51; right: clamp(16px, 3vw, 40px); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); font: 500 13px/1 var(--sans); color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 70%, transparent); border: 1px solid var(--line); border-radius: 999px; padding: 11px 16px; cursor: pointer; transition: opacity .4s, background-color .3s; }
+.iskip:hover { background: var(--clasp); color: #2B2230; border-color: var(--clasp); }
+.iskip:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* the site waits underneath: header, story copy, rail and controls fade in as the logotype lands */
+.head { transition: opacity .6s, background-color .4s, box-shadow .4s; }
+html.intro .head { opacity: 0; pointer-events: none; }
+html.intro .stage .copy, html.intro .stage .rail, html.intro .stage .hint, html.intro .stage .skip { opacity: 0 !important; }
+html.intro-end .stage .copy, html.intro-end .stage .rail, html.intro-end .stage .hint, html.intro-end .stage .skip { transition: opacity .8s; }
+@media (prefers-reduced-motion: reduce) { .intro-ov, .iskip { display: none; } html.intro { overflow: auto; } html.intro .head { opacity: 1; pointer-events: auto; } }
