@@ -6,6 +6,7 @@
 // centre). Points on the linker blend between the two halves: when the molecule is joined they spread
 // evenly along it, so it stretches across any gap; when it is split, each side rides with its own half.
 function makeMolecule(THREE, D, Q, geom, bow) {
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const NB = 6, BRK = NB / 2;                    // six pearls; the break sits between pearls 3 and 4
   // the linker is laid out generically rather than folded as in the crystal: a smooth arc from one
   // attachment atom to the other, about as long as the real chain, bowed away from the two halves so the
@@ -118,7 +119,7 @@ function makeMolecule(THREE, D, Q, geom, bow) {
     const a = P[BRK - 1], b = P[BRK], d = b.clone().sub(a), len = d.length(), k = Math.max(0, Math.min(1, (joined - .5) / .5));
     bond.visible = k > .01; bond.position.copy(a).add(b).multiplyScalar(.5);
     bond.quaternion.setFromUnitVectors(up, d.divideScalar(len || 1)); bond.scale.set(R.bond * k, len, R.bond * k);
-    const breath = 1 + .08 * Math.sin(performance.now() / 600);
+    const breath = still ? 1 : 1 + .08 * Math.sin(performance.now() / 600);
     glow.position.copy(bond.position); glow.scale.setScalar(13 * breath); glow.material.opacity = .72 * k; glow.visible = k > .01;
     return bond.position.clone();
   }

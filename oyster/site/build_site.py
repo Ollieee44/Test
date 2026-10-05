@@ -36,6 +36,9 @@ h = h.replace('<!--WORDMARK-->', svg('oyster-wordmark-nacre.svg', 'wm', 'wmMask'
 h = h.replace('<!--LOGOTYPE-->', svg('oyster-logotype-nacre.svg', 'lt', 'ltMask'))
 h = h.replace('<!--LOGOTYPE2-->', svg('oyster-logotype-nacre.svg', 'lt2', 'lt2Mask'))
 h = h.replace('window.__story = {', open(D + 'site.js').read() + open(D + 'wallpaper.js').read() + '\nwindow.__story = {', 1)
+# brand names are not for machine translation
+h = h.replace('SELFTAC&reg;', '<span translate="no">SELFTAC&reg;</span>')
+h = h.replace('<svg class="wm" role="img"', '<svg class="wm" translate="no" role="img"').replace('<svg class="lt" role="img"', '<svg class="lt" translate="no" role="img"').replace('<svg class="lt2" role="img"', '<svg class="lt2" translate="no" role="img"')
 h = h.replace('.nogl {', '.sr-only { position: absolute; left: -9999px; } .sr-only:focus { left: 16px; top: 16px; z-index: 20; background: var(--paper); padding: 10px 14px; border-radius: 8px; }\n.nogl {', 1)
 open(D + 'index.html', 'w').write(h)
 print('index.html', len(h) // 1024, 'KB')

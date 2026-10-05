@@ -1,6 +1,8 @@
 <title>Oyster SELFTAC Story</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<meta name="theme-color" content="#EFE6E1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
 <style>
 /* Layout: one pinned full-screen 3D stage that scroll scrubs through six beats, a short line of copy
@@ -26,11 +28,12 @@ body { color: var(--ink); font: 400 16px/1.55 var(--sans); -webkit-font-smoothin
 .pal { display: flex; gap: 4px; border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
 .pal button { font: 500 12px/1 var(--sans); border: 0; background: transparent; color: var(--ink); padding: 8px 12px; border-radius: 999px; cursor: pointer; }
 .pal button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.pal button:hover:not([aria-pressed="true"]) { background: color-mix(in srgb, var(--ink) 10%, transparent); }
 .pal button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .copy { position: absolute; left: clamp(16px, 4vw, 64px); top: 50%; transform: translateY(-50%); width: min(30vw, 430px); z-index: 2; }
 .beat { position: absolute; left: 0; top: 0; transform: translateY(-50%); opacity: 0; transition: none; }
 .beat .k { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
-.beat h2 { font: 500 clamp(30px, 3.2vw, 50px)/1.04 var(--serif); letter-spacing: -.015em; margin: 14px 0 0; text-wrap: balance; }
+.beat h1, .beat h2 { font: 500 clamp(30px, 3.2vw, 50px)/1.04 var(--serif); letter-spacing: -.015em; margin: 14px 0 0; text-wrap: balance; }
 .beat p { margin: 16px 0 0; color: var(--muted); font-size: clamp(15px, 1.15vw, 18px); max-width: 34ch; }
 .rail { position: absolute; left: clamp(16px, 3vw, 40px); right: clamp(16px, 3vw, 40px); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: 3fr 3fr 4fr 4fr 3fr 3fr; gap: 6px; z-index: 3; }
 .rail div { display: grid; gap: 8px; }
@@ -42,6 +45,8 @@ body { color: var(--ink); font: 400 16px/1.55 var(--sans); -webkit-font-smoothin
 .end .lt { width: min(54vw, 760px); height: auto; color: var(--ink); }
 .end p { margin: 0; font: 400 clamp(18px, 1.5vw, 22px)/1.4 var(--serif); color: var(--muted); }
 .end a { pointer-events: auto; font: 500 14px/1 var(--sans); color: var(--paper); background: var(--ink); padding: 14px 20px; border-radius: 999px; text-decoration: none; }
+.end a:hover { background: var(--accent); }
+.end a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .after { min-height: 60vh; display: grid; place-items: center; padding: 80px clamp(16px, 4vw, 64px); }
 .after p { max-width: 60ch; color: var(--muted); margin: 0; }
 .nogl { position: absolute; inset: 0; display: grid; place-items: center; padding: 40px; text-align: center; font: 400 15px/1.5 var(--sans); color: var(--muted); }
@@ -56,7 +61,7 @@ body { color: var(--ink); font: 400 16px/1.55 var(--sans); -webkit-font-smoothin
         <div class="pal" role="group" aria-label="Palette"><button type="button" data-pal="nacre" aria-pressed="true">Nacre</button><button type="button" data-pal="tidepool" aria-pressed="false">Tidepool</button></div>
       </div>
       <div class="copy" id="copy">
-        <div class="beat"><span class="k">01 &middot; The size problem</span><h2>Protein degraders, made small enough to reach the brain.</h2><p>Degraders remove disease-causing proteins instead of blocking them. Most are too large to be taken by mouth or to enter the brain.</p></div>
+        <div class="beat"><span class="k">01 &middot; The size problem</span><h1>Protein degraders, made small enough to reach the brain.</h1><p>Degraders remove disease-causing proteins instead of blocking them. Most are too large to be taken by mouth or to enter the brain.</p></div>
         <div class="beat"><span class="k">02 &middot; Split</span><h2>One degrader, two small halves.</h2><p>A reversible linker lets a SELFTAC&reg; molecule travel as two small molecules.</p></div>
         <div class="beat"><span class="k">03 &middot; The barrier</span><h2>Through the cells, not between them.</h2><p>Tight junctions seal the brain&rsquo;s capillaries. Each half is small enough to pass through the endothelial cells themselves.</p></div>
         <div class="beat"><span class="k">04 &middot; Rebuilt</span><h2>Inside the neuron, the halves click back together.</h2><p>One end holds the target protein, the other an E3 ligase.</p></div>
@@ -291,14 +296,17 @@ function frame(p) {
 // ---------- scroll: a smoothed progress through the pinned story ----------
 const story = document.getElementById('story');
 function target() { const r = story.getBoundingClientRect(); return clamp(-r.top / (r.height - innerHeight), 0, 1); }
-let prog = target(), last = performance.now(), hold = false;
+let goalNow = target(), storyOn = true;
+function measure() { goalNow = target(); storyOn = story.getBoundingClientRect().bottom > 0; }
+addEventListener('scroll', measure, { passive: true }); addEventListener('resize', measure);
+let prog = goalNow, last = performance.now(), hold = false;
 function resize() { const w = stage.clientWidth, h = stage.clientHeight; if (renderer) { renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(w, h, false); } camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize(); applyPalette();
 function loop(t) {
   const dt = Math.min(.1, (t - last) / 1000); last = t;
-  const goal = hold ? prog : target(); prog += (goal - prog) * (reduce ? 1 : 1 - Math.exp(-dt / .12)); if (Math.abs(goal - prog) < 1e-5) prog = goal;
+  const goal = hold ? prog : goalNow; prog += (goal - prog) * (reduce ? 1 : 1 - Math.exp(-dt / .12)); if (Math.abs(goal - prog) < 1e-5) prog = goal;
   // skip the work while the story is scrolled out of view
-  if (story.getBoundingClientRect().bottom > 0) { frame(prog); if (renderer) renderer.render(scene, camera); }
+  if (storyOn) { frame(prog); if (renderer) renderer.render(scene, camera); }
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);

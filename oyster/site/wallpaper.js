@@ -57,19 +57,23 @@ function makeBg(canvas) {
       ctx.restore();
     });
   }
-  var lastY = scrollY, lastMove = performance.now();
+  // the story's position is read on scroll and resize, not every frame
+  var ended = false, lastMove = performance.now(), idleSince = 0;
+  function measureEnd() { ended = storyEl.getBoundingClientRect().bottom < innerHeight * .5; lastMove = performance.now(); }
+  window.addEventListener('scroll', measureEnd, { passive: true }); window.addEventListener('resize', measureEnd);
   function loop(now) {
-    if (scrollY !== lastY) { lastY = scrollY; lastMove = now; }
-    var idleNow = now - lastMove > 350 && !reduce;
-    wig += ((idleNow ? 1 : 0) - wig) * (idleNow ? .03 : .12); if (wig < .002) wig = 0;
+    // the complexes wiggle for a few seconds after the page comes to rest, then settle (no endless loop)
+    var still = now - lastMove > 350 && !reduce;
+    if (!still) idleSince = 0; else if (!idleSince) idleSince = now;
+    var idleNow = still && now - idleSince < 5000;
+    wig += ((idleNow ? 1 : 0) - wig) * (idleNow ? .03 : .05); if (wig < .002) wig = 0;
     if (wig > 0) t += .016;
     // hidden through the 3D story; fades in once it has scrolled away
-    var ended = storyEl.getBoundingClientRect().bottom < h * .5;
     fade += ((ended ? 1 : 0) - fade) * .08; if (Math.abs(fade - (ended ? 1 : 0)) < .002) fade = ended ? 1 : 0;
     draw(); requestAnimationFrame(loop);
   }
   window.addEventListener('resize', size);
-  fade = storyEl.getBoundingClientRect().bottom < innerHeight * .5 ? 1 : 0; size(); requestAnimationFrame(loop);
+  measureEnd(); fade = ended ? 1 : 0; size(); requestAnimationFrame(loop);
   return { refresh: function () { col = readCol(); lastSig = ''; draw(); } };
 }
 

@@ -78,6 +78,11 @@ figures. One accent colour, used for one meaning.
 - Scroll-driven stories: keep them short, show the first line of copy from the start, give a visible
   "Skip to Oyster" control, and design a portrait cut for phones (camera pulled back, copy on a soft card).
 - Honour `prefers-reduced-motion` for every loop, and animate transform and opacity where possible.
+- Accessibility baseline (the site passed a Web Interface Guidelines audit; keep it that way): one h1
+  (the story's first line), each section's statement is its h2; visible focus and a hover state on every
+  link and button; status messages in an `aria-live` region; no endless autoplaying loops (motion follows
+  the scroll or settles after a few seconds); layout read on scroll or resize, never every frame;
+  brand names marked `translate="no"`; anchors clear the fixed header.
 
 ## Decks
 
