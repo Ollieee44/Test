@@ -2,9 +2,9 @@
 
 Each protein (BRD4 BD2, VHL, Elongin B, Elongin C) becomes a smooth, blobby molecular surface: atoms
 are splatted onto a grid, blurred with a wide Gaussian and contoured, so the real shape survives but
-the atomic detail does not. MZ1, the degrader, is drawn generically: each half (JQ1
-warhead, VH032 E3 ligand) is a soft outline traced along its bonds, and the linker is the curve
-between their attachment atoms, which the page dresses as beads. Everything is centred on the complex and written to data/meshes.json with positions
+the atomic detail does not. The degrader is deliberately generic: MZ1's crystal pose
+sets where its two halves and linker sit, but each half is drawn as an invented ring system traced
+along its bonds, so it reads as a PROTAC without being identifiable. Everything is centred on the complex and written to data/meshes.json with positions
 quantised to int16 and base64 encoded.
 """
 import base64, json, os
@@ -90,37 +90,73 @@ for fr in Chem.GetMolFrags(sub.GetMol()):
 path = [i for i in m[1:-1] if tmpl.GetAtomWithIdx(i).GetSymbol() != 'O' or tmpl.GetAtomWithIdx(i).GetDegree() == 2]
 mid = len(path) // 2
 
-# the degrader, drawn generically: each half is an outline traced along its bonds (a smooth tube
-# skeleton, so it reads as a small molecule without showing atoms), and the linker is a curve from the
-# warhead's attachment atom to the E3 ligand's, which the page dresses as a string of beads.
-def skeleton(idx, s=.34, r=.5, spacing=.14):
-    ids = set(idx); P = X[idx]
-    segs = [(X[b.GetBeginAtomIdx()], X[b.GetEndAtomIdx()]) for b in tmpl.GetBonds()
-            if b.GetBeginAtomIdx() in ids and b.GetEndAtomIdx() in ids]
-    pad = r + 3 * s; lo = P.min(0) - pad; hi = P.max(0) + pad
-    axes = [np.arange(lo[k], hi[k] + spacing, spacing) for k in range(3)]
+# the degrader, drawn generically. A chemist should read it as a PROTAC (two ligands joined by a linker)
+# without being able to tell which one, so each half is an invented, unremarkable ring system rather
+# than MZ1's real warhead and E3 ligand: no JQ1, no hydroxyproline, no glutarimide. Each half is
+# embedded in 3D, placed where the real half sits in the crystal (same centre, attachment end facing the
+# linker, ring plane turned toward the viewer) and drawn as an outline traced along its bonds: a smooth
+# tube, so the rings show as open loops and no atoms or elements are shown. The linker is a curve
+# between the two attachment atoms, which the page dresses as a string of beads.
+GENERIC = {'warhead': 'CC1CCN(CC1)c1nc2ccccc2s1',          # piperidine on a benzothiazole; attach at the methyl
+           'e3lig': 'CNC(=O)c1ccc(cc1)-c1ccc2cccnc2c1'}    # biaryl amide; attach at the N-methyl
+
+def rot_between(a, b):
+    a = a / np.linalg.norm(a); b = b / np.linalg.norm(b); v = np.cross(a, b); c = a @ b
+    K = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+    return np.eye(3) + K + K @ K / (1 + c)
+
+def rot_about(k, th):
+    k = k / np.linalg.norm(k); K = np.array([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
+    return np.eye(3) + np.sin(th) * K + (1 - np.cos(th)) * K @ K
+
+# the page turns the crystal by the shortest rotation taking the VHL-to-BRD4 axis onto -x; "toward the
+# viewer" is +z after that turn
+toScreen = rot_between(prot['brd4'].mean(0) - prot['vhl'].mean(0), np.array([-1., 0, 0]))
+
+def generic_half(name, attach):
+    mol = Chem.AddHs(Chem.MolFromSmiles(GENERIC[name]))
+    AllChem.EmbedMolecule(mol, randomSeed=7); AllChem.MMFFOptimizeMolecule(mol)
+    mol = Chem.RemoveHs(mol); Y = mol.GetConformer().GetPositions()
+    Yc = Y.mean(0); Cc = X[[i for i in part if part[i] == name]].mean(0)
+    R1 = rot_between(Y[0] - Yc, attach - Cc); Z = (Y - Yc) @ R1.T
+    n = np.linalg.svd(Z - Z.mean(0))[2][2]                # ring-plane normal
+    ax = attach - Cc; best = max(np.linspace(0, 2 * np.pi, 72, endpoint=False), key=lambda th: abs((toScreen @ rot_about(ax, th) @ n)[2]))
+    P = Z @ rot_about(ax, best).T + Cc
+    return P, [(b.GetBeginAtomIdx(), b.GetEndAtomIdx()) for b in mol.GetBonds()]
+
+def skeleton(P, bonds, r=.42, k=.3, spacing=.12):
+    """A tube of radius r along every bond: the signed distance to each bond segment, blended with a
+    smooth minimum (k) so joints are filleted, contoured at zero."""
+    pad = r + 1; lo = P.min(0) - pad; hi = P.max(0) + pad
+    axes = [np.arange(lo[j], hi[j] + spacing, spacing) for j in range(3)]
     G = np.stack(np.meshgrid(*axes, indexing='ij'), -1)
-    f = np.zeros(G.shape[:3])
-    for A, B in segs:                            # Gaussian of the distance to each bond: a smooth union
-        d = B - A; t = np.clip(((G - A) @ d) / (d @ d), 0, 1)
-        q = A + t[..., None] * d; f += np.exp(-((G - q) ** 2).sum(-1) / (2 * s * s))
-    v, fc, _, _ = measure.marching_cubes(f, np.exp(-r * r / (2 * s * s)))
+    d = None
+    for i, j in bonds:
+        A, B = P[i], P[j]; e = B - A; t = np.clip(((G - A) @ e) / (e @ e), 0, 1)
+        di = np.linalg.norm(G - (A + t[..., None] * e), axis=-1) - r
+        if d is None: d = di
+        else:                                    # polynomial smooth minimum
+            h = np.clip(.5 + .5 * (di - d) / k, 0, 1); d = di * (1 - h) + d * h - k * h * (1 - h)
+    v, fc, _, _ = measure.marching_cubes(-d, 0)
     v = v * spacing + lo
     nb = [set() for _ in range(len(v))]
     for a_, b_, c_ in fc:
         nb[a_] |= {b_, c_}; nb[b_] |= {a_, c_}; nb[c_] |= {a_, b_}
     nb = [np.fromiter(x, int) for x in nb]
-    for it in range(30):
+    for it in range(6):
         lam = .5 if it % 2 == 0 else -.53
         v = v + lam * (np.array([v[n].mean(0) for n in nb]) - v)
     return v, fc
 
-for name in ('warhead', 'e3lig'):
-    v, f = skeleton([i for i in part if part[i] == name])
-    out['parts'][name] = pack(v, f, origin)
-    print(name, '->', len(v), 'verts')
-curve = [m[0]] + path + [m[-1]]
-out['linker'] = {'curve': (X[curve] - origin).round(3).tolist()}
+ends = {}
+for name, attach in (('warhead', X[m[0]]), ('e3lig', X[m[-1]])):
+    P, bonds = generic_half(name, attach)
+    v, f = skeleton(P, bonds)
+    out['parts'][name] = pack(v, f, origin); ends[name] = P[0]
+    print(name, GENERIC[name], '->', len(v), 'verts')
+# the linker keeps the real chain's length (the page lays it out as an arc between the two ends)
+out['linker'] = {'curve': ([ends['warhead']] + list(X[path]) + [ends['e3lig']])}
+out['linker']['curve'] = (np.array(out['linker']['curve']) - origin).round(3).tolist()
 out['centres'] = {k: (prot[k].mean(0) - origin).round(2).tolist() for k in prot}
 out['centres'].update({k: (X[[i for i in part if part[i] == k]].mean(0) - origin).round(2).tolist() for k in ('warhead', 'e3lig')})
 # ubiquitin (PDB 1UBQ), centred on itself, for the tags the E2 hands to the target
