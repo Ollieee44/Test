@@ -972,13 +972,19 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   // one camera move (move): out of the distance, closest at about a third, then back and across into the 'o';
   // the lid opens through the closest point and the pan starts before the pull-back ends, so nothing stops
   const T = { fade: [0, 180], move: [0, 1900], merge: [1650, 1950],
-    letters: [1800, 2650], ther: [2250, 2650], glide: [2850, 3410], bg: [2990, 3410], site: 3130, end: 3450 };
+    letters: [1800, 2650], ther: [2250, 2650], glide: [2850, 3410], bg: [2850, 3410], site: 3360, end: 3450 };
   const k = (t, [a, b]) => clamp((t - a) / (b - a), 0, 1), eo = x => 1 - Math.pow(1 - x, 3);
   const lerp = (a, b, x) => a + (b - a) * x;
   const COL = ({ nacre: { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' }, tidepool: { out: '#6FA79D', inn: '#DDF0EA', ring: '#06302E' } })[pal] || { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' };
   const css = n => getComputedStyle(html).getPropertyValue(n).trim();
   const INK = css('--ink'), PEARL = css('--pearl');
-  ov.style.setProperty('--intro-a', PAL[pal].sky[0][0]); ov.style.setProperty('--intro-b', PAL[pal].sky[0][1]);
+  // the intro plays on a dark stage: on a light palette, Nacre's own ink mauve, with the logotype drawn light and the
+  // shells' outline softened to a rim that reads on the dark; it turns to the site's colours as the logo lands.
+  // A dark palette (Tidepool) keeps its own ground and colours.
+  const LIGHTSITE = getComputedStyle(html).colorScheme !== 'dark';
+  const STAGE = LIGHTSITE ? ['#3B2F42', '#241C29'] : PAL[pal].sky[0], LOGO0 = LIGHTSITE ? css('--paper') : INK, LINE = LIGHTSITE ? '#806A86' : INK;
+  ov.style.setProperty('--intro-a', STAGE[0]); ov.style.setProperty('--intro-b', STAGE[1]);
+  const mixHex = (a, b, x) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), x).getHexString();
 
   // ---------- the oyster: two shallow, rounded valves, a cupped bowl and a flatter lid hinged at the back ----------
   // Each valve is a round, slightly wavy outline in the horizontal plane, domed into a shell with a dished
@@ -1009,7 +1015,7 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
     const og = new THREE.BufferGeometry(); og.setAttribute('position', geo.attributes.position); og.setAttribute('normal', geo.attributes.normal);
     og.setIndex(Array.from(geo.index.array.slice(0, geo.groups[0].count)));
     const shellOnly = new THREE.Mesh(og); const o = addOutline(shellOnly, 1.5); shellOnly.remove(o); m.add(o);
-    o.material.uniforms.color.value.set(INK); return m;
+    o.material.uniforms.color.value.set(LINE); return m;
   }
   const oyster = new THREE.Group(); sc.add(oyster);
   const lower = shellMesh(valve(-24, -19)); oyster.add(lower);
@@ -1025,7 +1031,7 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
       }` });
   const PEARL_R = 9, PEARL_REST = new THREE.Vector3(0, -19 + PEARL_R + 3, 4), PEARL_AT = new THREE.Vector3(0, .53 * PEARL_R, 4);   // rest in the bowl; at the end it sits in the mouth, as in the logo
   const pearl = new THREE.Mesh(new THREE.SphereGeometry(PEARL_R, 48, 32), pearlMat); pearl.position.copy(PEARL_REST); oyster.add(pearl);
-  addOutline(pearl, 1.1).material.uniforms.color.value.set(INK);
+  addOutline(pearl, 1.1).material.uniforms.color.value.set(LINE);
   const CLOSED = 0, OPEN = 68 * Math.PI / 180;   // the lid lifts towards the viewer, about the hinge at the back
 
   // ---------- the logotype: its 'o' is the same open oyster cut out of an ink disc ----------
@@ -1036,7 +1042,7 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   // the 'o' fully drawn: shell cut-out, hollow and small pearl in place, disc in ink; only its opacity animates
   document.getElementById('ioCut').setAttribute('transform', 'translate(51.5 50) scale(0.76) translate(-50.5 -47.5)');
   document.getElementById('ioHole').setAttribute('r', '10.26'); document.getElementById('ioPearl').setAttribute('r', '7.22');
-  disc.style.fill = INK;
+  disc.style.fill = LOGO0; logo.style.color = LOGO0;
   // logotype units (viewBox 21.8 -613.8 2441 857.3): the 'o' disc centre, and logotype units per shell unit
   const VB = [21.8, -613.8, 2441], DISC = [-17.1 + 6.3571 * 50, -583.4 + 6.3571 * 51.5, 42 * 6.3571];
   const EL0 = .38, EL1 = .32;   // camera elevation: looking a little down on the oyster, so the lid and the pearl both show
@@ -1097,6 +1103,9 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
       pose = between(K.full, K.head, ease(k(t, T.glide)));
     }
     logo.style.transform = place(pose);
+    // the lights come up: the stage fades to the site as the logotype turns from light to ink on its way to the header
+    const lit = ease(k(t, T.bg)), lc = mixHex(LOGO0, INK, ease(clamp((lit - .3) / .4, 0, 1)));   // a quick crossover mid-fade
+    logo.style.color = lc; disc.style.fill = lc;
     ov.querySelector('.ibg').style.opacity = (1 - ease(k(t, T.bg))).toFixed(3);
     if (skipBtn) { const so = 1 - k(t, [T.glide[0], T.glide[0] + 300]); skipBtn.style.opacity = so.toFixed(3); skipBtn.style.visibility = so > 0 ? '' : 'hidden'; }
     if (t >= T.site && html.classList.contains('intro')) { html.classList.add('intro-end'); html.classList.remove('intro'); }
