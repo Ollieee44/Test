@@ -353,7 +353,11 @@ const BEATS = [[0, .13], [.13, .26], [.26, .4], [.4, .6], [.6, .767], [.767, .88
 // the original six-beat timeline runs on q; the neuron beat holds it at .46 (halves just under the
 // barrier) for 40%-58% of the scroll while the halves cross the neuron's membrane
 const HOLD = [.4, .58], QH = .46;
-const warp = p => p < HOLD[0] ? p * QH / HOLD[0] : p < HOLD[1] ? QH : QH + (p - HOLD[1]) * (1 - QH) / (1 - HOLD[1]);
+// the hold is eased in and out (the old timeline slows to a stop and picks up again) so nothing lurches
+const warp = (() => { const N = 2000, W = .03, sm = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); }, a = new Float32Array(N + 1), b = new Float32Array(N + 1);
+  for (let i = 1; i <= N; i++) { const x = (i - .5) / N; a[i] = a[i - 1] + (1 - sm((x - HOLD[0] + W) / (2 * W))) / N; b[i] = b[i - 1] + sm((x - HOLD[1] + W) / (2 * W)) / N; }
+  return p => { const f = clamp(p, 0, 1) * N, i = Math.min(N - 1, Math.floor(f)), t = f - i, A = a[i] + (a[i + 1] - a[i]) * t, B = b[i] + (b[i + 1] - b[i]) * t;
+    return QH * A / a[N] + (1 - QH) * B / b[N]; }; })();
 // target on BRD4 for the ubiquitin chain: its upper surface, on the side facing VHL
 const ubSpot = (() => { const g = P.brd4.children[0].geometry, pos = g.attributes.position, v = new THREE.Vector3(); let best = null, bs = -1e9;
   for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyQuaternion(Q); const s = v.y + .5 * v.x; if (s > bs) { bs = s; best = v.clone(); } } return best; })();
@@ -368,7 +372,8 @@ function frame(p0) {
   const hx = kf(p, [[.15, SPREAD], [.27, 22], [.5, 22], [.58, 22], [.66, GAP], [1, GAP]]);
   // below the barrier they settle on the neuron, pause in its membrane, and pass inside; the extra depth
   // eases away as they finish sinking to the neuron level
-  const dip = kf(c, [[0, 0], [.3, -20], [.45, -22], [.75, -30], [1, -30]]) * (1 - clamp((p - QH) / (.52 - QH), 0, 1));
+  // (the extra depth fades on the same easing as the final sink, so the halves only ever move down)
+  const dip = kf(c, [[0, 0], [.3, -20], [.45, -22], [.75, -30], [1, -30]]) * (1 - ease(clamp((p - QH) / (.52 - QH), 0, 1)));
   const hy = kf(p, [[.3, 0], [.36, -42], [.39, -43], [.43, -60], [.46, -62], [.52, Yn], [1, Yn]]) + dip;
   const joined = kf(p, [[.16, 1], [.2, 0], [.6, 0], [.665, 1]]);
   const oW = new THREE.Vector3(-hx, hy, 0), oE = new THREE.Vector3(hx, hy, 0);
@@ -418,10 +423,9 @@ function frame(p0) {
   // portrait screens have no room beside the copy: pull back until the subject fits the width
   const narrow = camera.aspect < .9, fitW = narrow ? Math.max(1, 1.1 / camera.aspect) : 1;
   const dist = fitW * kf(p, [[0, 100], [.15, 112], [.28, 160], [.36, 190], [.5, 175], [.68, 255], [.8, 320], [.9, 300], [1, 430]]);
-  const hc = Math.sin(Math.PI * c);
-  const az = kf(p, [[0, -.35], [.15, .25], [.3, .1], [.5, -.2], [.7, .12], [.85, -.1], [1, .2]]) + (reduce ? 0 : .04 * Math.sin(p0 * 9)) + .18 * hc;
-  const el = kf(p, [[0, .12], [.28, .2], [.36, .62], [.46, .48], [.55, .14], [1, .1]]) - .08 * hc;
-  const tgt = V(T); tgt.y -= 14 * hc;
+  const az = kf(p, [[0, -.35], [.15, .25], [.3, .1], [.5, -.2], [.7, .12], [.85, -.1], [1, .2]]) + (reduce ? 0 : .04 * Math.sin(p0 * 9));
+  const el = kf(p, [[0, .12], [.28, .2], [.36, .62], [.46, .48], [.55, .14], [1, .1]]);
+  const tgt = V(T);
   camera.position.set(tgt.x + dist * Math.sin(az) * Math.cos(el), tgt.y + dist * Math.sin(el), tgt.z + dist * Math.cos(az) * Math.cos(el));
   camera.lookAt(tgt);
   // compose to the right of the copy: slide the camera sideways so the subject sits right of centre,
