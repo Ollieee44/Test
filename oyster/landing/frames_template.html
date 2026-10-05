@@ -1,0 +1,306 @@
+<title>SELFTAC 3D Look</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: a viewing room. One large live 3D stage on the palette's ground, the look, palette and
+   state switches beside it, and the 20-second storyboard below. The stage uses literal brand
+   colours; the page chrome follows the viewer's theme. */
+:root {
+  --bg: #F2EEEB; --panel: #FBF9F7; --fg: #241D28; --muted: #6A5F6E; --line: rgba(36, 29, 40, .12); --accent: #8C5572;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #17131A; --panel: #211C25; --fg: #EFE6E1; --muted: #B4A8B6; --line: rgba(239, 230, 225, .13); --accent: #D9AFC2; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #17131A; --panel: #211C25; --fg: #EFE6E1; --muted: #B4A8B6; --line: rgba(239, 230, 225, .13); --accent: #D9AFC2; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 400 15px/1.55 var(--sans); -webkit-font-smoothing: antialiased; padding: 0 clamp(16px, 3.5vw, 40px); padding-block: 28px 56px; }
+.wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 22px; }
+header { display: grid; gap: 8px; max-width: 72ch; }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 500 clamp(34px, 4.2vw, 52px)/1.02 var(--serif); letter-spacing: -.015em; margin: 0; text-wrap: balance; }
+h2 { font: 500 clamp(24px, 2.4vw, 32px)/1.1 var(--serif); margin: 0; text-wrap: balance; }
+header p, .lede { margin: 0; color: var(--muted); }
+.bench { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+@media (max-width: 960px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.stage { position: relative; border-radius: 20px; overflow: hidden; aspect-ratio: 16 / 10; max-width: 100%; transition: background .5s; cursor: grab; }
+.stage:active { cursor: grabbing; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.stage .cap { position: absolute; left: 18px; bottom: 14px; right: 18px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 500 11px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; pointer-events: none; opacity: .8; }
+.stage .loading { position: absolute; inset: 0; display: grid; place-items: center; font: 400 13px/1.4 var(--mono); }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 16px; min-width: 0; }
+.panel h3 { font: 600 13px/1.2 var(--sans); margin: 0; }
+.grp { display: grid; gap: 8px; }
+.seg { display: grid; gap: 4px; }
+.seg button { text-align: left; font: 500 13px/1.25 var(--sans); border: 1px solid var(--line); background: transparent; color: var(--fg); padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+.seg button span { display: block; font-weight: 400; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.seg button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.seg.row { grid-auto-flow: column; grid-auto-columns: 1fr; }
+.seg.row button { text-align: center; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+.story { display: grid; gap: 14px; }
+.beats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 1100px) { .beats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .beats { grid-template-columns: minmax(0, 1fr); } }
+.beat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.beat .t { font: 500 11px/1 var(--mono); letter-spacing: .06em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.beat h4 { font: 600 14px/1.25 var(--sans); margin: 0; }
+.beat p { margin: 0; font-size: 13px; color: var(--muted); }
+.bar { height: 6px; border-radius: 3px; background: var(--line); position: relative; overflow: hidden; }
+.bar i { position: absolute; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+.note { font-size: 13px; color: var(--muted); max-width: 80ch; margin: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Oyster Therapeutics &middot; Landing page &middot; Step 1: look</span>
+    <h1>SELFTAC in 3D</h1>
+    <p>The real shapes from PDB 5T35, smoothed into cartoon versions: BRD4 (the target), VHL with Elongin B and C (the E3 ligase), and the degrader as two small heads joined by a bead linker. Pick a look and a palette, drag to turn the model, and switch between the states the animation moves through.</p>
+  </header>
+
+  <div class="bench">
+    <div class="stage" id="stage" aria-label="3D model of the ternary complex. Drag to rotate.">
+      <canvas id="gl"></canvas>
+      <div class="loading" id="loading">Loading the 3D model&hellip;</div>
+      <div class="cap"><span id="capL">Ternary complex</span><span id="capR">Clay and ink &middot; Nacre</span></div>
+    </div>
+    <aside class="panel" aria-label="View controls">
+      <div class="grp">
+        <h3>Look</h3>
+        <div class="seg" id="looks">
+          <button type="button" data-look="clay" aria-pressed="true">Clay and ink<span>Soft three-tone shading with an ink outline. Closest to the current diagrams.</span></button>
+          <button type="button" data-look="contour" aria-pressed="false">Nacre contours<span>Flat fills with ring lines across the surface, like the pearl and wallpaper.</span></button>
+          <button type="button" data-look="pearl" aria-pressed="false">Pearl<span>Glossy, iridescent and lit. The most dimensional.</span></button>
+        </div>
+      </div>
+      <div class="grp">
+        <h3>Palette</h3>
+        <div class="seg row" id="pals"><button type="button" data-pal="nacre" aria-pressed="true">Nacre</button><button type="button" data-pal="tidepool" aria-pressed="false">Tidepool</button></div>
+      </div>
+      <div class="grp">
+        <h3>State</h3>
+        <div class="seg" id="states">
+          <button type="button" data-state="degrader" aria-pressed="false">Degrader<span>The molecule on its own, joined.</span></button>
+          <button type="button" data-state="split" aria-pressed="false">Split<span>The two halves apart, with their proteins.</span></button>
+          <button type="button" data-state="complex" aria-pressed="true">Ternary complex<span>Reassembled, holding target and ligase.</span></button>
+        </div>
+      </div>
+      <p class="hint">Drag to rotate. The model turns slowly on its own when left alone.</p>
+    </aside>
+  </div>
+
+  <section class="story" aria-labelledby="sbH">
+    <h2 id="sbH">The 20 seconds</h2>
+    <p class="lede">A new landing page, desktop first. The sequence plays as you scroll: one screen-filling scene, with short lines of copy fading in beside it. Times are at an easy scrolling pace.</p>
+    <div class="beats" id="beats"></div>
+    <p class="note">The degrader shown is MZ1, the molecule in the 5T35 crystal structure, standing in for a SELFTAC compound. The proteins are smoothed molecular surfaces of the real chains; atomic detail is removed on purpose.</p>
+  </section>
+</div>
+
+<script type="application/json" id="meshes">/*MESHES*/</script>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+<script>
+// storyboard (plain script so it renders even if WebGL does not)
+(function () {
+  var B = [[0, 3, 'The degrader', 'One large degrader turns slowly in open space. Headline: protein degraders, made small enough to reach the brain.'],
+    [3, 6, 'Split in two', 'The linker opens at its reversible bond and the two halves drift apart.'],
+    [6, 10, 'Through the barrier', 'The camera follows the halves through a stylised blood-brain barrier, each passing through the cell membranes.'],
+    [10, 14, 'Rebuilt inside', 'In the neuron the halves meet, BRD4 and VHL glide in, and the linker clicks shut: the ternary complex.'],
+    [14, 17, 'Tagged and cleared', 'An E2 hands ubiquitin onto BRD4, which is drawn into the proteasome and broken down.'],
+    [17, 20, 'Again', 'A second target arrives for the same degrader, then the camera pulls back to the Oyster wordmark.']];
+  var box = document.getElementById('beats');
+  B.forEach(function (b) {
+    var d = document.createElement('div'); d.className = 'beat';
+    d.innerHTML = '<span class="t">' + b[0] + '–' + b[1] + ' s</span><h4>' + b[2] + '</h4><p>' + b[3] + '</p><div class="bar"><i style="left:' + (b[0] / 20 * 100) + '%;width:' + ((b[1] - b[0]) / 20 * 100) + '%"></i></div>';
+    box.appendChild(d);
+  });
+})();
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const DATA = JSON.parse(document.getElementById('meshes').textContent);
+const PAL = {
+  nacre: { bg: 'radial-gradient(120% 120% at 70% 20%, #F7F1EF 0%, #EADDDD 55%, #DCCFDD 100%)', ink: '#2B2230', label: 'Nacre',
+    brd4: '#E7C9D6', vhl: '#D6CBE6', elob: '#E8DEDB', eloc: '#DDD2D4', warhead: '#B4678B', e3lig: '#8A73B2', linker: '#8C5572', brk: '#2B2230', ring: '#8C5572' },
+  tidepool: { bg: 'radial-gradient(120% 120% at 70% 20%, #1B6763 0%, #0F4C4A 55%, #0A3836 100%)', ink: '#06302E', label: 'Tidepool',
+    brd4: '#F5D89A', vhl: '#9FD6C6', elob: '#3E7D78', eloc: '#346F6B', warhead: '#F2B84B', e3lig: '#5FC2A6', linker: '#EAF3EF', brk: '#F2B84B', ring: '#0B3B39' },
+};
+const LOOK_LABEL = { clay: 'Clay and ink', contour: 'Nacre contours', pearl: 'Pearl' };
+const STATE_LABEL = { degrader: 'Degrader', split: 'Split', complex: 'Ternary complex' };
+let look = 'clay', pal = 'nacre', state = 'complex';
+
+const stage = document.getElementById('stage'), canvas = document.getElementById('gl');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
+catch (e) { document.getElementById('loading').textContent = 'This browser cannot show the 3D model (WebGL is unavailable).'; throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(28, 1, 1, 2000);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.enablePan = false; controls.minDistance = 60; controls.maxDistance = 420;
+controls.autoRotate = !matchMedia('(prefers-reduced-motion: reduce)').matches; controls.autoRotateSpeed = .6;
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(), .04).texture;
+
+// ---------- geometry ----------
+function geom(p) {
+  const pb = Uint8Array.from(atob(p.pos), c => c.charCodeAt(0)), ib = Uint8Array.from(atob(p.idx), c => c.charCodeAt(0));
+  const q = new Int16Array(pb.buffer), pos = new Float32Array(q.length);
+  for (let i = 0; i < q.length; i++) pos[i] = q[i] / 100;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setIndex(new THREE.BufferAttribute(p.idx32 ? new Uint32Array(ib.buffer) : new Uint16Array(ib.buffer), 1));
+  g.computeVertexNormals(); return g;
+}
+const C = DATA.centres, V = k => new THREE.Vector3(...k);
+// axis from the ligase side to the target side, used to pull the two halves apart
+const axis = V(C.brd4).sub(V(C.vhl)).normalize();
+const left = new THREE.Group(), right = new THREE.Group(), world = new THREE.Group();
+world.add(left, right); scene.add(world);
+// turn the model so the target sits on the left and the ligase on the right, gap facing the camera
+world.quaternion.setFromUnitVectors(axis, new THREE.Vector3(-1, 0, 0));
+const parts = {};
+for (const k of ['brd4', 'warhead']) parts[k] = left;
+for (const k of ['vhl', 'elob', 'eloc', 'e3lig']) parts[k] = right;
+const meshes = {};
+for (const k in parts) {
+  const m = new THREE.Mesh(geom(DATA.parts[k]));
+  m.userData.key = k; m.userData.outline = ['warhead', 'e3lig'].includes(k) ? .22 : .42;
+  parts[k].add(m); meshes[k] = m;
+}
+// linker: a smooth tube through the backbone atoms, with a bead on each, split at the reversible bond
+// The beads live in the world frame: when the molecule is joined they spread evenly between the two
+// heads, so the linker stretches across any gap; when it is split, each half keeps its own beads.
+const L = DATA.linker, beads = L.beads.map(V), mid = L.break[1], endW = V(L.ends.warhead), endE = V(L.ends.e3lig);
+function tube(pts, r) { return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), pts.length * 8, r, 10, false); }
+const linkL = new THREE.Mesh(), linkR = new THREE.Mesh();
+linkL.userData = { key: 'linker', outline: .12 }; linkR.userData = { key: 'linker', outline: .12 };
+world.add(linkL, linkR);
+const beadMeshes = [];
+beads.forEach((p, i) => {
+  const isBrk = L.break.includes(i), r = isBrk ? .95 : L.oxygen[i] ? .85 : .62;
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16)); m.position.copy(p);
+  m.userData = { key: isBrk ? 'brk' : 'linker', outline: .12 };
+  world.add(m); beadMeshes.push(m);
+});
+function placeLinker(offL, offR, joined) {
+  const n = beads.length, pts = beads.map((p, i) => {
+    const t = (i + 1) / (n + 1), j = new THREE.Vector3().lerpVectors(offL, offR, t), s = i < mid ? offL : offR;
+    return p.clone().add(j.multiplyScalar(joined).add(s.clone().multiplyScalar(1 - joined)));
+  });
+  pts.forEach((p, i) => beadMeshes[i].position.copy(p));
+  const a = [endW.clone().add(offL)].concat(pts.slice(0, mid)), b = pts.slice(mid).concat([endE.clone().add(offR)]);
+  if (joined > .5) a.push(pts[mid]);
+  for (const [m, q] of [[linkL, a], [linkR, b]]) { if (m.geometry) m.geometry.dispose(); m.geometry = tube(q, .32);
+    m.children.forEach(c => c.geometry = m.geometry); }
+}
+placeLinker(new THREE.Vector3(), new THREE.Vector3(), 1);
+const proteins = ['brd4', 'vhl', 'elob', 'eloc'].map(k => meshes[k]);
+
+// ---------- materials ----------
+const gradTex = (() => { const d = new Uint8Array([90, 170, 255]); const t = new THREE.DataTexture(d, 3, 1, THREE.RedFormat); t.minFilter = t.magFilter = THREE.NearestFilter; t.needsUpdate = true; return t; })();
+const contourShader = {
+  uniforms: { col: { value: new THREE.Color() }, ring: { value: new THREE.Color() }, centre: { value: new THREE.Vector3() }, spacing: { value: 1.6 }, light: { value: new THREE.Vector3(.4, .7, .6).normalize() } },
+  // rings are measured in the mesh's own frame, so they stay put as the model turns
+  vertexShader: `varying vec3 vN; varying vec3 vW; varying vec3 vV;
+    void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = position; vN = normalize(mat3(modelMatrix) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`,
+  fragmentShader: `uniform vec3 col; uniform vec3 ring; uniform vec3 centre; uniform float spacing; uniform vec3 light; varying vec3 vN; varying vec3 vW; varying vec3 vV;
+    void main() {
+      vec3 n = normalize(vN); float d = length(vW - centre) / spacing; float f = abs(fract(d) - .5); float w = fwidth(d);
+      float line = smoothstep(.5 - 1.6 * w, .5 - .4 * w, f);   // thin ring line at each shell
+      float lit = .82 + .18 * max(dot(n, light), 0.0);
+      float rim = pow(1.0 - max(dot(n, normalize(vV)), 0.0), 2.2);
+      vec3 c = col * lit; c = mix(c, ring, line * .55); c = mix(c, ring, rim * .35);
+      gl_FragColor = vec4(c, 1.0);
+      #include <colorspace_fragment>
+    }`,
+};
+const outlineMat = new THREE.ShaderMaterial({
+  uniforms: { color: { value: new THREE.Color() }, thick: { value: .4 } }, side: THREE.BackSide,
+  vertexShader: `uniform float thick; void main() { vec3 p = position + normalize(normal) * thick; gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }`,
+  fragmentShader: `uniform vec3 color; void main() { gl_FragColor = vec4(color, 1.0);
+    #include <colorspace_fragment>
+  }`,
+});
+const outlines = [];
+world.traverse(o => { if (o.isMesh && o.userData.outline) {
+  const om = new THREE.Mesh(o.geometry, outlineMat.clone()); om.userData.of = o; om.renderOrder = -1; o.add(om); outlines.push(om); } });
+
+function matFor(key, P) {
+  const color = new THREE.Color(P[key]);
+  if (look === 'clay') return new THREE.MeshToonMaterial({ color, gradientMap: gradTex });
+  if (look === 'pearl') return new THREE.MeshPhysicalMaterial({ color, roughness: .32, metalness: 0, clearcoat: .8, clearcoatRoughness: .25, iridescence: .7, iridescenceIOR: 1.35, sheen: .6, sheenColor: new THREE.Color('#ffffff'), envMapIntensity: 1.1 });
+  const m = new THREE.ShaderMaterial(contourShader); m.uniforms = THREE.UniformsUtils.clone(contourShader.uniforms);
+  m.uniforms.col.value.set(P[key]); m.uniforms.ring.value.set(P.ring); return m;
+}
+function applyLook() {
+  const P = PAL[pal];
+  stage.style.background = P.bg; stage.style.color = pal === 'nacre' ? '#2B2230' : '#EAF3EF';
+  scene.environment = look === 'pearl' ? envTex : null;
+  world.traverse(o => {
+    if (!o.isMesh || o.userData.of) return;
+    if (o.material) o.material.dispose();
+    o.material = matFor(o.userData.key, P);
+    if (look === 'contour' && o.material.uniforms) {
+      const c = new THREE.Vector3(); o.geometry.computeBoundingSphere(); c.copy(o.geometry.boundingSphere.center);
+      o.material.uniforms.centre.value.copy(c); o.material.uniforms.spacing.value = ['brd4', 'vhl', 'elob', 'eloc'].includes(o.userData.key) ? 1.7 : .7;
+    }
+  });
+  outlines.forEach(om => {
+    const of = om.userData.of; om.visible = look !== 'pearl';
+    om.material.uniforms.color.value.set(P.ink); om.material.uniforms.thick.value = of.userData.outline * (look === 'contour' ? .8 : 1);
+  });
+  document.getElementById('capR').textContent = LOOK_LABEL[look] + ' · ' + P.label;
+}
+scene.add(new THREE.HemisphereLight('#ffffff', '#b9a7b4', 1.1));
+const key = new THREE.DirectionalLight('#ffffff', 1.6); key.position.set(60, 90, 80); scene.add(key);
+const fill = new THREE.DirectionalLight('#ffffff', .5); fill.position.set(-80, -20, 40); scene.add(fill);
+
+// ---------- states ----------
+// per state: separation of the two halves along the axis, protein visibility, camera distance
+// sep: distance between the two halves along the axis (the complex is opened slightly so the degrader
+// shows between target and ligase); joined: linker continuous (1) or broken at the reversible bond (0)
+const STATES = { degrader: { sep: 0, prot: 0, dist: 78, joined: 1 }, split: { sep: 40, prot: 1, dist: 300, joined: 0 }, complex: { sep: 24, prot: 1, dist: 245, joined: 1 } };
+const cur = Object.assign({}, STATES.complex), tgt = Object.assign({}, cur);
+function setState(s, jump) { state = s; Object.assign(tgt, STATES[s]); if (jump) Object.assign(cur, STATES[s]); document.getElementById('capL').textContent = STATE_LABEL[s]; }
+const degCentre = V(C.warhead).add(V(C.e3lig)).multiplyScalar(.5);
+let jumpNext = false;
+function frameState(dt) {
+  const k = 1 - Math.exp(-dt / .35);
+  for (const p of ['sep', 'prot', 'dist', 'joined']) cur[p] += (tgt[p] - cur[p]) * k;
+  left.position.copy(axis).multiplyScalar(cur.sep / 2); right.position.copy(axis).multiplyScalar(-cur.sep / 2);
+  placeLinker(left.position, right.position, cur.joined);
+  proteins.forEach(m => { m.visible = cur.prot > .02; m.scale.setScalar(.6 + .4 * cur.prot); });
+  // proteins shrink towards their own centres as they fade out
+  proteins.forEach(m => { const c = V(C[m.userData.key]); m.position.copy(c).multiplyScalar(1 - m.scale.x); });
+  const focus = new THREE.Vector3().lerpVectors(degCentre.clone().applyQuaternion(world.quaternion), new THREE.Vector3(), cur.prot);
+  controls.target.lerp(focus, jumpNext ? 1 : k); jumpNext = false;
+  const dir = camera.position.clone().sub(controls.target).normalize();
+  camera.position.copy(controls.target).addScaledVector(dir, cur.dist);
+}
+
+// ---------- controls ----------
+function wire(id, attr, fn) {
+  document.querySelectorAll('#' + id + ' button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#' + id + ' button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); fn(b.dataset[attr]);
+  }));
+}
+wire('looks', 'look', v => { look = v; applyLook(); });
+wire('pals', 'pal', v => { pal = v; applyLook(); });
+wire('states', 'state', v => setState(v));
+
+function resize() { const r = stage.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(stage);
+camera.position.set(0, 30, 235); setState('complex'); applyLook(); resize();
+document.getElementById('loading').remove();
+let last = performance.now();
+renderer.setAnimationLoop(t => { const dt = Math.min(.05, (t - last) / 1000); last = t; frameState(dt); controls.update(); renderer.render(scene, camera); });
+window.__frames = { setLook: v => { look = v; applyLook(); }, setPal: v => { pal = v; applyLook(); }, setState: (s, j) => { setState(s, j); jumpNext = !!j; }, controls, camera };
+</script>
