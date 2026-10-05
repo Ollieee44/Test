@@ -966,8 +966,10 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   if (reduce || !renderer || scrollY > 10) { finish(); return; }
   try { r3 = new THREE.WebGLRenderer({ canvas: document.getElementById('introGl'), antialias: true, alpha: true }); } catch (e) { finish(); return; }
 
-  // timeline (ms)
-  const T = { fade: [0, 450], open: [350, 1750], lift: [1700, 2600], disc: [2450, 3050], carve: [2700, 3350], letters: [3000, 3750], ther: [3400, 3950], glide: [4100, 5000], bg: [4300, 5000], site: 4450, end: 5050 };
+  // timeline (ms): the shells part like curtains, the camera pushes in on the pearl, the pearl becomes the 'o',
+  // the view pans across the word, and the logotype settles into the header
+  const T = { fade: [0, 400], part: [250, 2000], zoom: [700, 2600], swap: [2450, 2750], disc: [2550, 3150], carve: [2750, 3400],
+    pan: [3350, 4450], letters: [3400, 3900], ther: [3900, 4400], glide: [4650, 5600], bg: [4850, 5600], site: 5050, end: 5650 };
   const k = (t, [a, b]) => clamp((t - a) / (b - a), 0, 1), eo = x => 1 - Math.pow(1 - x, 3);
   const lerp = (a, b, x) => a + (b - a) * x;
   const COL = ({ nacre: { out: '#CDB8C6', inn: '#F6ECF0', ring: '#8C5572' }, tidepool: { out: '#6FA79D', inn: '#DDF0EA', ring: '#06302E' } })[pal] || { out: '#CDB8C6', inn: '#F6ECF0', ring: '#8C5572' };
@@ -1027,68 +1029,67 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   const PEARL_AT = new THREE.Vector3(62, -51, 0), PEARL_R = 9.5;
   const pearl = new THREE.Mesh(new THREE.SphereGeometry(PEARL_R, 48, 32), pearlMat); pearl.position.copy(PEARL_AT); oyster.add(pearl);
   addOutline(pearl, .5).material.uniforms.color.value.set(INK);
-  const CLOSED = -.07, OPEN = 24 * Math.PI / 180;   // the logo's pose: the upper shell lifted 24 degrees about the hinge
+  const CLOSED = -.07;
 
-  // ---------- the logotype, large and centred, then into the header ----------
+  // ---------- the logotype: a close-up of its 'o', a pan across the word, then into the header ----------
   const logo = document.getElementById('ilogo'), disc = document.getElementById('ioDisc'), mark = document.getElementById('ioMark');
   const cut = document.getElementById('ioCut'), hole = document.getElementById('ioHole'), smallPearl = document.getElementById('ioPearl');
   const clipR = document.getElementById('ioClipR'), letters = document.getElementById('ioLetters'), ther = document.getElementById('ioTher');
-  const pdiv = document.getElementById('ipearl'), head = document.querySelector('.head .wm');
-  let W = 0, H = 0, L = null;
+  const head = document.querySelector('.head .wm');
+  clipR.setAttribute('width', 2100); document.getElementById('ipearl').remove();
+  // the 'o' disc in the logotype's own units (viewBox 21.8 -613.8 2441 857.3): centre and radius
+  const VB = [21.8, -613.8, 2441], DISC = [-17.1 + 6.3571 * 50, -583.4 + 6.3571 * 51.5, 42 * 6.3571];
+  let W = 0, H = 0, LW = 0, RB = 0, K = null;
   function layout() {
     W = innerWidth; H = innerHeight; const narrow = W < 760;
     r3.setPixelRatio(Math.min(devicePixelRatio, 2)); r3.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix();
-    const lw = Math.min(W * (narrow ? .84 : .62), 900), lh = lw * 857.3 / 2441;
-    logo.style.width = lw + 'px'; L = { x: (W - lw) / 2, y: H * .47 - lh * .5, w: lw };
-    // the oyster fills about a third of the width (more on phones), a little below centre
-    const frac = narrow ? .62 : .3, D = (86 / frac) / (2 * Math.tan(THREE.MathUtils.degToRad(11)) * cam.aspect);
-    cam.userData.D = D;
+    LW = Math.min(W * (narrow ? .84 : .62), 900); logo.style.width = LW + 'px';
+    const u = LW / VB[2], cx = (DISC[0] - VB[0]) * u, cy = (DISC[1] - VB[1]) * u, cr = DISC[2] * u;
+    RB = Math.min(W, H) * (narrow ? .3 : .26);   // the pearl's size at the end of the push-in, and the close-up 'o'
+    const s0 = RB / cr, lh = LW * 857.3 / VB[2];
+    K = { close: [W / 2 - s0 * cx, H / 2 - s0 * cy, s0], full: [(W - LW) / 2, H * .47 - lh / 2, 1] };
+    // the closed oyster fills the screen, like a drawn curtain: its width spans the screen and its height most of it
+    const f = (H / 2) / Math.tan(THREE.MathUtils.degToRad(11));
+    cam.userData.far = Math.min(86 / (narrow ? 1.6 : 1.08) / W, 66 / H) * f;   // camera distance for that framing
+    cam.userData.near = PEARL_R * f / RB;                                          // distance at which the pearl is RB across
   }
-  layout(); addEventListener('resize', layout);
+  layout(); addEventListener('resize', () => { layout(); });
   const hex = c => new THREE.Color(c), mixHex = (a, b, x) => '#' + hex(a).lerp(hex(b), x).getHexString();
-  let glideFrom = null, pearlFrom = null, discTo = null;
-  function screenOf(v) { const p = v.clone().project(cam); return [(p.x + 1) / 2 * W, (1 - p.y) / 2 * H]; }
+  const place = ([x, y, s]) => `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(${s.toFixed(5)})`;
+  const between = (A, B, g) => [lerp(A[0], B[0], g), lerp(A[1], B[1], g), Math.exp(lerp(Math.log(A[2]), Math.log(B[2]), g))];
+  const pearlW = new THREE.Vector3();
 
   function render(t) {
-    // 3D: fade in, turn to face front while the upper shell lifts to the logo's pose; the pearl glints as it is revealed
-    const o = eo(k(t, T.open)), f = k(t, T.fade), lift = ease(k(t, T.lift));
-    hinge.rotation.z = lerp(CLOSED, OPEN, ease(k(t, T.open)));
-    const az = lerp(.62, 0, o), el = lerp(.32, .04, o), D = cam.userData.D * lerp(1.08, 1, o);
-    cam.position.set(D * Math.sin(az) * Math.cos(el), D * Math.sin(el) - 4, D * Math.cos(az) * Math.cos(el)); cam.lookAt(0, -4, 0);
-    pearlMat.uniforms.glint.value = 1.4 * bump(t, 1300, 1900);
-    oyster.scale.setScalar(lerp(.94, 1, f) * lerp(1, .82, lift)); oyster.position.y = 58 - 10 * lift;
-    pearl.visible = t < T.lift[0];
-    r3.domElement.style.opacity = (f * (1 - k(t, [T.lift[0] + 150, T.lift[1] - 100]))).toFixed(3);
+    // curtains: the upper shell swings up and away on its hinge, the lower drops away, both off the screen
+    const pt = ease(k(t, T.part)), z = ease(k(t, T.zoom)), f = k(t, T.fade);
+    hinge.rotation.z = lerp(CLOSED, 1.25, pt); hinge.position.y = HINGE.y + 75 * pt * pt;
+    lower.position.y = -78 * pt * pt;
+    // the camera starts square on the closed oyster and pushes in on the pearl, turning to face it
+    oyster.updateMatrixWorld(); pearlW.copy(PEARL_AT); oyster.localToWorld(pearlW);
+    const tgt = new THREE.Vector3(0, -4, 0).lerp(pearlW, z), D = Math.exp(lerp(Math.log(cam.userData.far), Math.log(cam.userData.near), z));
+    const az = lerp(.28, 0, ease(k(t, [0, T.zoom[1]]))), el = lerp(.16, 0, ease(k(t, [0, T.zoom[1]])));
+    cam.position.set(tgt.x + D * Math.sin(az) * Math.cos(el), tgt.y + D * Math.sin(el), tgt.z + D * Math.cos(az) * Math.cos(el)); cam.lookAt(tgt);
+    pearlMat.uniforms.glint.value = 1.2 * bump(t, 1200, 2300);
     sc.updateMatrixWorld(); r3.render(sc, cam);
-    // the logotype's position, and where its 'o' disc sits on screen
-    logo.style.transform = glideFrom ? '' : `translate(${L.x}px, ${L.y}px)`;
-    if (!discTo) { const r = disc.getBoundingClientRect(); discTo = [r.left + r.width / 2, r.top + r.height / 2, r.width / 2]; }
-    // the pearl leaves the shell as a flat-shaded disc, rises and swings left into the 'o', growing to its size
-    if (t >= T.lift[0] && !pearlFrom) { const c = PEARL_AT.clone(); oyster.localToWorld(c); const e = c.clone().add(new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld, 0).multiplyScalar(PEARL_R * oyster.scale.x));
-      const s0 = screenOf(c), s1 = screenOf(e); pearlFrom = [s0[0], s0[1], Math.hypot(s1[0] - s0[0], s1[1] - s0[1])]; }
-    if (pearlFrom) {
-      const [x0, y0, r0] = pearlFrom, [x1, y1, r1] = discTo;
-      const x = lerp(x0, x1, lift), y = lerp(y0, y1, lift) - Math.sin(Math.PI * lift) * H * .08, r = lerp(r0, r1, eo(lift));
-      pdiv.style.transform = `translate(${x}px, ${y}px) scale(${(2 * r / 100).toFixed(4)})`;
-      pdiv.style.opacity = (1 - k(t, [T.disc[0], T.disc[0] + 250])).toFixed(3);
-    } else pdiv.style.opacity = 0;
-    // the disc turns from pearl to ink, then the open shell is carved out of it and a small pearl settles in the hollow
-    mark.style.opacity = k(t, [T.disc[0], T.disc[0] + 200]).toFixed(3);
+    // the pearl, now RB across at the centre, becomes the 'o': the flat disc takes over, turns to ink and is carved
+    const sw = k(t, T.swap);
+    r3.domElement.style.opacity = (f * (1 - sw)).toFixed(3);
+    mark.style.opacity = sw.toFixed(3);
     disc.style.fill = mixHex(PEARL, INK, ease(k(t, T.disc)));
     const cv = eo(k(t, T.carve));
     cut.setAttribute('transform', `translate(51.5 50) scale(${(.76 * cv).toFixed(4)}) translate(-50.5 -47.5)`);
     hole.setAttribute('r', (10.26 * cv).toFixed(3)); smallPearl.setAttribute('r', (7.22 * eo(k(t, [T.carve[0] + 200, T.carve[1] + 100]))).toFixed(3));
-    // 'yster' writes in from the left, 'therapeutics' rises in under it
-    clipR.setAttribute('width', (2100 * ease(k(t, T.letters))).toFixed(1));
-    letters.style.opacity = k(t, [T.letters[0], T.letters[0] + 150]).toFixed(3);
-    const th = ease(k(t, T.ther)) * (1 - k(t, [T.glide[0], T.glide[0] + 350]));
-    ther.style.opacity = th.toFixed(3); ther.setAttribute('transform', `translate(0 ${(30 * (1 - ease(k(t, T.ther)))).toFixed(1)})`);
-    // glide: the logotype shrinks into the header wordmark (same drawing, same frame) while the story fades in under it
+    // pan: pull back and across from the close-up 'o' so the rest of the word slides in from the right
+    letters.style.opacity = ease(k(t, T.letters)).toFixed(3);
+    const thIn = ease(k(t, T.ther)); ther.style.opacity = (thIn * (1 - k(t, [T.glide[0], T.glide[0] + 350]))).toFixed(3);
+    ther.setAttribute('transform', `translate(0 ${(30 * (1 - thIn)).toFixed(1)})`);
+    let pose = between(K.close, K.full, ease(k(t, T.pan)));
+    // merge: the logotype shrinks into the header wordmark (same drawing, same frame) as the story fades in under it
     if (t >= T.glide[0]) {
-      if (!glideFrom) { const h = head.getBoundingClientRect(); glideFrom = { x: L.x, y: L.y, s: h.width / L.w, tx: h.left, ty: h.top }; }
-      const g = ease(k(t, T.glide)), G = glideFrom;
-      logo.style.transform = `translate(${lerp(G.x, G.tx, g)}px, ${lerp(G.y, G.ty, g)}px) scale(${lerp(1, G.s, g)})`;
+      if (!K.head) { const h = head.getBoundingClientRect(); K.head = [h.left, h.top, h.width / LW]; }
+      pose = between(K.full, K.head, ease(k(t, T.glide)));
     }
+    logo.style.transform = place(pose);
     ov.querySelector('.ibg').style.opacity = (1 - ease(k(t, T.bg))).toFixed(3);
     if (skipBtn) { const so = 1 - k(t, [T.glide[0], T.glide[0] + 300]); skipBtn.style.opacity = so.toFixed(3); skipBtn.style.visibility = so > 0 ? '' : 'hidden'; }
     if (t >= T.site && html.classList.contains('intro')) { html.classList.add('intro-end'); html.classList.remove('intro'); }
