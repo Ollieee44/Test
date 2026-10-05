@@ -7,7 +7,7 @@ html { scroll-behavior: smooth; }
 .head { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; align-items: center; gap: 28px; padding: 18px clamp(16px, 3vw, 40px); transition: background-color .4s, box-shadow .4s, padding .4s; }
 .head.solid { background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 1px 0 var(--line); padding-block: 12px; }
 .head .home { display: flex; color: var(--ink); }
-.head .wm { height: 28px; width: auto; }
+.head .wm { height: 42px; width: auto; }
 .head nav { margin-left: auto; display: flex; gap: 22px; }
 .head nav a { color: var(--ink); text-decoration: none; font: 500 13.5px/1 var(--sans); padding: 8px 0; position: relative; }
 .head nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 1.5px; background: var(--clasp); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
