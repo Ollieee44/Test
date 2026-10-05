@@ -19,8 +19,10 @@
   // timeline (ms): the closed oyster rushes out towards the viewer, pulls back as it opens on its pearl, then
   // recedes into the screen until it sits exactly in the logotype's 'o'; the ink disc closes round it, the word
   // writes in, and the logotype settles into the header
-  const T = { fade: [0, 180], fly: [0, 700], open: [660, 1330], recede: [1400, 1920], merge: [1720, 1990],
-    letters: [1850, 2200], ther: [2060, 2340], glide: [2420, 2980], bg: [2560, 2980], site: 2700, end: 3010 };
+  // one camera move (move): out of the distance, closest at about a third, then back and across into the 'o';
+  // the lid opens through the closest point and the pan starts before the pull-back ends, so nothing stops
+  const T = { fade: [0, 180], move: [0, 1900], merge: [1650, 1950],
+    letters: [1800, 2150], ther: [2000, 2300], glide: [2400, 2960], bg: [2540, 2960], site: 2680, end: 3000 };
   const k = (t, [a, b]) => clamp((t - a) / (b - a), 0, 1), eo = x => 1 - Math.pow(1 - x, 3);
   const lerp = (a, b, x) => a + (b - a) * x;
   const COL = ({ nacre: { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' }, tidepool: { out: '#6FA79D', inn: '#DDF0EA', ring: '#06302E' } })[pal] || { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' };
@@ -107,21 +109,25 @@
     const up = new THREE.Vector3(0, Math.cos(EL1), -Math.sin(EL1));
     TL = PEARL_AT.clone().add(new THREE.Vector3(-(px - W / 2) / s, 0, 0)).addScaledVector(up, (py - H / 2) / s);
   }
-  layout(); addEventListener('resize', layout);
+  let L9 = 0, Lc = 0, Ll = 0;
+  const setPath = () => { L9 = Math.log(Dc * 9); Lc = Math.log(Dc); Ll = Math.log(Dl); };
+  layout(); setPath(); addEventListener('resize', () => { layout(); setPath(); });
   const place = ([x, y, s]) => `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(${s.toFixed(5)})`;
   const between = (A, B, g) => [lerp(A[0], B[0], g), lerp(A[1], B[1], g), Math.exp(lerp(Math.log(A[2]), Math.log(B[2]), g))];
-  const logLerp = (a, b, x) => Math.exp(lerp(Math.log(a), Math.log(b), x));
 
   function render(t) {
     // the rush out: from far away to nearly filling the screen, accelerating; then it eases back as it opens
-    const fly = k(t, T.fly), fe = fly * fly * (3 - 2 * fly) * .4 + fly * fly * fly * .6, op = ease(k(t, T.open)), rc = ease(k(t, T.recede));
-    let D = logLerp(Dc * 9, Dc, fe); D = logLerp(D, Dm, op); D = logLerp(D, Dl, rc);
+    // in: decelerating to the closest point; out: the pull-back and the pan share one easing, and the pan sets off
+    // a little before the closest point, so the move turns round without stopping
+    const u = k(t, T.move), sm = x => x * x * x * (x * (6 * x - 15) + 10);
+    const op = ease(clamp((u - .2) / .42, 0, 1)), rc = sm(clamp((u - .45) / 0.55, 0, 1));
+    const D = Math.exp(u < .34 ? lerp(L9, Lc, 1 - Math.pow(1 - u / .34, 2.2)) : lerp(Lc, Ll, sm((u - .34) / .66)));
     hinge.rotation.x = -lerp(lerp(CLOSED, OPEN, op), 32 * Math.PI / 180, rc);
     // straight ahead: it comes at the viewer front-on and its lid lifts towards them to show the pearl
     const az = 0, el = lerp(EL0, EL1, Math.max(op, rc));
     const tgt = CENTRE.clone().lerp(TL, rc);
     cam.position.set(tgt.x + D * Math.sin(az) * Math.cos(el), tgt.y + D * Math.sin(el), tgt.z + D * Math.cos(az) * Math.cos(el)); cam.lookAt(tgt);
-    pearlMat.uniforms.glint.value = 1.3 * bump(t, 1500, 2200);
+    pearlMat.uniforms.glint.value = 1.3 * bump(u, .45, .9);
     sc.updateMatrixWorld(); r3.render(sc, cam);
     // merge: the ink disc fades in round the oyster (its cut-outs line up with the shells and the pearl), then the 3D goes
     const m = ease(k(t, T.merge));
