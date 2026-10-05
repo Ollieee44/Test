@@ -87,10 +87,10 @@ const root = document.documentElement, stage = document.getElementById('stage'),
 // ---------- palettes ----------
 const PAL = {
   nacre: { ring: '#8C5572', ink: '#2B2230', brd4: '#E7C9D6', vhl: '#D6CBE6', elob: '#E8DEDB', eloc: '#DDD2D4', warhead: '#B4678B', e3lig: '#8A73B2',
-    linker: '#8C5572', brk: '#2B2230', ub: '#C99BB0', pearl3d: '#F6EEF1', e2: '#CDBFDF', prot: '#B9A9B6', wall: '#EADADF', flash: '#8C5572',
+    linker: '#8C5572', brk: '#2B2230', ub: '#C99BB0', pearl3d: '#F6EEF1', clasp: '#D9A443', e2: '#CDBFDF', prot: '#B9A9B6', wall: '#EADADF', flash: '#8C5572',
     sky: [['#F6EEEC', '#E3D3D8'], ['#F4E7E6', '#E6CBD0'], ['#EFE6EE', '#D9CCE2']] },
   tidepool: { ring: '#06302E', ink: '#06302E', brd4: '#F5D89A', vhl: '#9FD6C6', elob: '#3E7D78', eloc: '#346F6B', warhead: '#F2B84B', e3lig: '#5FC2A6',
-    linker: '#EAF3EF', brk: '#F2B84B', ub: '#F7C873', pearl3d: '#EAF3EF', e2: '#8CC9B8', prot: '#4F8C86', wall: '#2E6E69', flash: '#F2B84B',
+    linker: '#EAF3EF', brk: '#F2B84B', ub: '#F7C873', pearl3d: '#EAF3EF', clasp: '#F27D62', e2: '#8CC9B8', prot: '#4F8C86', wall: '#2E6E69', flash: '#F2B84B',
     sky: [['#1B6763', '#0F4C4A'], ['#1D615D', '#0E4543'], ['#155A57', '#0A3836']] },
 };
 let pal = 'nacre';
@@ -237,10 +237,21 @@ function makeMolecule(THREE, D, Q, geom, bow) {
   const [cW, cE] = heads.map(h => h.c);
 
   // the linker: pearls (instanced), the strand on each side, and the reversible bond between the middle two
-  const pearls = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 28, 18), mat('pearl', .9), NB);
-  pearls.frustumCulled = false; group.add(pearls, outline(pearls, NB));
+  const ball = new THREE.SphereGeometry(1, 28, 18);
+  const pearls = new THREE.InstancedMesh(ball, mat('pearl', .9), NB - 2);
+  pearls.frustumCulled = false; group.add(pearls, outline(pearls, NB - 2));
+  // the meeting point is the idea worth showing, so it is drawn as a clasp: the two pearls either side of
+  // the reversible bond are larger and in an accent colour, the bond is thick and the same colour, and a
+  // soft glow breathes around the join while it is closed
+  const clasp = new THREE.InstancedMesh(ball, mat('clasp', 1), 2);
+  clasp.frustumCulled = false; group.add(clasp, outline(clasp, 2));
+  const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+    const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(.35, 'rgba(255,255,255,.55)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = r; g.fillRect(0, 0, 128, 128); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false }));
+  glow.renderOrder = 2; group.add(glow);
   const strandMat = mat('strand', 0), strands = [0, 1].map(() => { const t = new THREE.Mesh(new THREE.BufferGeometry(), strandMat); const o = outline(t); t.add(o); group.add(t); return t; });
-  const bond = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 18, 1, true), mat('brk', .5));
+  const bond = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 18, 1, true), mat('brk', .8));
   bond.add(outline(bond)); group.add(bond);
 
   // the pearls sit only on the part of the linker that is out in the open: find where the curve leaves
@@ -253,7 +264,7 @@ function makeMolecule(THREE, D, Q, geom, bow) {
   while (u1 > .6 && inside(heads[1].mesh, curve0.getPointAt(u1))) u1 -= .01;
   const uMid = (u0 + u1) / 2, uOf = k => u0 + (u1 - u0) * (k + (k >= BRK ? .25 : 0) + .6) / (NB + .45);   // a slightly wider gap at the break
   const pw = new THREE.Vector3(), pe = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s3 = new THREE.Vector3();
-  const R = { pearl: 1.1, strand: .36, bond: .55 };
+  const R = { pearl: 1.1, clasp: 1.65, strand: .36, bond: .8 };
   // a point on the linker at fraction u, with each half's rigid move applied and blended across
   function along(u, T) {
     const p = curve0.getPointAt(u), side = u < uMid ? 0 : 1;
@@ -266,8 +277,10 @@ function makeMolecule(THREE, D, Q, geom, bow) {
     heads[0].mesh.quaternion.multiplyQuaternions(rW, Q); heads[0].mesh.position.copy(cW).sub(cW.clone().applyQuaternion(rW)).add(oW);
     heads[1].mesh.quaternion.multiplyQuaternions(rE, Q); heads[1].mesh.position.copy(cE).sub(cE.clone().applyQuaternion(rE)).add(oE);
     const T = { joined, w: p => p.sub(cW).applyQuaternion(rW).add(cW).add(oW), e: p => p.sub(cE).applyQuaternion(rE).add(cE).add(oE) };
-    const P = []; for (let k = 0; k < NB; k++) { P.push(along(uOf(k), T)); pearls.setMatrixAt(k, m4.compose(P[k], q.identity(), s3.setScalar(R.pearl))); }
-    pearls.instanceMatrix.needsUpdate = true;
+    const P = []; let j = 0;
+    for (let k = 0; k < NB; k++) { P.push(along(uOf(k), T)); const c = k === BRK - 1 || k === BRK;
+      (c ? clasp : pearls).setMatrixAt(c ? k - BRK + 1 : j++, m4.compose(P[k], q.identity(), s3.setScalar(c ? R.clasp : R.pearl))); }
+    pearls.instanceMatrix.needsUpdate = clasp.instanceMatrix.needsUpdate = true;
     // strand: from inside each half to its middle pearl, sampled finely so it bends with the curve
     const half = (u0, u1) => { const pts = []; for (let i = 0; i <= 12; i++) pts.push(along(u0 + (u1 - u0) * i / 12, T)); return pts; };
     [half(0, uOf(BRK - 1)), half(uOf(BRK), 1)].forEach((pts, i) => { const t = strands[i]; t.geometry.dispose();
@@ -276,15 +289,18 @@ function makeMolecule(THREE, D, Q, geom, bow) {
     const a = P[BRK - 1], b = P[BRK], d = b.clone().sub(a), len = d.length(), k = Math.max(0, Math.min(1, (joined - .5) / .5));
     bond.visible = k > .01; bond.position.copy(a).add(b).multiplyScalar(.5);
     bond.quaternion.setFromUnitVectors(up, d.divideScalar(len || 1)); bond.scale.set(R.bond * k, len, R.bond * k);
+    const breath = 1 + .08 * Math.sin(performance.now() / 600);
+    glow.position.copy(bond.position); glow.scale.setScalar(13 * breath); glow.material.opacity = .72 * k; glow.visible = k > .01;
     return bond.position.clone();
   }
   function setColors(P) {
     mats.warhead.uniforms.col.value.set(P.warhead); mats.e3lig.uniforms.col.value.set(P.e3lig);
-    mats.pearl.uniforms.col.value.set(P.pearl3d); mats.strand.uniforms.col.value.set(P.linker); mats.brk.uniforms.col.value.set(P.brk);
+    mats.pearl.uniforms.col.value.set(P.pearl3d); mats.strand.uniforms.col.value.set(P.linker); mats.brk.uniforms.col.value.set(P.clasp); mats.clasp.uniforms.col.value.set(P.clasp); glow.material.color.set(P.clasp);
     for (const k in mats) mats[k].uniforms.ink.value.set(P.ink);
     lineMat.uniforms.color.value.set(P.ink);
   }
   group.traverse(o => { o.userData.mol = true; });
+  glow.userData.mol = true;
   return { group, update, setColors, centre: cW.clone().add(cE).multiplyScalar(.5) };
 }
 
@@ -296,7 +312,7 @@ function applyPalette() {
   const c = PAL[pal]; root.setAttribute('data-palette', pal);
   mats.forEach(m => { m.uniforms.col.value.set(c[m.userData.key]); m.uniforms.ring.value.set(c.ring); });
   outlines.forEach(o => o.material.uniforms.color.value.set(c.ink));
-  flash.material.color.set(c.flash); mol.setColors(c);
+  flash.material.color.set(c.clasp); mol.setColors(c);
   document.querySelectorAll('.pal button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.pal === pal)));
 }
 document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click', () => { pal = b.dataset.pal; applyPalette(); }));
@@ -342,7 +358,7 @@ function frame(p) {
   const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(p * 15), free * .45 * Math.cos(p * 13), 0));
   const brk = mol.update(oW, oE, rW, rE, joined);
   // the bond clicking shut
-  const fx = bump(p, .655, .69); flash.position.copy(brk); flash.scale.setScalar(1 + 3 * clamp((p - .655) / .035, 0, 1)); flash.material.opacity = fx * .9;
+  const fx = bump(p, .655, .69); flash.position.copy(brk); flash.scale.setScalar(1 + 3 * clamp((p - .655) / .035, 0, 1)); flash.material.opacity = fx * .9; flash.visible = fx > .01;
   flash.lookAt(camera.position);
   // target and ligase glide in once the halves reach the neuron; the target leaves for the proteasome
   // BRD4 rises into place from below (clear of the copy on the left), later leaving for the proteasome

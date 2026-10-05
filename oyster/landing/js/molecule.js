@@ -66,10 +66,21 @@ function makeMolecule(THREE, D, Q, geom, bow) {
   const [cW, cE] = heads.map(h => h.c);
 
   // the linker: pearls (instanced), the strand on each side, and the reversible bond between the middle two
-  const pearls = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 28, 18), mat('pearl', .9), NB);
-  pearls.frustumCulled = false; group.add(pearls, outline(pearls, NB));
+  const ball = new THREE.SphereGeometry(1, 28, 18);
+  const pearls = new THREE.InstancedMesh(ball, mat('pearl', .9), NB - 2);
+  pearls.frustumCulled = false; group.add(pearls, outline(pearls, NB - 2));
+  // the meeting point is the idea worth showing, so it is drawn as a clasp: the two pearls either side of
+  // the reversible bond are larger and in an accent colour, the bond is thick and the same colour, and a
+  // soft glow breathes around the join while it is closed
+  const clasp = new THREE.InstancedMesh(ball, mat('clasp', 1), 2);
+  clasp.frustumCulled = false; group.add(clasp, outline(clasp, 2));
+  const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+    const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(.35, 'rgba(255,255,255,.55)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = r; g.fillRect(0, 0, 128, 128); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false }));
+  glow.renderOrder = 2; group.add(glow);
   const strandMat = mat('strand', 0), strands = [0, 1].map(() => { const t = new THREE.Mesh(new THREE.BufferGeometry(), strandMat); const o = outline(t); t.add(o); group.add(t); return t; });
-  const bond = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 18, 1, true), mat('brk', .5));
+  const bond = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 18, 1, true), mat('brk', .8));
   bond.add(outline(bond)); group.add(bond);
 
   // the pearls sit only on the part of the linker that is out in the open: find where the curve leaves
@@ -82,7 +93,7 @@ function makeMolecule(THREE, D, Q, geom, bow) {
   while (u1 > .6 && inside(heads[1].mesh, curve0.getPointAt(u1))) u1 -= .01;
   const uMid = (u0 + u1) / 2, uOf = k => u0 + (u1 - u0) * (k + (k >= BRK ? .25 : 0) + .6) / (NB + .45);   // a slightly wider gap at the break
   const pw = new THREE.Vector3(), pe = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s3 = new THREE.Vector3();
-  const R = { pearl: 1.1, strand: .36, bond: .55 };
+  const R = { pearl: 1.1, clasp: 1.65, strand: .36, bond: .8 };
   // a point on the linker at fraction u, with each half's rigid move applied and blended across
   function along(u, T) {
     const p = curve0.getPointAt(u), side = u < uMid ? 0 : 1;
@@ -95,8 +106,10 @@ function makeMolecule(THREE, D, Q, geom, bow) {
     heads[0].mesh.quaternion.multiplyQuaternions(rW, Q); heads[0].mesh.position.copy(cW).sub(cW.clone().applyQuaternion(rW)).add(oW);
     heads[1].mesh.quaternion.multiplyQuaternions(rE, Q); heads[1].mesh.position.copy(cE).sub(cE.clone().applyQuaternion(rE)).add(oE);
     const T = { joined, w: p => p.sub(cW).applyQuaternion(rW).add(cW).add(oW), e: p => p.sub(cE).applyQuaternion(rE).add(cE).add(oE) };
-    const P = []; for (let k = 0; k < NB; k++) { P.push(along(uOf(k), T)); pearls.setMatrixAt(k, m4.compose(P[k], q.identity(), s3.setScalar(R.pearl))); }
-    pearls.instanceMatrix.needsUpdate = true;
+    const P = []; let j = 0;
+    for (let k = 0; k < NB; k++) { P.push(along(uOf(k), T)); const c = k === BRK - 1 || k === BRK;
+      (c ? clasp : pearls).setMatrixAt(c ? k - BRK + 1 : j++, m4.compose(P[k], q.identity(), s3.setScalar(c ? R.clasp : R.pearl))); }
+    pearls.instanceMatrix.needsUpdate = clasp.instanceMatrix.needsUpdate = true;
     // strand: from inside each half to its middle pearl, sampled finely so it bends with the curve
     const half = (u0, u1) => { const pts = []; for (let i = 0; i <= 12; i++) pts.push(along(u0 + (u1 - u0) * i / 12, T)); return pts; };
     [half(0, uOf(BRK - 1)), half(uOf(BRK), 1)].forEach((pts, i) => { const t = strands[i]; t.geometry.dispose();
@@ -105,14 +118,17 @@ function makeMolecule(THREE, D, Q, geom, bow) {
     const a = P[BRK - 1], b = P[BRK], d = b.clone().sub(a), len = d.length(), k = Math.max(0, Math.min(1, (joined - .5) / .5));
     bond.visible = k > .01; bond.position.copy(a).add(b).multiplyScalar(.5);
     bond.quaternion.setFromUnitVectors(up, d.divideScalar(len || 1)); bond.scale.set(R.bond * k, len, R.bond * k);
+    const breath = 1 + .08 * Math.sin(performance.now() / 600);
+    glow.position.copy(bond.position); glow.scale.setScalar(13 * breath); glow.material.opacity = .72 * k; glow.visible = k > .01;
     return bond.position.clone();
   }
   function setColors(P) {
     mats.warhead.uniforms.col.value.set(P.warhead); mats.e3lig.uniforms.col.value.set(P.e3lig);
-    mats.pearl.uniforms.col.value.set(P.pearl3d); mats.strand.uniforms.col.value.set(P.linker); mats.brk.uniforms.col.value.set(P.brk);
+    mats.pearl.uniforms.col.value.set(P.pearl3d); mats.strand.uniforms.col.value.set(P.linker); mats.brk.uniforms.col.value.set(P.clasp); mats.clasp.uniforms.col.value.set(P.clasp); glow.material.color.set(P.clasp);
     for (const k in mats) mats[k].uniforms.ink.value.set(P.ink);
     lineMat.uniforms.color.value.set(P.ink);
   }
   group.traverse(o => { o.userData.mol = true; });
+  glow.userData.mol = true;
   return { group, update, setColors, centre: cW.clone().add(cE).multiplyScalar(.5) };
 }

@@ -87,10 +87,10 @@ const root = document.documentElement, stage = document.getElementById('stage'),
 // ---------- palettes ----------
 const PAL = {
   nacre: { ring: '#8C5572', ink: '#2B2230', brd4: '#E7C9D6', vhl: '#D6CBE6', elob: '#E8DEDB', eloc: '#DDD2D4', warhead: '#B4678B', e3lig: '#8A73B2',
-    linker: '#8C5572', brk: '#2B2230', ub: '#C99BB0', pearl3d: '#F6EEF1', e2: '#CDBFDF', prot: '#B9A9B6', wall: '#EADADF', flash: '#8C5572',
+    linker: '#8C5572', brk: '#2B2230', ub: '#C99BB0', pearl3d: '#F6EEF1', clasp: '#D9A443', e2: '#CDBFDF', prot: '#B9A9B6', wall: '#EADADF', flash: '#8C5572',
     sky: [['#F6EEEC', '#E3D3D8'], ['#F4E7E6', '#E6CBD0'], ['#EFE6EE', '#D9CCE2']] },
   tidepool: { ring: '#06302E', ink: '#06302E', brd4: '#F5D89A', vhl: '#9FD6C6', elob: '#3E7D78', eloc: '#346F6B', warhead: '#F2B84B', e3lig: '#5FC2A6',
-    linker: '#EAF3EF', brk: '#F2B84B', ub: '#F7C873', pearl3d: '#EAF3EF', e2: '#8CC9B8', prot: '#4F8C86', wall: '#2E6E69', flash: '#F2B84B',
+    linker: '#EAF3EF', brk: '#F2B84B', ub: '#F7C873', pearl3d: '#EAF3EF', clasp: '#F27D62', e2: '#8CC9B8', prot: '#4F8C86', wall: '#2E6E69', flash: '#F2B84B',
     sky: [['#1B6763', '#0F4C4A'], ['#1D615D', '#0E4543'], ['#155A57', '#0A3836']] },
 };
 let pal = 'nacre';
@@ -178,7 +178,7 @@ function applyPalette() {
   const c = PAL[pal]; root.setAttribute('data-palette', pal);
   mats.forEach(m => { m.uniforms.col.value.set(c[m.userData.key]); m.uniforms.ring.value.set(c.ring); });
   outlines.forEach(o => o.material.uniforms.color.value.set(c.ink));
-  flash.material.color.set(c.flash); mol.setColors(c);
+  flash.material.color.set(c.clasp); mol.setColors(c);
   document.querySelectorAll('.pal button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.pal === pal)));
 }
 document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click', () => { pal = b.dataset.pal; applyPalette(); }));
@@ -224,7 +224,7 @@ function frame(p) {
   const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(p * 15), free * .45 * Math.cos(p * 13), 0));
   const brk = mol.update(oW, oE, rW, rE, joined);
   // the bond clicking shut
-  const fx = bump(p, .655, .69); flash.position.copy(brk); flash.scale.setScalar(1 + 3 * clamp((p - .655) / .035, 0, 1)); flash.material.opacity = fx * .9;
+  const fx = bump(p, .655, .69); flash.position.copy(brk); flash.scale.setScalar(1 + 3 * clamp((p - .655) / .035, 0, 1)); flash.material.opacity = fx * .9; flash.visible = fx > .01;
   flash.lookAt(camera.position);
   // target and ligase glide in once the halves reach the neuron; the target leaves for the proteasome
   // BRD4 rises into place from below (clear of the copy on the left), later leaving for the proteasome
