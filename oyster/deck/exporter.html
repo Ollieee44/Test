@@ -7,6 +7,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 const DATA = await (await fetch('http://local/meshes.json')).json();
 const MOLECULE = await (await fetch('http://local/molecule.js')).text();
@@ -104,6 +105,46 @@ window.API = {
     rr.setClearColor(0, 0); rr.render(scene, cam);
     const url = cv.toDataURL('image/png'); rr.dispose(); holder.remove(info[k].group); return url;
   },
+};
+// the blood-brain barrier as the website draws it: three endothelial cells side by side, translucent, with
+// contour rings in each cell's own frame and an ink outline. Rendered with the site's shader to a
+// transparent image covering the whole slide, using the slide's projection (inches per angstrom k, the
+// view centre landing at X0, Y0 on a W x H inch slide, the scene turned by yaw then pitch).
+API.wall = (o) => {
+  const { yaw, pitch, k, X0, Y0, W, H, centre, wallY, px } = o;
+  const scene = new THREE.Scene(), turned = new THREE.Group(); scene.add(turned);
+  turned.rotation.set(pitch, yaw, 0, 'XYZ');
+  const fill = new THREE.ShaderMaterial({ transparent: true, depthWrite: false,
+    uniforms: { col: { value: new THREE.Color('#EADADF') }, ring: { value: new THREE.Color('#8C5572') }, spacing: { value: 2.4 }, alpha: { value: .42 } },
+    vertexShader: `varying vec3 vN; varying vec3 vL; varying vec3 vV;
+      void main() { vec4 w = modelMatrix * vec4(position, 1.0); vL = position; vN = normalize(mat3(modelMatrix) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`,
+    fragmentShader: `uniform vec3 col; uniform vec3 ring; uniform float spacing; uniform float alpha; varying vec3 vN; varying vec3 vL; varying vec3 vV;
+      void main() { vec3 n = normalize(vN); float d = length(vL) / spacing; float f = abs(fract(d) - .5); float w = fwidth(d);
+        float line = smoothstep(.5 - 1.6 * w, .5 - .4 * w, f);
+        float lit = .82 + .18 * max(dot(n, normalize(vec3(.4, .7, .6))), 0.0);
+        float rim = pow(1.0 - max(dot(n, normalize(vV)), 0.0), 2.2);
+        vec3 c = col * lit; c = mix(c, ring, line * .55); c = mix(c, ring, rim * .35);
+        gl_FragColor = vec4(c, alpha);
+        #include <colorspace_fragment>
+      }` });
+  const ink = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.BackSide,
+    uniforms: { color: { value: new THREE.Color('#2B2230') } },
+    vertexShader: `void main() { vec3 p = position + normalize(normal) * .5; gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }`,
+    fragmentShader: `uniform vec3 color; void main() { gl_FragColor = vec4(color, .35);
+      #include <colorspace_fragment>
+    }` });
+  const g = new RoundedBoxGeometry(o.cellW || 118, 16, 96, 6, 7);
+  for (let i = -2; i <= 2; i++) {
+    const b = new THREE.Mesh(g, fill); b.position.set(i * ((o.cellW || 118) + 2) + (o.wallX || 0), wallY - centre[1], 0);
+    const o2 = new THREE.Mesh(g, ink); o2.renderOrder = -1; b.add(o2); turned.add(b);
+  }
+  // orthographic camera matching the slide: view centre at (X0, Y0) inches, k inches per angstrom
+  const cam = new THREE.OrthographicCamera(-X0 / k, (W - X0) / k, Y0 / k, -(H - Y0) / k, -1000, 1000);
+  cam.position.set(0, 0, 500); cam.lookAt(0, 0, 0);
+  const cv = document.createElement('canvas'); cv.width = px; cv.height = Math.round(px * H / W);
+  const rr = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  rr.setClearColor(0, 0); rr.render(scene, cam);
+  const url = cv.toDataURL('image/png'); rr.dispose(); return url;
 };
 window.READY = true;
 </script>

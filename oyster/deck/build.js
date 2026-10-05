@@ -80,7 +80,9 @@ async function exportAssets() {
   const lp = await b.newPage({ viewport: { width: 2441, height: 858 } });
   await lp.setContent('<style>html,body{margin:0;background:transparent}svg{display:block;width:2441px;height:auto}</style>' + fs.readFileSync(path.join(HERE, '../brand/oyster-logotype-nacre.svg'), 'utf8'));
   await lp.screenshot({ path: path.join(OUT, 'logotype.png'), omitBackground: true });
-  return { info, spots, still, close: () => b.close() };
+  const wall = async (o) => { const f = path.join(ASSETS, 'barrier.png');
+    fs.writeFileSync(f, Buffer.from((await page.evaluate(o => API.wall(o), o)).split(',')[1], 'base64')); return f; };
+  return { info, spots, still, wall, close: () => b.close() };
 }
 
 // ---------- small vector maths ----------
@@ -142,9 +144,9 @@ function turn(p, yaw, pitch) {
     let centre = s.focus === 'deg' ? deg : complex;
     if (s.shift) centre = add(centre, [...s.shift, 0]);
     const toSlide = p => { const q = turn(sub(p, centre), s.yaw, s.pitch); return [X0 + q[0] * s.k, Y0 - q[1] * s.k, q[2]]; };
-    if (s.membrane) {   // the barrier: two endothelial cells side by side, the halves passing through
-      for (const [i, x] of [[0, 5.45], [1, 9.5]]) slide.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y: 3.0, w: 3.95, h: 2.0, rectRadius: .45,
-        fill: { color: 'EADADF', transparency: 35 }, line: { color: '8C5572', width: 1, transparency: 40 }, objectName: '!!Membrane' + i });
+    if (s.membrane) {   // the barrier, drawn as on the website, the halves passing through it
+      const img = await A.wall({ yaw: s.yaw, pitch: s.pitch, k: s.k, X0, Y0, W, H, centre, wallY: deg[1] - 24, cellW: 76, wallX: 2, px: 2400 });
+      slide.addImage({ path: img, x: 0, y: 0, w: W, h: H, objectName: '!!Barrier', altText: 'The blood-brain barrier: endothelial cells side by side' });
     }
     // 3D parts, drawn back to front
     const items = Object.entries(s.parts).map(([name, spec]) => { const pl = place(s, name, spec); const [x, y, z] = toSlide(pl.p);
