@@ -179,7 +179,7 @@ function turn(p, yaw, pitch) {
         const x = .7 + i * 2.32, reached = i <= s.step, clasp = i === 3, d = clasp ? .26 : .2;
         slide.addShape(pres.shapes.OVAL, { x: x + .15 - d / 2, y: 6.86 - d / 2, w: d, h: d, objectName: '!!Rail pearl ' + i,
           fill: { color: reached ? (clasp ? 'D9A443' : 'FFFFFF') : 'F6EEEC', transparency: reached ? 0 : 100 }, line: { color: '2B2230', width: 1.1, transparency: reached ? 0 : 50 } });
-        slide.addText(label.toUpperCase(), { isTextBox: true, x: x + .38, y: 6.74, w: 1.8, h: .26, fontFace: 'IBM Plex Mono', fontSize: 9, charSpacing: 1.5, color: i === s.step ? C.text1 : C.text2, margin: 0, objectName: '!!Rail label ' + i });
+        slide.addText(label.toUpperCase(), { isTextBox: true, x: x + .05, y: 7.02, w: 1.8, h: .24, fontFace: 'IBM Plex Mono', fontSize: 9, charSpacing: 1.5, color: i === s.step ? C.text1 : C.text2, margin: 0, objectName: '!!Rail label ' + i });
       });
     }
     slide.addNotes(NOTES[s.key]);
