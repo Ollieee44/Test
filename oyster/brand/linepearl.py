@@ -33,6 +33,25 @@ def drawing(scale, box):
         ribs.append((T(HINGE[0] + R * .34 * math.cos(a), HINGE[1] + R * .34 * math.sin(a)), T(HINGE[0] + R * math.cos(a), HINGE[1] + R * math.sin(a))))
     return shapes, ribs, pearl
 
+def circle_box(scale, rim, disc=(51.5, 50, 42)):
+    """The largest box for drawing() whose outline (fan and dish, with their line weight) sits inside the
+    disc with rim units of solid disc left all round."""
+    (fan, dish, _), _, _ = drawing(scale, (0, 0, 100, 100))
+    pts = fan + dish
+    x0 = min(x for x, _ in pts); x1 = max(x for x, _ in pts); y0 = min(y for _, y in pts); y1 = max(y for _, y in pts)
+    cx, cy, R = disc; best = None
+    for i in range(121):                       # try vertical offsets of the drawing's centre
+        dy = -12 + 24 * i / 120
+        # the largest scale t at which every point lies within R - rim of the disc's centre
+        lo, hi = 0.0, 2.0
+        for _ in range(40):
+            t = (lo + hi) / 2
+            ok = all(math.hypot(cx + t * (x - (x0 + x1) / 2) - cx, cy + dy + t * (y - (y0 + y1) / 2) - cy) + W / 2 <= R - rim for x, y in pts)
+            lo, hi = (t, hi) if ok else (lo, t)
+        if best is None or lo > best[0]: best = (lo, dy)
+    t, dy = best
+    return (cx - t * (x1 - x0) / 2, cy + dy - t * (y1 - y0) / 2, cx + t * (x1 - x0) / 2, cy + dy + t * (y1 - y0) / 2)
+
 def _ribs(ribs, color):
     return ''.join(f'<line x1="{a[0]:.2f}" y1="{a[1]:.2f}" x2="{b[0]:.2f}" y2="{b[1]:.2f}" stroke="{color}" stroke-width="{W}" stroke-linecap="round"/>' for a, b in ribs)
 
@@ -48,10 +67,10 @@ def build(ns=''):
         sym[name] = (f'<g mask="url(#{a})">{P(fan, st)}<g clip-path="url(#{cp})">{_ribs(ribs, "currentColor")}</g></g>'
                      f'<g mask="url(#{b})">{P(dish, st)}{P(dish_in, st)}</g><circle cx="{px:.2f}" cy="{py:.2f}" r="{pr:.2f}" {P1}/>')
 
-    def inside(name, scale, gap=2.6):
+    def inside(name, scale, gap=2.6, box=(21, 23, 82, 80)):
         # the disc is solid; the drawing's lines are cut through it. Mask order matters: the fan's lines,
         # then the dish filled white (so the fan does not show through it), then the dish's lines
-        (fan, dish, dish_in), ribs, (px, py, pr) = drawing(scale, (21, 23, 82, 80))
+        (fan, dish, dish_in), ribs, (px, py, pr) = drawing(scale, box)
         st = f'fill="none" stroke="#000" stroke-width="{W}" stroke-linejoin="round" stroke-linecap="round"'
         a, cp = f'{ns}mL-{name}', f'{ns}cL-{name}'
         masks[name] = (mask(a, P(fan, st) + f'<g clip-path="url(#{cp})">{_ribs(ribs, "#000")}</g>'
@@ -62,6 +81,8 @@ def build(ns=''):
 
     for key, s in SIZES.items(): line(f'line-{key}', s)
     for key in ('s', 'm', 'l'): inside(f'io-{key}', SIZES[key])
+    # the 80% pearl inside out, the drawing as large as the disc allows, with a solid rim of 7, 5 or 3.5 units
+    for rim in (7, 5, 3.5): inside(f'io-s-rim{str(rim).replace(".", "")}', SIZES['s'], box=circle_box(SIZES['s'], rim))
     return masks, sym
 
 def standalone(name, ink, pearl, clasp, ns='x-'):

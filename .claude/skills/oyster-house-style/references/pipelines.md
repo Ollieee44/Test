@@ -81,6 +81,7 @@ URL, so the client's link stays the same:
 | From the references (`brand/refs.html`) | https://claude.ai/artifact/ACn2XP8bzFsQJVb5d5DKyb |
 | Fan and pearl riffs (`brand/riffs.html`) | https://claude.ai/artifact/S2YScwuN6szkQzeQ2rex7Y |
 | Line fan, pearl sizes (`brand/linepearl.html`) | https://claude.ai/artifact/4zMWE6ipDqHpULNFiJG8os |
+| Line fan, inside out tighter (`brand/linepick.html`) | https://claude.ai/artifact/4gdAYgpeD5UJzm2T1zwqw1 |
 
 The deck is delivered as a file (send it to the user), not an artifact. Commit and push after each
 change with a message that says what changed and why.
