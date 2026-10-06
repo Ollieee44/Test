@@ -974,7 +974,7 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   // timeline (ms): the closed clam rushes in from the left and above, opens as it comes closest, its lid rising to
   // stand upright; the pearl forms in the cup; as it pulls back it swings round to face us and drops to the mark's
   // low angle, landing in the 'o'; the line-cut disc closes round it, the word writes in, the logotype settles
-  const T = { fade: [0, 180], move: [0, 2100], merge: [1850, 2150],
+  const T = { fade: [0, 180], move: [0, 1950], merge: [1850, 2150],   // the move has all but stopped as the disc fades in
     letters: [2000, 2850], ther: [2450, 2850], glide: [3050, 3610], bg: [3050, 3610], site: 3560, end: 3650 };
   const k = (t, [a, b]) => clamp((t - a) / (b - a), 0, 1);
   const lerp = (a, b, x) => a + (b - a) * x;
@@ -1086,6 +1086,18 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
     // aim so the hinge lands on the logo's hinge: the camera's right is +x, its up is (0, cos EL, -sin EL)
     const [hx, hy] = toLT(GEO.hinge), sx = K.full[0] + (hx - VB[0]) * u - W / 2, sy = K.full[1] + (hy - VB[1]) * u - H / 2;
     TL = new THREE.Vector3(-sx / s, 0, 0).add(new THREE.Vector3(0, Math.cos(EL), -Math.sin(EL)).multiplyScalar(sy / s));
+    // then pin the pearl: it sits in front of the hinge, so perspective moves it a few pixels off the logo's pearl,
+    // which showed as a jump when the disc faded in. At the final camera, project it and nudge the aim and the
+    // distance until its centre and size match the logo's pearl exactly
+    const [qx, qy] = toLT(GEO.pearl), PX = K.full[0] + (qx - VB[0]) * u, PY = K.full[1] + (qy - VB[1]) * u, PR = GEO.pearl[2] * 6.3571 * u;
+    const RIGHT = new THREE.Vector3(1, 0, 0), UP = new THREE.Vector3(0, Math.cos(EL), -Math.sin(EL)), v = new THREE.Vector3();
+    for (let i = 0; i < 6; i++) {
+      cam.position.set(TL.x, TL.y + Dl * Math.sin(EL), TL.z + Dl * Math.cos(EL)); cam.lookAt(TL); cam.updateMatrixWorld();
+      v.copy(PEARL_AT).project(cam);
+      const ex = (v.x + 1) / 2 * W, ey = (1 - v.y) / 2 * H, rr = PEARL_R / (cam.position.distanceTo(PEARL_AT) * TAN) * H / 2;
+      const sNow = s * (Dl / (Dl * rr / PR)); Dl *= rr / PR;
+      TL.addScaledVector(RIGHT, (ex - PX) / sNow).addScaledVector(UP, -(ey - PY) / sNow);
+    }
   }
   let L9 = 0, Lc = 0, Ll = 0;
   const setPath = () => { L9 = Math.log(Dc * 9); Lc = Math.log(Dc); Ll = Math.log(Dl); };
