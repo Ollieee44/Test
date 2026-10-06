@@ -1,0 +1,50 @@
+/* Print stylesheet for the Oyster project report: A4, the brand's Nacre colours, fonts available offline
+   (Caladea for headings in place of Newsreader, Inter for text, DejaVu Sans Mono for code). */
+@page { size: A4; margin: 16mm 15mm 18mm; }
+:root { --ink: #2B2230; --muted: #65586A; --accent: #8C5572; --paper: #EFE6E1; --line: rgba(43, 34, 48, .16); --clasp: #D9A443; --teal: #0F4C4A; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; color: var(--ink); font: 400 9.6pt/1.5 "Inter", "Liberation Sans", sans-serif; }
+h1, h2, h3 { font-family: "Caladea", "Liberation Serif", serif; font-weight: 700; color: var(--ink); margin: 0; }
+h1 { font-size: 30pt; line-height: 1.05; letter-spacing: -.01em; margin: 6pt 0 10pt; }
+h2 { font-size: 19pt; margin: 0 0 8pt; padding-bottom: 5pt; border-bottom: 1.5pt solid var(--accent); }
+h3 { font-size: 12.5pt; margin: 13pt 0 4pt; color: var(--accent); break-after: avoid; }
+h2 { break-after: avoid; } pre, table, .journey { break-inside: avoid; }
+p { margin: 0 0 7pt; }
+ul { margin: 0 0 6pt; padding-left: 13pt; } li { margin: 0 0 4pt; }
+a { color: var(--accent); text-decoration: none; }
+code, pre { font-family: "DejaVu Sans Mono", monospace; font-size: 7.6pt; }
+code { background: #F4EEEA; padding: 0 2.5pt; border-radius: 2pt; }
+pre { background: #F4EEEA; border-left: 2.5pt solid var(--clasp); padding: 7pt 9pt; margin: 4pt 0 8pt; white-space: pre-wrap; line-height: 1.45; }
+.small { font-size: 8.2pt; color: var(--muted); }
+section { break-before: page; }
+section.cover { break-before: auto; }
+.eyebrow { font: 500 7.6pt/1 "DejaVu Sans Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 11pt; color: var(--muted); max-width: 150mm; margin-bottom: 12pt; }
+.sites { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; margin: 6pt 0 10pt; }
+.site { border: .6pt solid var(--line); border-radius: 6pt; overflow: hidden; break-inside: avoid; }
+.shots { display: grid; grid-template-columns: 1fr 1fr; }
+.shots img { width: 100%; display: block; aspect-ratio: 16 / 10; object-fit: cover; }
+.meta { padding: 5pt 7pt 6pt; display: grid; gap: 1pt; }
+.meta b { font-size: 9.5pt; } .meta span { font-size: 7.4pt; } .meta code { font-size: 6.8pt; justify-self: start; }
+.map { width: 100%; height: auto; display: block; margin: 4pt 0 6pt; }
+.map .bx rect { fill: #FBF8F6; stroke: var(--line); stroke-width: 1; }
+.map .bx.web rect { fill: #F6EEEC; } .map .bx.logo rect { fill: #EEF4F2; }
+.map .bx.out rect { fill: var(--ink); stroke: none; } .map .bx.out .t, .map .bx.out .s { fill: #EFE6E1; }
+.map .d { font: 500 7.5px "DejaVu Sans Mono", monospace; fill: var(--accent); letter-spacing: .06em; }
+.map .t { font: 700 11px "Caladea", serif; fill: var(--ink); }
+.map .s { font: 400 8.2px "Inter", sans-serif; fill: var(--muted); }
+.map .lane { font: 500 8px "DejaVu Sans Mono", monospace; letter-spacing: .14em; fill: var(--muted); }
+.map .note { font: italic 400 7.6px "Inter", sans-serif; fill: var(--muted); }
+.map .ar { fill: none; stroke: var(--accent); stroke-width: 1.2; } .map .ar.dash { stroke-dasharray: 3 3; stroke: var(--clasp); }
+.map .ah { fill: var(--accent); }
+.journey { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5pt; margin: 6pt 0 10pt; }
+.jc { border: .6pt solid var(--line); border-radius: 5pt; padding: 5pt 4pt 6pt; display: grid; justify-items: center; text-align: center; gap: 1pt; background: #F6EFEC; break-inside: avoid; }
+.jc.pick { border: 1.4pt solid var(--accent); }
+.jc b { font: 500 7.6pt "DejaVu Sans Mono", monospace; color: var(--accent); }
+.jc span { font-size: 7.6pt; font-weight: 600; line-height: 1.2; } .jc i { font-size: 6.8pt; color: var(--muted); font-style: normal; line-height: 1.2; }
+table { width: 100%; border-collapse: collapse; margin: 4pt 0 8pt; }
+td, th { border-top: .6pt solid var(--line); padding: 5pt 6pt 5pt 0; vertical-align: top; text-align: left; }
+.t4 th { font-weight: 600; } .t4 td { font-size: 9pt; }
+.files td:first-child { width: 33%; } .files td { font-size: 8.8pt; }
+.links td:first-child { width: 30%; font-weight: 600; } .links td { font-size: 8.2pt; }
