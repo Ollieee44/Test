@@ -78,6 +78,7 @@ URL, so the client's link stays the same:
 | Open oyster (`brand/threequarter.html`) | https://claude.ai/artifact/3XER9VkRqams9ryoFciMjb |
 | Open oyster picks, 02 and 05 (`brand/openpick.html`) | https://claude.ai/artifact/JCZmPkni1P6zVMZuQHMMFY |
 | Two valves, one hinge (`brand/hinged.html`) | https://claude.ai/artifact/N8uzWVpwns4Skux3XkmCYy |
+| From the references (`brand/refs.html`) | https://claude.ai/artifact/ACn2XP8bzFsQJVb5d5DKyb |
 
 The deck is delivered as a file (send it to the user), not an artifact. Commit and push after each
 change with a message that says what changed and why.
