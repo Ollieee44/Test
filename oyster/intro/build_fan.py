@@ -1,5 +1,6 @@
-"""Build intro/fan-tidepool.html: the intro reworked for the face-on fan mark (11.7 in the Mark Catalogue: the
-line fan and 80% pearl inside out, rim 3.5), opening in Tidepool.
+"""Build the pages for the face-on fan mark (11.7 in the Mark Catalogue: the
+line fan and 80% pearl inside out, rim 3.5): intro/fan-tidepool.html and intro/fan-nacre.html (the website opened
+by the reworked intro, in each palette) and intro/fan-site.html (the website alone).
 
 The site (../site/index.html, left untouched) gets the new mark as the 'o' of every wordmark (header, end card,
 footer). The intro's 3D oyster is rebuilt to match it: both valves have the mark's fan outline, hinged at the back;
@@ -65,7 +66,11 @@ GEO = {'edge': edge, 'k': round(k, 6), 'hinge': [round(ox + k * HINGE[0], 3), ro
        'pearl': [round(px, 3), round(py, 3), round(pr, 3)], 'pearlRef': round(linepearl.PR * SCALE, 2),
        'ribs': [round(math.degrees(math.atan2(b[0] - a[0], -(b[1] - a[1]))), 2) for a, b in ribs], 'side': round(side, 2)}
 
-# ---------- assemble, as build_intro.py does ----------
+# ---------- the website alone, with the new mark and no intro ----------
+site = h.replace('<title>Oyster Therapeutics</title>', '<title>Oyster Website, Fan Mark</title>', 1)
+open(D + 'fan-site.html', 'w').write(site)
+
+# ---------- the intro, as build_intro.py does: one page opening in each palette ----------
 once('<figcaption><span class="dot"></span>The clasp: closes as you scroll</figcaption>',
      '<figcaption><span class="dot"></span>A reversible clasp: it closes, then lets go</figcaption>')
 once('aria-label="The two halves of a SELFTAC molecule closing at the clasp as you scroll"',
@@ -73,13 +78,17 @@ once('aria-label="The two halves of a SELFTAC molecule closing at the clasp as y
 once("goal = Math.max(0, Math.min(1, 1 - (r.top + r.height / 2 - innerHeight * .45) / (innerHeight * .45))); };",
      "const v = Math.max(0, Math.min(1, 1 - (r.top + r.height / 2) / innerHeight)), up = Math.min(1, v / .45), down = Math.min(1, (1 - v) / .4); goal = Math.max(0, Math.min(up, down)); };   // 0 low on the screen, 1 through the middle, 0 again as it leaves the top")
 once('</style>', open(D + 'intro.css').read() + '</style>')
-overlay = ('<script>document.documentElement.classList.add("intro"); window.__startPal = "tidepool";</script>'
-           '<style>.intro-ov .ibg { --intro-a: #0B3A38; --intro-b: #04201F; }</style>\n'
-           '<div class="intro-ov" id="intro" aria-hidden="true"><div class="ibg"></div><canvas id="introGl"></canvas>' + ilogo + '</div>\n'
-           '<button type="button" class="iskip" id="introSkip">Skip intro</button>\n')
-once('<canvas id="bgArt"', overlay + '<canvas id="bgArt"')
 js = open(D + 'intro_fan.js').read().replace('/*GEO*/null', json.dumps(GEO))
 once('\nwindow.__story = {', '\n' + js + '\nwindow.__story = {')
-once('<title>Oyster Therapeutics</title>', '<title>Oyster Intro, Fan Mark</title>')   # its own name, to tell it from the live site
-open(D + 'fan-tidepool.html', 'w').write(h)
-print('intro/fan-tidepool.html', len(h) // 1024, 'KB;', count, 'wordmarks swapped; ribs', GEO['ribs'])
+base = h
+for pal, start in (('tidepool', '<script>document.documentElement.classList.add("intro"); window.__startPal = "tidepool";</script>'
+                                 '<style>.intro-ov .ibg { --intro-a: #0B3A38; --intro-b: #04201F; }</style>'),   # the stage teal from the first frame
+                   ('nacre', '<script>document.documentElement.classList.add("intro");</script>')):   # Nacre is the site's default
+    overlay = (start + '\n<div class="intro-ov" id="intro" aria-hidden="true"><div class="ibg"></div><canvas id="introGl"></canvas>' + ilogo + '</div>\n'
+               '<button type="button" class="iskip" id="introSkip">Skip intro</button>\n')
+    h = base
+    once('<canvas id="bgArt"', overlay + '<canvas id="bgArt"')
+    once('<title>Oyster Therapeutics</title>', f'<title>Oyster Intro, Fan Mark ({pal.title()})</title>')   # its own name, to tell it from the live site
+    open(D + f'fan-{pal}.html', 'w').write(h)
+    print(f'intro/fan-{pal}.html', len(h) // 1024, 'KB')
+print('intro/fan-site.html;', count, 'wordmarks swapped; ribs', GEO['ribs'])
