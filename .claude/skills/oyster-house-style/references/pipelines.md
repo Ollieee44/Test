@@ -75,6 +75,7 @@ URL, so the client's link stays the same:
 | Logotype studio | https://claude.ai/artifact/7tNEfaWQeav7iTWnMSocu1 |
 | Inside Out, refined (`brand/refine.html`) | https://claude.ai/artifact/TYDiqpmFntUpWcALworY7g |
 | Beyond the compact (`brand/frontal.html`) | https://claude.ai/artifact/H9Kr4y1ZRdNsRYhnCf1NKf |
+| Open oyster (`brand/threequarter.html`) | https://claude.ai/artifact/3XER9VkRqams9ryoFciMjb |
 
 The deck is delivered as a file (send it to the user), not an artifact. Commit and push after each
 change with a message that says what changed and why.
