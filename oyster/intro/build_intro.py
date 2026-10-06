@@ -28,6 +28,14 @@ s = s.replace('</g></svg>', '<g id="ioLetters" style="opacity:0" clip-path="url(
 s = s.replace('<svg ', '<svg class="ilogo" id="ilogo" aria-hidden="true" ', 1)
 assert all(f'id="{i}"' in s for i in ('ioCut', 'ioHole', 'ioMark', 'ioDisc', 'ioPearl', 'ioClipR', 'ioLetters', 'ioTher'))
 
+# the 'Why Oyster' clasp, intro versions only: it closes as the figure rises into view and opens again as it
+# leaves, so the scroll shows the bond is reversible; the caption says so instead of telling you to scroll
+once('<figcaption><span class="dot"></span>The clasp: closes as you scroll</figcaption>',
+     '<figcaption><span class="dot"></span>A reversible clasp: it closes, then lets go</figcaption>')
+once('aria-label="The two halves of a SELFTAC molecule closing at the clasp as you scroll"',
+     'aria-label="The two halves of a SELFTAC molecule joining at the clasp and coming apart again"')
+once("goal = Math.max(0, Math.min(1, 1 - (r.top + r.height / 2 - innerHeight * .45) / (innerHeight * .45))); };",
+     "const v = Math.max(0, Math.min(1, 1 - (r.top + r.height / 2) / innerHeight)), up = Math.min(1, v / .45), down = Math.min(1, (1 - v) / .4); goal = Math.max(0, Math.min(up, down)); };   // 0 low on the screen, 1 through the middle, 0 again as it leaves the top")
 once('</style>', open(D + 'intro.css').read() + '</style>')
 overlay = ('<script>document.documentElement.classList.add("intro")</script>\n'
            '<div class="intro-ov" id="intro" aria-hidden="true"><div class="ibg"></div><canvas id="introGl"></canvas><div class="ipearl" id="ipearl"></div>' + s + '</div>\n'

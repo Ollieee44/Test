@@ -287,8 +287,8 @@ html.intro-end .stage .copy, html.intro-end .stage .rail, html.intro-end .stage 
       </ul>
     </div>
     <figure class="vis rv">
-      <canvas id="claspGl" aria-label="The two halves of a SELFTAC molecule closing at the clasp as you scroll" role="img"></canvas>
-      <figcaption><span class="dot"></span>The clasp: closes as you scroll</figcaption>
+      <canvas id="claspGl" aria-label="The two halves of a SELFTAC molecule joining at the clasp and coming apart again" role="img"></canvas>
+      <figcaption><span class="dot"></span>A reversible clasp: it closes, then lets go</figcaption>
     </figure>
   </div>
 </section>
@@ -844,7 +844,7 @@ if (claspCanvas && renderer) {
   // where the figure sits is read on scroll and resize, not every frame: 0 while it is low on the
   // screen, 1 once its centre passes 45% of the viewport height
   let goal = 0;
-  const measure2 = () => { const r = claspCanvas.getBoundingClientRect(); goal = Math.max(0, Math.min(1, 1 - (r.top + r.height / 2 - innerHeight * .45) / (innerHeight * .45))); };
+  const measure2 = () => { const r = claspCanvas.getBoundingClientRect(); const v = Math.max(0, Math.min(1, 1 - (r.top + r.height / 2) / innerHeight)), up = Math.min(1, v / .45), down = Math.min(1, (1 - v) / .4); goal = Math.max(0, Math.min(up, down)); };   // 0 low on the screen, 1 through the middle, 0 again as it leaves the top
   addEventListener('scroll', measure2, { passive: true }); addEventListener('resize', measure2); measure2();
   // it moves only with the scroll (no autoplaying loop): the halves close and the model turns a little
   // as the section comes up, and the scene stops redrawing once it has settled
