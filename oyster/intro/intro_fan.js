@@ -46,23 +46,39 @@
   const edgeAt = phi => { const i = clamp((phi / D2R + 90) / 3, 0, 60), a = Math.floor(i), b = Math.min(60, a + 1); return lerp(GEO.edge[a], GEO.edge[b], i - a) * U; };
   const LEN = edgeAt(0);                       // hinge to lip
   const bulge = s => Math.pow(Math.max(0, 4 * s * (1 - s)), .75);   // 0 at the hinge and at the lip
-  // the lid's swell near the hinge: a full-size pearl does not fit near the hinge of a thin shell, so while the
-  // clam is closed the lid is thick there, like a cockle's, and the swell smooths away as it opens
-  const swell = s => Math.exp(-Math.pow((s - .2) / .4, 2)), SWELL = 18;   // the lowest, broadest swell that clears the pearl
-  function valve(dOut, dIn, sx, hump = 0) {   // dOut, dIn: how far the outer and inner surfaces bow out (negative: downwards)
-    const NR = 44, NT = 96, pos = [], outer = [], inner = [];
-    for (const [d, list, up] of [[dOut, outer, dOut > 0], [dIn, inner, dIn < 0]]) {   // faces wound to point out of the shell
-      const base = pos.length / 3;
+  // closed, the clam is a smooth oval, domed all over and rounded behind the hinge; open, each valve is the mark's
+  // fan. A full-size pearl does not fit near the hinge of the thin fan, so the closed dome is highest over the
+  // pearl; both valves ease from the oval into the fan as the lid lifts. Checked so that the lid clears the pearl
+  // at every step of the opening, over its whole surface (by 0.56 units at the closest, in the final pose)
+  const OV = { a: 38, back: 10, zp: 12 }; OV.zc = (LEN - OV.back) / 2; OV.b = (LEN + OV.back) / 2;
+  function rimFrom(px, pz, dx, dz) {   // distance from a point inside the oval to its rim along (dx, dz)
+    const A = dx * dx / (OV.a * OV.a) + dz * dz / (OV.b * OV.b), B = 2 * (px * dx / (OV.a * OV.a) + (pz - OV.zc) * dz / (OV.b * OV.b));
+    const C = px * px / (OV.a * OV.a) + (pz - OV.zc) ** 2 / (OV.b * OV.b) - 1;
+    return (-B + Math.sqrt(B * B - 4 * A * C)) / (2 * A);
+  }
+  const dome = (x, z) => { const dz = z - OV.zp, d = Math.hypot(x, dz); if (d < 1e-6) return 1;   // 1 over the pearl, 0 at the rim
+    const t = d / rimFrom(0, OV.zp, x / d, dz / d); return Math.pow(Math.max(0, 1 - t * t), .7); };
+  const fanEdge = phi => Math.abs(phi) > Math.PI / 2 ? 0 : edgeAt(phi);   // the fan has nothing behind its hinge
+  function valve(dFan, dOval, sx) {   // [fan, oval] pairs of how far the outer and inner surfaces bow out (negative: downwards)
+    const NR = 44, NT = 144, fan = [], oval = [], outer = [], inner = [];
+    for (const [k, list, up] of [[0, outer, dFan[0] > 0], [1, inner, dFan[1] < 0]]) {   // faces wound to point out of the shell
+      const base = fan.length / 3;
       for (let i = 0; i <= NR; i++) { const s = i / NR;
-        for (let j = 0; j <= NT; j++) { const phi = (-90 + 180 * j / NT) * D2R, r = s * edgeAt(phi);
-          pos.push(r * Math.sin(phi) * sx, d * bulge(s) + hump * swell(s), r * Math.cos(phi)); } }
+        for (let j = 0; j <= NT; j++) { const phi = (-180 + 360 * j / NT) * D2R, rf = s * fanEdge(phi), ro = s * rimFrom(0, 0, Math.sin(phi), Math.cos(phi));
+          fan.push(rf * Math.sin(phi) * sx, dFan[k] * bulge(s), rf * Math.cos(phi));
+          const ox = ro * Math.sin(phi), oz = ro * Math.cos(phi); oval.push(ox, dOval[k] * dome(ox, oz), oz); } }
       for (let i = 0; i < NR; i++) for (let j = 0; j < NT; j++) {
         const a = base + i * (NT + 1) + j, b = a + 1, c = a + NT + 1, e = c + 1;
         if (up) list.push(a, c, b, b, c, e); else list.push(a, b, c, b, e, c); }
     }
-    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(oval, 3));
     g.setIndex(outer.concat(inner)); g.addGroup(0, outer.length, 0); g.addGroup(outer.length, inner.length, 1);
-    g.computeVertexNormals(); return g;
+    g.computeVertexNormals(); g.userData = { fan: Float32Array.from(fan), oval: Float32Array.from(oval) }; return g;
+  }
+  function morph(g, w) {   // w: 1 the closed oval, 0 the open fan
+    const p = g.attributes.position.array, { fan, oval } = g.userData;
+    for (let i = 0; i < p.length; i++) p[i] = fan[i] + (oval[i] - fan[i]) * w;
+    g.attributes.position.needsUpdate = true; g.computeVertexNormals(); g.attributes.normal.needsUpdate = true;
   }
   // flat-shaded nacre with lines in the valve's own frame: growth rings round the hinge (outside), or the fan's
   // ribs (inside the lid, where the logo draws them), with a soft rim like the story's contour material
@@ -98,17 +114,11 @@
   const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(22, 1, 1, 6000);
   const oyster = new THREE.Group(); sc.add(oyster);
   const SXL = 1.09;                                         // the lower valve is a little wider, as the logo's dish is
-  const lower = shellMesh(valve(-12, -8, SXL), 0, SXL); oyster.add(lower);
+  const lowerGeo = valve([-12, -8], [-12, -9], SXL), lower = shellMesh(lowerGeo, 0, SXL); oyster.add(lower);
   const lid = new THREE.Group(); oyster.add(lid);           // the hinge is the origin
-  const upperGeo = valve(7, 4.6, 1), upper = shellMesh(upperGeo, 2, 1); lid.add(upper);
-  const FLAT = upperGeo.attributes.position.array.slice(), FULL = valve(7, 4.6, 1, SWELL).attributes.position.array;
-  let swollen = -1;
-  function setSwell(w) {   // w: 1 closed (thick at the hinge), 0 open (the drawing's lid)
-    if (Math.abs(w - swollen) < 1e-4) return; swollen = w;
-    const p = upperGeo.attributes.position.array;
-    for (let i = 0; i < p.length; i++) p[i] = FLAT[i] + (FULL[i] - FLAT[i]) * w;
-    upperGeo.attributes.position.needsUpdate = true; upperGeo.computeVertexNormals(); upperGeo.attributes.normal.needsUpdate = true;
-  }
+  const upperGeo = valve([7, 4.6], [22.5, 20], 1), upper = shellMesh(upperGeo, 2, 1); lid.add(upper);
+  let shapeW = -1;
+  function setShape(w) { if (Math.abs(w - shapeW) < 1e-4) return; shapeW = w; morph(upperGeo, w); morph(lowerGeo, w); }
   const pearlMat = new THREE.ShaderMaterial({ uniforms: { col: { value: new THREE.Color(PEARL) }, glint: { value: 0 } },
     vertexShader: `varying vec3 vN; varying vec3 vV; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vN = normalize(mat3(modelMatrix) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`,
     fragmentShader: `uniform vec3 col; uniform float glint; varying vec3 vN; varying vec3 vV;
@@ -121,7 +131,7 @@
   const pearl = new THREE.Mesh(new THREE.SphereGeometry(PEARL_R, 48, 32), pearlMat); oyster.add(pearl);
   addOutline(pearl, .8).material.uniforms.color.value.set(LINE);
   // the pearl rests in the cup near the hinge, as the logo has it, just in front of the standing lid. It is there,
-  // full size and still, from the first frame: the closed lid's swell makes room for it
+  // full size and still, from the first frame: the closed clam's dome is highest over it
   const PZ = 10.5, PEARL_AT = new THREE.Vector3(0, -8 * bulge(PZ / LEN) + PEARL_R - .4, PZ);
   pearl.position.copy(PEARL_AT);
   const EL = 10 * D2R;                                      // the mark's view: a little above, looking down 10 degrees (the dish's ellipse)
@@ -177,9 +187,8 @@
     const op = ease(clamp((u - .16) / .44, 0, 1)), rc = sm(clamp((u - .4) / .6, 0, 1));
     const D = Math.exp(u < .34 ? lerp(L9, Lc, 1 - Math.pow(1 - u / .34, 2.2)) : lerp(Lc, Ll, sm((u - .34) / .66)));
     lid.rotation.x = -OPEN * op;
-    // the swell fades from halfway through the opening and is gone as the lid stands up; checked so that the lid
-    // clears the pearl at every step (by at least 0.3 units)
-    const sw = clamp((op - .55) / .45, 0, 1); setSwell(1 - sw * sw * (3 - 2 * sw));
+    // the oval eases into the fan from halfway through the opening, and is the fan as the lid stands up
+    const sw = clamp((op - .55) / .45, 0, 1); setShape(1 - sw * sw * (3 - 2 * sw));
     // three-quarter from the left and well above at first, so the clam reads as a shell; face-on and low at the end
     const az = lerp(-34 * D2R, 0, rc), el = lerp(lerp(38 * D2R, 22 * D2R, op), EL, rc);
     const tgt = CENTRE.clone().lerp(TL, rc);
