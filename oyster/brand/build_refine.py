@@ -143,8 +143,8 @@ def sheet(module, opts, title, h1, intro, footer, out):
     </header>
     <main>
       <div class="wrap">
-        <div class="strip n">{strip}</div>
-        <div class="strip t">{strip2}</div>
+        <div class="strip n" style="--n:{len(opts)}">{strip}</div>
+        <div class="strip t" style="--n:{len(opts)}">{strip2}</div>
       </div>
     {cards}
     </main>

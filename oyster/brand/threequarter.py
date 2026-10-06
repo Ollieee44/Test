@@ -47,12 +47,15 @@ def shell(ns, name, lower, upper, pearl, ring, extra_up='', extra_lo=''):
     body = f'{P(up_out, f"mask=\"url(#{a})\"")}{P(lo_out, f"mask=\"url(#{b})\"")}<circle cx="{px}" cy="{py}" r="{pr}" {P1}/>'
     return m, body
 
-def pair(depth=1.0, frill=0.0, lean=0.0):
+def pair(depth=1.0, frill=0.0, lean=0.0, back=False):
     """The two valves, (outer, opening) each. depth scales how far we look down into the bowl (1 is
-    three-quarter, less is a lower angle); lean tips the upper valve further back. The upper valve's
+    three-quarter, less is a lower angle); lean tips the upper valve further back; back pushes the
+    cup's opening back and tips it, so it is no longer a symmetric almond (with a round pearl in the
+    middle of an almond, the mark read as an eye). The upper valve's
     left end rests on the lower valve's rim: that is the hinge."""
     f = lambda a: a * frill
     lower = (oval(52, 66, 40, 21 * depth + 3, 4, f(1.6), 7, .4, (300, 240)),
+             oval(50, 66 - 7.5 * depth, 31, 11 * depth, -3, f(1.0), 8, 1.1) if back else
              oval(54, 66 - 6.5 * depth, 32, 10.5 * depth, 4, f(1.0), 8, 1.1))
     upper = (oval(56, 37 - 3 * lean, 40, 22 + 4 * lean, -24 + 10 * lean, f(1.9), 6, 2.2, (110, 60)),
              oval(58, 39.5 - 3 * lean, 32, 15 + 4 * lean, -24 + 10 * lean, f(1.1), 7, .7))
@@ -87,6 +90,11 @@ def build(ns=''):
     # 05 a lower angle: closer to front-on, the bowl's opening a thin ellipse, the upper valve
     # leaning back further so more of its inside shows
     masks['low'], sym['low'] = shell(ns, 'low', *pair(depth=.65, frill=1, lean=1), (56, 59, 9), 3.2)
+
+    # the chosen two with the eye read fixed: the opening pulled back, and the pearl moved forward
+    # onto the front lip, off-centre, so it breaks the cup's outline instead of sitting in it like a pupil
+    masks['frilled2'], sym['frilled2'] = shell(ns, 'frilled2', *pair(frill=1, back=True), (68, 67.5, 9.6), 3.4)
+    masks['low2'], sym['low2'] = shell(ns, 'low2', *pair(depth=.65, frill=1, lean=1, back=True), (68, 69.5, 10), 3.4)
     return masks, sym
 
 def standalone(name, ink, pearl, clasp, ns='x-'):
