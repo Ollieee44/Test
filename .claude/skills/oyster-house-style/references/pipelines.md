@@ -65,6 +65,7 @@ URL, so the client's link stays the same:
 | Page | Artifact |
 |---|---|
 | Website with intro (`intro/index.html`) | https://claude.ai/artifact/NTiBBienf6HvCseLhbCDHU |
+| Intro for the fan mark 11.7, Tidepool (`intro/fan-tidepool.html`, built by `intro/build_fan.py` + `intro_fan.js`; test hook `window.__intro.at(ms)`) | https://claude.ai/artifact/FdQsz8x3zDvkPnTZvowc1s |
 | Palette explorer (`site/palettes.html`) | https://claude.ai/artifact/AfzgUFchFXjBXQWcboMYMy |
 | Current website (`site/index.html`) | https://claude.ai/artifact/9pFqdk4otTS46U21phpLCk |
 | 3D story (`landing/landing.html`) | https://claude.ai/artifact/9aJKZGFD5fzeHUrQu9EPTk |
