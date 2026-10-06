@@ -65,7 +65,7 @@ URL, so the client's link stays the same:
 | Page | Artifact |
 |---|---|
 | Website with intro (`intro/index.html`) | https://claude.ai/artifact/NTiBBienf6HvCseLhbCDHU |
-| **Site versions hub: old and new logo, every intro and site** (`oyster/hub.html`, built by `oyster/build_hub.py`) | https://claude.ai/artifact/6TjGz7zGCkspdhHfUZicQa |
+| **Site versions hub: old and new logo, every intro and site, all bundled inside it so one share covers them** (`oyster/hub.html`, built by `oyster/build_hub.py`; publish with `files` mapping `pages/<name>.html` to `oyster/hub_pages/<name>.html`, see `BUNDLE`) | https://claude.ai/artifact/6TjGz7zGCkspdhHfUZicQa |
 | Old-logo intro, Tidepool (`intro/tidepool.html`) | https://claude.ai/artifact/QNC92GFvJXE6w1tULP5ELu |
 | Fan-mark intro, Tidepool (`intro/fan-tidepool.html`; `intro/build_fan.py` + `intro_fan.js` build all three fan pages; test hook `window.__intro.at(ms)`) | https://claude.ai/artifact/FdQsz8x3zDvkPnTZvowc1s |
 | Fan-mark intro, Nacre (`intro/fan-nacre.html`) | https://claude.ai/artifact/7dgMtsG9wGQ18WXi8d6J73 |

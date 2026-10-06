@@ -1,23 +1,48 @@
 """Build hub.html, "Oyster Site Versions": one place to open every version of the website, old logo beside new.
 
 Each logo shows its real logotype (taken from the header of its own site page) in both palettes, with links to its
-intro in Nacre, its intro in Tidepool and the website without the intro. Brand tools are listed below. Update LINKS
-when a page moves; rebuild after either site changes.
+intro in Nacre, its intro in Tidepool and the website without the intro. Brand tools are listed below.
+
+The hub is published as one artifact with every page bundled inside it (pages/*.html, written to hub_pages/ with a
+document skeleton and a small "All versions" link back), so sharing the hub alone gives access to all of them.
+Rebuild after any of the pages change, then publish hub.html with the `files` map that BUNDLE describes.
 """
 import os, re
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
-ART = 'https://claude.ai/artifact/'
+# Published path inside the hub artifact -> source page. Each source is also its own artifact (see pipelines.md).
+BUNDLE = {'pages/old-intro-nacre.html': 'intro/index.html', 'pages/old-intro-tidepool.html': 'intro/tidepool.html',
+          'pages/old-site.html': 'site/index.html', 'pages/new-intro-nacre.html': 'intro/fan-nacre.html',
+          'pages/new-intro-tidepool.html': 'intro/fan-tidepool.html', 'pages/new-site.html': 'intro/fan-site.html',
+          'pages/catalogue.html': 'brand/catalogue.html', 'pages/logotype.html': 'brand/logotype/studio.html',
+          'pages/palettes.html': 'site/palettes.html'}
 LOGOS = [
  ('old', 'Old logo', 'Inside Out', 'The side-view shell cut out of a disc, with the pearl in its cradle. The mark on the live site.',
-  D + 'site/index.html', [('Intro &middot; Nacre', ART + 'NTiBBienf6HvCseLhbCDHU'), ('Intro &middot; Tidepool', ART + 'QNC92GFvJXE6w1tULP5ELu'),
-                          ('Website, no intro', ART + '9pFqdk4otTS46U21phpLCk')], 'Live', '4.1'),
+  D + 'site/index.html', [('Intro &middot; Nacre', 'pages/old-intro-nacre.html'), ('Intro &middot; Tidepool', 'pages/old-intro-tidepool.html'),
+                          ('Website, no intro', 'pages/old-site.html')], 'Live', '4.1'),
  ('new', 'New logo', 'Fan, inside out', 'The face-on fan and pearl in line, cut out of a disc (80% pearl, rim 3.5). The intro&rsquo;s clam opens with its lid standing up as the fan.',
-  D + 'intro/fan-site.html', [('Intro &middot; Nacre', ART + '7dgMtsG9wGQ18WXi8d6J73'), ('Intro &middot; Tidepool', ART + 'FdQsz8x3zDvkPnTZvowc1s'),
-                              ('Website, no intro', ART + 'NSRLa7dnMy96W1ViKGfjHc')], 'Proposed', '11.7'),
+  D + 'intro/fan-site.html', [('Intro &middot; Nacre', 'pages/new-intro-nacre.html'), ('Intro &middot; Tidepool', 'pages/new-intro-tidepool.html'),
+                              ('Website, no intro', 'pages/new-site.html')], 'Proposed', '11.7'),
 ]
-TOOLS = [('Mark catalogue', 'Every mark drawn for Oyster, numbered.', ART + 'AJUpcjMJuGVzcQt5ZAfNrK'),
-         ('Logotype studio', 'Letter spacing for the wordmark.', ART + '7tNEfaWQeav7iTWnMSocu1'),
-         ('Palette explorer', 'The site in six palettes.', ART + 'AfzgUFchFXjBXQWcboMYMy')]
+TOOLS = [('Mark catalogue', 'Every mark drawn for Oyster, numbered.', 'pages/catalogue.html'),
+         ('Logotype studio', 'Letter spacing for the wordmark.', 'pages/logotype.html'),
+         ('Palette explorer', 'The site in six palettes.', 'pages/palettes.html')]
+
+# A small link back to the hub, pinned bottom left of each bundled page.
+BACK = ('<a href="../" onclick="if(history.length>1){history.back();return false}" style="position:fixed;left:12px;bottom:12px;z-index:2147483647;font:500 12px/1 \'IBM Plex Mono\',ui-monospace,monospace;'
+        'letter-spacing:.06em;padding:8px 11px;border-radius:999px;background:rgba(36,29,40,.82);color:#EFE6E1;border:1px solid rgba(239,230,225,.28);text-decoration:none;'
+        '-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)">&larr; All versions</a>')
+
+def bundled(src):
+    """A source page as a standalone document: add the skeleton the artifact host adds to a page, and the back link."""
+    s = open(D + src).read()
+    if '<!doctype' not in s.lower()[:200]:
+        s = '<!doctype html>\n<html lang="en">\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' + s
+    i = s.lower().rfind('</body>')
+    return s[:i] + BACK + s[i:] if i >= 0 else s + BACK + '\n'
+
+os.makedirs(D + 'hub_pages', exist_ok=True)
+for out, src in BUNDLE.items():
+    open(D + 'hub_pages/' + out.split('/')[-1], 'w').write(bundled(src))
 PAL = {'nacre': ('#EFE6E1', '#2B2230', '#C99BB0'), 'tidepool': ('#0F4C4A', '#EAF3EF', '#F2B84B')}
 
 def wordmark(path, key, pal):
@@ -32,12 +57,12 @@ cards = ''
 for key, title, name, note, path, links, tag, num in LOGOS:
     tiles = ''.join(f'<div class="tile" style="background:{bg};color:{ink};--pearl:{pearl}" title="{p.title()}">{wordmark(path, key, p)}</div>'
                     for p, (bg, ink, pearl) in PAL.items())
-    btns = ''.join(f'<a class="btn" href="{u}" target="_blank" rel="noopener">{lab}<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9 9 3M4.5 3H9v4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>'
+    btns = ''.join(f'<a class="btn" href="{u}">{lab}<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8M6.5 2.5 10 6l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>'
                    for lab, u in links)
     cards += (f'<section class="logo {key}" aria-labelledby="h-{key}"><header><span class="tag {tag.lower()}">{tag}</span>'
               f'<h2 id="h-{key}">{title}</h2><p class="name">{name} <span>&middot; catalogue {num}</span></p></header>'
               f'<div class="tiles">{tiles}</div><p class="note">{note}</p><div class="btns">{btns}</div></section>')
-tools = ''.join(f'<a class="tool" href="{u}" target="_blank" rel="noopener"><b>{t}</b><span>{d}</span></a>' for t, d, u in TOOLS)
+tools = ''.join(f'<a class="tool" href="{u}"><b>{t}</b><span>{d}</span></a>' for t, d, u in TOOLS)
 
 CSS = '''
 :root { --bg: #F3EEEB; --surface: #FBF8F6; --ink: #241D28; --muted: #6A5E6C; --line: rgba(36,29,40,.13); --accent: #8C5572;
@@ -95,11 +120,11 @@ html = f'''<!doctype html>
 <main class="wrap">
   <span class="eyebrow">Oyster Therapeutics</span>
   <h1>Oyster Site Versions</h1>
-  <p class="lede">The website with each logo, side by side. Each opens in its own tab: the intro in either palette, or the website without the intro. On any intro, Skip or a scroll jumps to the end.</p>
+  <p class="lede">The website with each logo, side by side. Open the intro in either palette, or the website without the intro. On any intro, Skip or a scroll jumps to the end; &ldquo;All versions&rdquo;, bottom left, brings you back here.</p>
   <div class="grid">{cards}</div>
   <h3>Brand tools</h3>
   <div class="tools">{tools}</div>
-  <footer>Built by <code>oyster/build_hub.py</code>.</footer>
+  <footer>Every page above is bundled into this one, so sharing this page shares them all. Built by <code>oyster/build_hub.py</code>.</footer>
 </main>
 <!-- artifact:end -->
 </body>

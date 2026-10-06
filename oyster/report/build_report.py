@@ -79,7 +79,7 @@ html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Oys
   <h1>How we got to the four Oyster websites</h1>
   <p class="lede">A summary of the key discussions and decisions behind the Oyster website and logo, a map of how they led to four versions of the website (two logos, each in the Nacre and Tidepool palettes, each opened by a 3D intro), and the steps, tools and skills needed to rebuild them.</p>
   <div class="sites">{site_cards}</div>
-  <p class="small">Each site opens with its intro (left: the clam opening; right: the logotype it lands as), then the 3D SELFTAC scroll story and the company sections. All versions are linked from one page: {A("6TjGz7zGCkspdhHfUZicQa", "Oyster Site Versions")}. Links are private to the owner until shared from each page&rsquo;s Share menu.</p>
+  <p class="small">Each site opens with its intro (left: the clam opening; right: the logotype it lands as), then the 3D SELFTAC scroll story and the company sections. All four, with their intros and the brand tools, are bundled into one page: {A("6TjGz7zGCkspdhHfUZicQa", "Oyster Site Versions")}. Share that page and a colleague can open everything in it. Every other link in this report is a separate page, private to its owner until shared from its own Share menu.</p>
 </section>
 
 <section>
@@ -188,7 +188,7 @@ cd brand &amp;&amp; python build_catalogue.py            # the mark catalogue (a
 <section>
   <h2>Appendix: every page</h2>
   <table class="files links">
-    <tr><td>Site Versions hub</td><td>{A("6TjGz7zGCkspdhHfUZicQa")}</td></tr>
+    <tr><td>Site Versions hub<br><span class="small">bundles the six sites and intros, the catalogue, logotype studio and palette explorer; share this one</span></td><td>{A("6TjGz7zGCkspdhHfUZicQa")}</td></tr>
     <tr><td>Old logo: intro Nacre / Tidepool / website</td><td>{A("NTiBBienf6HvCseLhbCDHU")}<br>{A("QNC92GFvJXE6w1tULP5ELu")}<br>{A("9pFqdk4otTS46U21phpLCk")}</td></tr>
     <tr><td>New logo: intro Nacre / Tidepool / website</td><td>{A("7dgMtsG9wGQ18WXi8d6J73")}<br>{A("FdQsz8x3zDvkPnTZvowc1s")}<br>{A("NSRLa7dnMy96W1ViKGfjHc")}</td></tr>
     <tr><td>Mark catalogue</td><td>{A("AJUpcjMJuGVzcQt5ZAfNrK")}</td></tr>
