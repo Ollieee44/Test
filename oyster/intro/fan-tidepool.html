@@ -972,10 +972,12 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   try { r3 = new THREE.WebGLRenderer({ canvas: document.getElementById('introGl'), antialias: true, alpha: true }); } catch (e) { finish(); return; }
 
   // timeline (ms): the closed clam rushes in from the left and above, opens as it comes closest, its lid rising to
-  // stand upright; the pearl forms in the cup; as it pulls back it swings round to face us and drops to the mark's
-  // low angle, landing in the 'o'; the line-cut disc closes round it, the word writes in, the logotype settles
-  const T = { fade: [0, 180], move: [0, 1950], merge: [1850, 2150],   // the move has all but stopped as the disc fades in
-    letters: [2000, 2850], ther: [2450, 2850], glide: [3050, 3610], bg: [3050, 3610], site: 3560, end: 3650 };
+  // stand upright over the pearl; as it pulls back it swings round to face us and drops to the mark's low angle,
+  // landing in the 'o'; the line-cut disc closes round it, the word writes in, the logotype settles.
+  // Everything is set at SLOW times its first pace (the opening, and the whole intro, 25% slower)
+  const SLOW = 1.25, sl = ([a, b]) => [a * SLOW, b * SLOW];
+  const T = { fade: sl([0, 180]), move: sl([0, 1950]), merge: sl([1850, 2150]),   // the move has all but stopped as the disc fades in
+    letters: sl([2000, 2850]), ther: sl([2450, 2850]), glide: sl([3050, 3610]), bg: sl([3050, 3610]), site: 3560 * SLOW, end: 3650 * SLOW };
   const k = (t, [a, b]) => clamp((t - a) / (b - a), 0, 1);
   const lerp = (a, b, x) => a + (b - a) * x;
   const COL = ({ nacre: { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' }, tidepool: { out: '#7DB8AC', inn: '#DCEFE8', ring: '#2F6F69' } })[pal] || { out: '#CDB8C6', inn: '#EBD9E2', ring: '#8C5572' };
@@ -994,13 +996,16 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   const edgeAt = phi => { const i = clamp((phi / D2R + 90) / 3, 0, 60), a = Math.floor(i), b = Math.min(60, a + 1); return lerp(GEO.edge[a], GEO.edge[b], i - a) * U; };
   const LEN = edgeAt(0);                       // hinge to lip
   const bulge = s => Math.pow(Math.max(0, 4 * s * (1 - s)), .75);   // 0 at the hinge and at the lip
-  function valve(dOut, dIn, sx) {   // dOut, dIn: how far the outer and inner surfaces bow out (negative: downwards)
+  // the lid's swell near the hinge: a full-size pearl does not fit near the hinge of a thin shell, so while the
+  // clam is closed the lid is thick there, like a cockle's, and the swell smooths away as it opens
+  const swell = s => Math.exp(-Math.pow((s - .2) / .4, 2)), SWELL = 18;   // the lowest, broadest swell that clears the pearl
+  function valve(dOut, dIn, sx, hump = 0) {   // dOut, dIn: how far the outer and inner surfaces bow out (negative: downwards)
     const NR = 44, NT = 96, pos = [], outer = [], inner = [];
     for (const [d, list, up] of [[dOut, outer, dOut > 0], [dIn, inner, dIn < 0]]) {   // faces wound to point out of the shell
       const base = pos.length / 3;
       for (let i = 0; i <= NR; i++) { const s = i / NR;
         for (let j = 0; j <= NT; j++) { const phi = (-90 + 180 * j / NT) * D2R, r = s * edgeAt(phi);
-          pos.push(r * Math.sin(phi) * sx, d * bulge(s), r * Math.cos(phi)); } }
+          pos.push(r * Math.sin(phi) * sx, d * bulge(s) + hump * swell(s), r * Math.cos(phi)); } }
       for (let i = 0; i < NR; i++) for (let j = 0; j < NT; j++) {
         const a = base + i * (NT + 1) + j, b = a + 1, c = a + NT + 1, e = c + 1;
         if (up) list.push(a, c, b, b, c, e); else list.push(a, b, c, b, e, c); }
@@ -1045,7 +1050,15 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   const SXL = 1.09;                                         // the lower valve is a little wider, as the logo's dish is
   const lower = shellMesh(valve(-12, -8, SXL), 0, SXL); oyster.add(lower);
   const lid = new THREE.Group(); oyster.add(lid);           // the hinge is the origin
-  const upper = shellMesh(valve(7, 4.6, 1), 2, 1); lid.add(upper);
+  const upperGeo = valve(7, 4.6, 1), upper = shellMesh(upperGeo, 2, 1); lid.add(upper);
+  const FLAT = upperGeo.attributes.position.array.slice(), FULL = valve(7, 4.6, 1, SWELL).attributes.position.array;
+  let swollen = -1;
+  function setSwell(w) {   // w: 1 closed (thick at the hinge), 0 open (the drawing's lid)
+    if (Math.abs(w - swollen) < 1e-4) return; swollen = w;
+    const p = upperGeo.attributes.position.array;
+    for (let i = 0; i < p.length; i++) p[i] = FLAT[i] + (FULL[i] - FLAT[i]) * w;
+    upperGeo.attributes.position.needsUpdate = true; upperGeo.computeVertexNormals(); upperGeo.attributes.normal.needsUpdate = true;
+  }
   const pearlMat = new THREE.ShaderMaterial({ uniforms: { col: { value: new THREE.Color(PEARL) }, glint: { value: 0 } },
     vertexShader: `varying vec3 vN; varying vec3 vV; void main() { vec4 w = modelMatrix * vec4(position, 1.0); vN = normalize(mat3(modelMatrix) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`,
     fragmentShader: `uniform vec3 col; uniform float glint; varying vec3 vN; varying vec3 vV;
@@ -1057,16 +1070,12 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   const PEARL_R = GEO.pearlRef * U;
   const pearl = new THREE.Mesh(new THREE.SphereGeometry(PEARL_R, 48, 32), pearlMat); oyster.add(pearl);
   addOutline(pearl, .8).material.uniforms.color.value.set(LINE);
-  // the pearl rests in the cup near the hinge, as the logo has it, just in front of the standing lid
-  // the pearl is there from the first frame, full size: it rests mid-cup, where the shell is deepest, under a lid
-  // that starts a little ajar (a full-size pearl does not fit near the hinge of a closed shell), and as the lid
-  // lifts it rolls back along the cup to its place in front of the fan, near the hinge, as the logo has it
-  const restAt = z => new THREE.Vector3(0, -8 * bulge(z / LEN) + PEARL_R - .4, z);
-  const PZ0 = 33, PZ = 10.5, PEARL_AT = restAt(PZ);
-  pearl.position.copy(restAt(PZ0));
+  // the pearl rests in the cup near the hinge, as the logo has it, just in front of the standing lid. It is there,
+  // full size and still, from the first frame: the closed lid's swell makes room for it
+  const PZ = 10.5, PEARL_AT = new THREE.Vector3(0, -8 * bulge(PZ / LEN) + PEARL_R - .4, PZ);
+  pearl.position.copy(PEARL_AT);
   const EL = 10 * D2R;                                      // the mark's view: a little above, looking down 10 degrees (the dish's ellipse)
   const OPEN = 90 * D2R + EL;                               // the lid stands upright, tipped back to face the camera
-  const AJAR = 25 * D2R;                                    // it starts just open, with the pearl glimpsed inside
 
   // ---------- the logotype: its 'o' is the same clam, cut out of a disc as lines ----------
   const logo = document.getElementById('ilogo'), mark = document.getElementById('ioMark');
@@ -1117,8 +1126,10 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
     const u = k(t, T.move), sm = x => x * x * x * (x * (6 * x - 15) + 10);
     const op = ease(clamp((u - .16) / .44, 0, 1)), rc = sm(clamp((u - .4) / .6, 0, 1));
     const D = Math.exp(u < .34 ? lerp(L9, Lc, 1 - Math.pow(1 - u / .34, 2.2)) : lerp(Lc, Ll, sm((u - .34) / .66)));
-    lid.rotation.x = -lerp(AJAR, OPEN, op);
-    pearl.position.copy(restAt(lerp(PZ0, PZ, ease(clamp((op - .1) / .75, 0, 1)))));   // rolls back as the lid lifts
+    lid.rotation.x = -OPEN * op;
+    // the swell fades from halfway through the opening and is gone as the lid stands up; checked so that the lid
+    // clears the pearl at every step (by at least 0.3 units)
+    const sw = clamp((op - .55) / .45, 0, 1); setSwell(1 - sw * sw * (3 - 2 * sw));
     // three-quarter from the left and well above at first, so the clam reads as a shell; face-on and low at the end
     const az = lerp(-34 * D2R, 0, rc), el = lerp(lerp(38 * D2R, 22 * D2R, op), EL, rc);
     const tgt = CENTRE.clone().lerp(TL, rc);
