@@ -46,27 +46,37 @@
   const edgeAt = phi => { const i = clamp((phi / D2R + 90) / 3, 0, 60), a = Math.floor(i), b = Math.min(60, a + 1); return lerp(GEO.edge[a], GEO.edge[b], i - a) * U; };
   const LEN = edgeAt(0);                       // hinge to lip
   const bulge = s => Math.pow(Math.max(0, 4 * s * (1 - s)), .75);   // 0 at the hinge and at the lip
-  // closed, the clam is a smooth oval, domed all over and rounded behind the hinge; open, each valve is the mark's
-  // fan. A full-size pearl does not fit near the hinge of the thin fan, so the closed dome is highest over the
-  // pearl; both valves ease from the oval into the fan as the lid lifts. Checked so that the lid clears the pearl
-  // at every step of the opening, over its whole surface (by 0.56 units at the closest, in the final pose)
-  const OV = { a: 38, back: 10, zp: 12 }; OV.zc = (LEN - OV.back) / 2; OV.b = (LEN + OV.back) / 2;
-  function rimFrom(px, pz, dx, dz) {   // distance from a point inside the oval to its rim along (dx, dz)
-    const A = dx * dx / (OV.a * OV.a) + dz * dz / (OV.b * OV.b), B = 2 * (px * dx / (OV.a * OV.a) + (pz - OV.zc) * dz / (OV.b * OV.b));
-    const C = px * px / (OV.a * OV.a) + (pz - OV.zc) ** 2 / (OV.b * OV.b) - 1;
-    return (-B + Math.sqrt(B * B - 4 * A * C)) / (2 * A);
+  // closed, the clam has the fan's own outline with a rounded end behind the hinge, as wide as the fan's hinge, and
+  // is domed smoothly all over, highest over the pearl (a full-size pearl does not fit near the hinge of the thin
+  // fan); as the lid lifts the dome flattens into the fan and the rounded end tucks away, with no change of width,
+  // so nothing pinches in. The fan is widened a little at the hinge (HW either side) for room beside the pearl;
+  // in the logo's view that corner is behind the pearl and the dish. Checked so that the lid clears the pearl at
+  // every step of the opening, over its whole surface (by 0.56 units at the closest, in the final pose)
+  const HW = 11.5, CAP = 10, PEAK = 10;
+  const fanEdge = phi => Math.abs(phi) > Math.PI / 2 ? 0 : Math.abs(phi) < Math.PI / 3 ? edgeAt(phi) : Math.max(edgeAt(phi), HW / Math.abs(Math.sin(phi)));
+  const capEdge = phi => 1 / Math.sqrt(Math.sin(phi) ** 2 / (HW * HW) + Math.cos(phi) ** 2 / (CAP * CAP));
+  const closedEdge = phi => Math.abs(phi) <= Math.PI / 2 ? fanEdge(phi) : capEdge(phi);
+  const RIM = [];
+  for (let j = 0; j < 720; j++) { const p = (-180 + j / 2) * D2R, r = closedEdge(p); RIM.push([r * Math.sin(p), r * Math.cos(p)]); }
+  function rimFrom(px, pz, dx, dz) {   // distance from a point inside the closed outline to its rim along (dx, dz)
+    let best = 1e9;
+    for (let i = 0; i < RIM.length; i++) { const [ax, az] = RIM[i], [bx, bz] = RIM[(i + 1) % RIM.length], ex = bx - ax, ez = bz - az;
+      const den = dx * ez - dz * ex; if (Math.abs(den) < 1e-12) continue;
+      const t = ((ax - px) * ez - (az - pz) * ex) / den, u = ((ax - px) * dz - (az - pz) * dx) / den;
+      if (t > 1e-6 && u >= 0 && u <= 1 && t < best) best = t; }
+    return best;
   }
-  const dome = (x, z) => { const dz = z - OV.zp, d = Math.hypot(x, dz); if (d < 1e-6) return 1;   // 1 over the pearl, 0 at the rim
-    const t = d / rimFrom(0, OV.zp, x / d, dz / d); return Math.pow(Math.max(0, 1 - t * t), .7); };
-  const fanEdge = phi => Math.abs(phi) > Math.PI / 2 ? 0 : edgeAt(phi);   // the fan has nothing behind its hinge
+  const dome = (x, z, s) => { const dz = z - PEAK, d = Math.hypot(x, dz); if (d < 1e-6) return 1;   // 1 over the pearl, 0 at the rim
+    const r = rimFrom(0, PEAK, x / d, dz / d), t = r < 1e8 ? Math.min(1, d / r) : 1;   // a ray that grazes a corner counts as the rim
+    return s >= 1 ? 0 : Math.sqrt(Math.max(0, 1 - t * t)); };
   function valve(dFan, dOval, sx) {   // [fan, oval] pairs of how far the outer and inner surfaces bow out (negative: downwards)
     const NR = 44, NT = 144, fan = [], oval = [], outer = [], inner = [];
     for (const [k, list, up] of [[0, outer, dFan[0] > 0], [1, inner, dFan[1] < 0]]) {   // faces wound to point out of the shell
       const base = fan.length / 3;
       for (let i = 0; i <= NR; i++) { const s = i / NR;
-        for (let j = 0; j <= NT; j++) { const phi = (-180 + 360 * j / NT) * D2R, rf = s * fanEdge(phi), ro = s * rimFrom(0, 0, Math.sin(phi), Math.cos(phi));
+        for (let j = 0; j <= NT; j++) { const phi = (-180 + 360 * j / NT) * D2R, rf = s * fanEdge(phi), ro = s * closedEdge(phi);
           fan.push(rf * Math.sin(phi) * sx, dFan[k] * bulge(s), rf * Math.cos(phi));
-          const ox = ro * Math.sin(phi), oz = ro * Math.cos(phi); oval.push(ox, dOval[k] * dome(ox, oz), oz); } }
+          const ox = ro * Math.sin(phi), oz = ro * Math.cos(phi); oval.push(ox, dOval[k] * dome(ox, oz, s), oz); } }
       for (let i = 0; i < NR; i++) for (let j = 0; j < NT; j++) {
         const a = base + i * (NT + 1) + j, b = a + 1, c = a + NT + 1, e = c + 1;
         if (up) list.push(a, c, b, b, c, e); else list.push(a, b, c, b, e, c); }
@@ -75,7 +85,7 @@
     g.setIndex(outer.concat(inner)); g.addGroup(0, outer.length, 0); g.addGroup(outer.length, inner.length, 1);
     g.computeVertexNormals(); g.userData = { fan: Float32Array.from(fan), oval: Float32Array.from(oval) }; return g;
   }
-  function morph(g, w) {   // w: 1 the closed oval, 0 the open fan
+  function morph(g, w) {   // w: 1 closed, 0 the open fan
     const p = g.attributes.position.array, { fan, oval } = g.userData;
     for (let i = 0; i < p.length; i++) p[i] = fan[i] + (oval[i] - fan[i]) * w;
     g.attributes.position.needsUpdate = true; g.computeVertexNormals(); g.attributes.normal.needsUpdate = true;
@@ -116,7 +126,7 @@
   const SXL = 1.09;                                         // the lower valve is a little wider, as the logo's dish is
   const lowerGeo = valve([-12, -8], [-12, -9], SXL), lower = shellMesh(lowerGeo, 0, SXL); oyster.add(lower);
   const lid = new THREE.Group(); oyster.add(lid);           // the hinge is the origin
-  const upperGeo = valve([7, 4.6], [22.5, 20], 1), upper = shellMesh(upperGeo, 2, 1); lid.add(upper);
+  const upperGeo = valve([7, 4.6], [24.5, 22], 1), upper = shellMesh(upperGeo, 2, 1); lid.add(upper);
   let shapeW = -1;
   function setShape(w) { if (Math.abs(w - shapeW) < 1e-4) return; shapeW = w; morph(upperGeo, w); morph(lowerGeo, w); }
   const pearlMat = new THREE.ShaderMaterial({ uniforms: { col: { value: new THREE.Color(PEARL) }, glint: { value: 0 } },
@@ -187,7 +197,7 @@
     const op = ease(clamp((u - .16) / .44, 0, 1)), rc = sm(clamp((u - .4) / .6, 0, 1));
     const D = Math.exp(u < .34 ? lerp(L9, Lc, 1 - Math.pow(1 - u / .34, 2.2)) : lerp(Lc, Ll, sm((u - .34) / .66)));
     lid.rotation.x = -OPEN * op;
-    // the oval eases into the fan from halfway through the opening, and is the fan as the lid stands up
+    // the closed dome eases into the fan from halfway through the opening, and is the fan as the lid stands up
     const sw = clamp((op - .55) / .45, 0, 1); setShape(1 - sw * sw * (3 - 2 * sw));
     // three-quarter from the left and well above at first, so the clam reads as a shell; face-on and low at the end
     const az = lerp(-34 * D2R, 0, rc), el = lerp(lerp(38 * D2R, 22 * D2R, op), EL, rc);
