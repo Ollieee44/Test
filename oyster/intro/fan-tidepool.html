@@ -1058,10 +1058,15 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
   const pearl = new THREE.Mesh(new THREE.SphereGeometry(PEARL_R, 48, 32), pearlMat); oyster.add(pearl);
   addOutline(pearl, .8).material.uniforms.color.value.set(LINE);
   // the pearl rests in the cup near the hinge, as the logo has it, just in front of the standing lid
-  const PZ = 10.5, PEARL_AT = new THREE.Vector3(0, -8 * bulge(PZ / LEN) + PEARL_R - .4, PZ);
-  pearl.position.copy(PEARL_AT);
+  // the pearl is there from the first frame, full size: it rests mid-cup, where the shell is deepest, under a lid
+  // that starts a little ajar (a full-size pearl does not fit near the hinge of a closed shell), and as the lid
+  // lifts it rolls back along the cup to its place in front of the fan, near the hinge, as the logo has it
+  const restAt = z => new THREE.Vector3(0, -8 * bulge(z / LEN) + PEARL_R - .4, z);
+  const PZ0 = 33, PZ = 10.5, PEARL_AT = restAt(PZ);
+  pearl.position.copy(restAt(PZ0));
   const EL = 10 * D2R;                                      // the mark's view: a little above, looking down 10 degrees (the dish's ellipse)
   const OPEN = 90 * D2R + EL;                               // the lid stands upright, tipped back to face the camera
+  const AJAR = 25 * D2R;                                    // it starts just open, with the pearl glimpsed inside
 
   // ---------- the logotype: its 'o' is the same clam, cut out of a disc as lines ----------
   const logo = document.getElementById('ilogo'), mark = document.getElementById('ioMark');
@@ -1112,9 +1117,8 @@ document.querySelectorAll('.pal button').forEach(b => b.addEventListener('click'
     const u = k(t, T.move), sm = x => x * x * x * (x * (6 * x - 15) + 10);
     const op = ease(clamp((u - .16) / .44, 0, 1)), rc = sm(clamp((u - .4) / .6, 0, 1));
     const D = Math.exp(u < .34 ? lerp(L9, Lc, 1 - Math.pow(1 - u / .34, 2.2)) : lerp(Lc, Ll, sm((u - .34) / .66)));
-    lid.rotation.x = -OPEN * op;
-    // the pearl forms in the cup as the lid lifts: it would show through the closed shell, so it grows from nothing
-    pearl.scale.setScalar(Math.max(.001, ease(clamp((op - .25) / .5, 0, 1))));
+    lid.rotation.x = -lerp(AJAR, OPEN, op);
+    pearl.position.copy(restAt(lerp(PZ0, PZ, ease(clamp((op - .1) / .75, 0, 1)))));   // rolls back as the lid lifts
     // three-quarter from the left and well above at first, so the clam reads as a shell; face-on and low at the end
     const az = lerp(-34 * D2R, 0, rc), el = lerp(lerp(38 * D2R, 22 * D2R, op), EL, rc);
     const tgt = CENTRE.clone().lerp(TL, rc);
