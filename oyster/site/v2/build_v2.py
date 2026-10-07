@@ -184,14 +184,33 @@ a = module.index('// ---------- site: header state'); b = module.index('\nwindow
 module = module[:a] + clasp + module[b:]
 # a longer glide behind the scroll
 module = once(module, '1 - Math.exp(-dt / .22)', '1 - Math.exp(-dt / .3)')
-# redraw only when the picture changes, and lift the loading mark once the first frame is up
+# the load-in (loadin.js): the fan mark's pearl becomes the clasp as the halves close on it, only at the top of the story
+module = once(module, '\nfunction frame(p0) {', '\n' + open(D + 'loadin.js').read() + 'function frame(p0) {')
+module = once(module, '  const joined = kf(p, [[.16, 1], [.2, 0], [.6, 0], [.665, 1]]);\n',
+              '  const joined = kf(p, [[.16, 1], [.2, 0], [.6, 0], [.665, 1]]);\n'
+              '  // load-in: the halves fly in from far behind and close on the pearl (only at the top of the story)\n'
+              '  const ia = 1 - clamp(p0 / .05, 0, 1), ei = ease(clamp((intro - .2) / .6, 0, 1));\n'
+              '  const hxI = hx + ia * (1 - ei) * 8, joinedI = joined * (1 - ia * (1 - clamp((intro - .8) / .08, 0, 1)));\n'
+              '  const away = mol.centre.clone().sub(camera.position).normalize().multiplyScalar(ia * (1 - ei) * 160);   // straight back along the line of sight\n')
+module = once(module, 'const oW = new THREE.Vector3(-hx, hy, 0), oE = new THREE.Vector3(hx, hy, 0);', 'const oW = new THREE.Vector3(-hxI, hy, 0).add(away), oE = new THREE.Vector3(hxI, hy, 0).add(away);')
+module = once(module, 'free * .5 * Math.sin(spin * .9), 0));', 'free * .5 * Math.sin(spin * .9) + ia * (1 - ei) * .9, 0));')
+module = once(module, 'free * .45 * Math.cos(spin * 1.2), 0));', 'free * .45 * Math.cos(spin * 1.2) - ia * (1 - ei) * .9, 0));')
+module = once(module, 'const brk = mol.update(oW, oE, rW, rE, joined);', 'const brk = mol.update(oW, oE, rW, rE, joinedI);')
+module = once(module, 'const fx = bump(p, .655, .69); flash.position.copy(brk); flash.scale.setScalar(1 + 3 * clamp((p - .655) / .035, 0, 1));',
+              'const fs = bump(p, .655, .69), fi = ia * bump(intro, .8, 1), fx = Math.max(fs, fi); flash.position.copy(brk);\n'
+              '  flash.scale.setScalar(1 + 3 * (fi > fs ? clamp((intro - .8) / .2, 0, 1) : clamp((p - .655) / .035, 0, 1)));')
+module = once(module, "document.getElementById('hint').style.opacity = 1 - clamp(p / .02, 0, 1);",
+              "document.getElementById('hint').style.opacity = 1 - clamp(p / .02, 0, 1);\n  claspNdc.copy(brk).project(camera);   // where the load-in's pearl lands")
+# redraw only when the picture changes; the load-in starts once the mark has been up long enough and a frame is ready
 module = once(module, '  if (storyOn) { frame(prog); if (renderer) renderer.render(scene, camera); }',
-              "  const sig = prog.toFixed(5) + '|' + spin.toFixed(4) + '|' + pal + '|' + stage.clientWidth + 'x' + stage.clientHeight;\n"
-              "  if (storyOn && sig !== drawnSig) { frame(prog); if (renderer) renderer.render(scene, camera); drawnSig = sig; if (!ready) { ready = true; requestAnimationFrame(() => stage.classList.add('ready')); } }")
+              "  const now = performance.now();\n"
+              "  if (introStart < 0 && firstDrawn && now - pageT0 > (intro >= 1 ? 0 : LOGO_MS)) startIntro(now);\n"
+              "  if (introHold >= 0) intro = introHold; else if (introStart >= 0 && intro < 1) intro = Math.min(1, (now - introStart) / INTRO_MS);\n"
+              "  const sig = prog.toFixed(5) + '|' + spin.toFixed(4) + '|' + pal + '|' + intro.toFixed(4) + '|' + stage.clientWidth + 'x' + stage.clientHeight;\n"
+              "  if (storyOn && sig !== drawnSig) { frame(prog); if (renderer) renderer.render(scene, camera); drawnSig = sig; firstDrawn = true; }")
 module = once(module, '\nrequestAnimationFrame(loop);\n',
-              "\nlet drawnSig = '', ready = false;\n"
-              "// every shader is built before the first frame, so nothing hitches when a new part of the story comes into view\n"
-              "if (renderer) { try { renderer.compile(scene, camera); } catch (e) {} } else stage.classList.add('ready');\n"
+              "\n// every shader is built before the first frame, so nothing hitches when a new part of the story comes into view\n"
+              "if (renderer) { try { renderer.compile(scene, camera); } catch (e) {} }\n"
               "requestAnimationFrame(loop);\n")
 for gone in ('makeBg(', 'const NAMES', 'const head ='):
     assert gone not in module, gone

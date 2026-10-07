@@ -54,6 +54,7 @@ three.js from an npm install of `three@0.160.0`, and font files. Launch Chromium
 --enable-unsafe-swiftshader` for WebGL. Hooks for screenshots:
 
 - Landing: `window.__story.frame(p)` holds the story at progress p (0–1).
+- Website v2 Science page: `window.__intro(ms)` holds the load-in (fan mark's pearl becoming the clasp) at ms (0–2100).
 - Site: scroll to `story:<p>` (the story section's offset) or to `#vision`, `#why`, `#pipeline`,
   `#team`, `#investors`, `#news`, `#contact`; wait about 2 s for smoothing and reveals.
 

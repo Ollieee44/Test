@@ -12,6 +12,11 @@
 .stage.ready .loader { opacity: 0; visibility: hidden; }
 @media (min-width: 761px) { .loader { padding-left: 34vw; } .loader span { left: calc(50% + 17vw); } }
 @keyframes breatheMark { 50% { transform: scale(1.06); opacity: .82; } }
+/* the load-in: the shell shrinks away while its pearl (a separate element, .lpearl) flies to the clasp */
+.stage.ready .loader .fm { animation: none; transform: scale(.82); opacity: 0; transition: transform .8s var(--ease), opacity .6s; }
+.loader .fm .pearl { transition: opacity .2s; }
+.lpearl { position: absolute; z-index: 2; border-radius: 50%; pointer-events: none; will-change: transform, opacity;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--clasp) 22%, transparent), 0 0 22px color-mix(in srgb, var(--clasp) 50%, transparent); }
 
 /* ---------- the fan mark ---------- */
 .fm { display: block; height: auto; overflow: visible; }
