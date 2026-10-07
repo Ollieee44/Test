@@ -446,7 +446,8 @@ function frame(p0) {
   // load-in: the halves fly in from far behind and close on the pearl (only at the top of the story)
   const ia = 1 - clamp(p0 / .05, 0, 1), ei = ease(clamp((intro - .2) / .6, 0, 1));
   const hxI = hx + ia * (1 - ei) * 8, joinedI = joined * (1 - ia * (1 - clamp((intro - .8) / .08, 0, 1)));
-  const away = mol.centre.clone().sub(camera.position).normalize().multiplyScalar(ia * (1 - ei) * 160);   // straight back along the line of sight
+  // straight back along the line of sight, by a multiple of the camera distance, so they start as specks on any screen
+  const away = mol.centre.clone().sub(camera.position); away.multiplyScalar(ia * (1 - ei) * 1.6);
   const oW = new THREE.Vector3(-hxI, hy, 0).add(away), oE = new THREE.Vector3(hxI, hy, 0).add(away);
   // tumble the free halves a little while they travel, each about its own centre; settle before they rebind
   const free = kf(p, [[.17, 0], [.24, 1], [.56, 1], [.64, 0]]);

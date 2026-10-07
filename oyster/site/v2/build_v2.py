@@ -203,7 +203,8 @@ module = once(module, '  const joined = kf(p, [[.16, 1], [.2, 0], [.6, 0], [.665
               '  // load-in: the halves fly in from far behind and close on the pearl (only at the top of the story)\n'
               '  const ia = 1 - clamp(p0 / .05, 0, 1), ei = ease(clamp((intro - .2) / .6, 0, 1));\n'
               '  const hxI = hx + ia * (1 - ei) * 8, joinedI = joined * (1 - ia * (1 - clamp((intro - .8) / .08, 0, 1)));\n'
-              '  const away = mol.centre.clone().sub(camera.position).normalize().multiplyScalar(ia * (1 - ei) * 160);   // straight back along the line of sight\n')
+              '  // straight back along the line of sight, by a multiple of the camera distance, so they start as specks on any screen\n'
+              '  const away = mol.centre.clone().sub(camera.position); away.multiplyScalar(ia * (1 - ei) * 1.6);\n')
 module = once(module, 'const oW = new THREE.Vector3(-hx, hy, 0), oE = new THREE.Vector3(hx, hy, 0);', 'const oW = new THREE.Vector3(-hxI, hy, 0).add(away), oE = new THREE.Vector3(hxI, hy, 0).add(away);')
 module = once(module, 'free * .5 * Math.sin(spin * .9), 0));', 'free * .5 * Math.sin(spin * .9) + ia * (1 - ei) * .9, 0));')
 module = once(module, 'free * .45 * Math.cos(spin * 1.2), 0));', 'free * .45 * Math.cos(spin * 1.2) - ia * (1 - ei) * .9, 0));')

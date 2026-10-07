@@ -335,6 +335,8 @@ h1.say { font-weight: 400; }
 .loader span { position: absolute; left: 50%; top: calc(50% + clamp(56px, 6vw, 84px)); transform: translateX(-50%); font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 .stage.ready .loader { opacity: 0; visibility: hidden; }
 @media (min-width: 761px) { .loader { padding-left: 34vw; } .loader span { left: calc(50% + 17vw); } }
+/* phones: the mark waits where the clasp will appear (about 40% down, above the copy card), so its pearl only has a short way to go */
+@media (max-width: 760px) { .loader { place-items: start center; padding-top: calc(40svh - 44px); } .loader .fm { width: 88px; } .loader span { top: calc(40svh + 60px); } }
 @keyframes breatheMark { 50% { transform: scale(1.06); opacity: .82; } }
 /* the load-in: the shell shrinks away while its pearl (a separate element, .lpearl) flies to the clasp */
 .stage.ready .loader .fm { animation: none; transform: scale(.82); opacity: 0; transition: transform .8s var(--ease), opacity .6s; }
