@@ -109,21 +109,49 @@ for num, name, idea, fn in sdeg.VARIANTS + FONT_CARDS:
               f'<div class="row bigs">{bigs}</div><div class="row">{lts}</div><span class="lab">Header size, 42px</span><div class="row">{hdr}</div></article>')
 
 def _arch_tight():
-    """The Archivo logotype for the negative-space mock-ups, with s, t, e and r moved left together so the
-    closest distance from the y to the s as drawn there (halves eased apart) matches the mean closest
+    """The Archivo logotype for the negative-space mock-ups, with s, t, e and r moved together so the
+    closest distance from the y to the s as drawn there (halves eased apart, which on its own pushes the s into the y) matches the mean closest
     distance of s-t and t-e. The y, the mark and "therapeutics" stay put."""
     lt = FACES['arch'][0]
     P = re.findall(r'<path d="([^"]*)" transform="translate\(([\d.]+) 0\.0\) scale\(1\.0000 -1\.0000\)"/>', lt)
-    pts = lambda d, x: np.concatenate([sdeg.sgeom.polygon(c, 16) + [float(x), 0] for c in re.findall(r'M[^M]*', d)])
+    pts = lambda d, x: [sdeg.sgeom.polygon(c, 16) + [float(x), 0] for c in re.findall(r'M[^M]*', d)]
     sdeg.use('arch'); up, lo = sdeg.split_outline(); t = sdeg.at(sdeg.S_MID)[1]; dd = .22 * sdeg.W_MID; sdeg.use('news')
-    sx = float(P[1][1]); s_pts = np.concatenate([np.array(up) - t * dd, np.array(lo) + t * dd]) + [sx, 0]
-    gap = lambda A, B: np.sqrt(((A[:, None] - B[None]) ** 2).sum(-1)).min()
+    sx = float(P[1][1]); s_pts = [np.array(up) - t * dd + [sx, 0], np.array(lo) + t * dd + [sx, 0]]
+    def dense(A, step=2.0):
+        """Points every `step` units along each edge (straight edges have only their two ends otherwise)."""
+        B = np.roll(A, -1, 0); n = np.maximum(1, (np.linalg.norm(B - A, axis=1) / step).astype(int))
+        return np.concatenate([A[k] + (B[k] - A[k]) * np.arange(n[k])[:, None] / n[k] for k in range(len(A))])
+    def gap(A, B):
+        """Closest distance between two outlines; negative-free, so overlapping letters measure 0."""
+        A, B = dense(A), dense(B)
+        return min(np.sqrt(((A[i:i + 2000, None] - B[None]) ** 2).sum(-1)).min() for i in range(0, len(A), 2000))
     y, tt, e = pts(*P[0]), pts(*P[2]), pts(*P[3])
-    target = (gap(s_pts, tt) + gap(tt, e)) / 2; delta = gap(y, s_pts) - target
+    G = lambda A, B: min(gap(a, b) for a in A for b in B)
+    def inside_any(pts, polys):
+        P_ = np.concatenate([dense(q) for q in polys]); Q = np.concatenate(polys)
+        hit = np.zeros(len(pts), bool)
+        for q in polys:   # even-odd over every contour
+            a, b = q, np.roll(q, -1, 0); x, yy = pts[:, :1], pts[:, 1:]
+            c = (a[None, :, 1] > yy) != (b[None, :, 1] > yy)
+            xi = a[None, :, 0] + (yy - a[None, :, 1]) * (b[None, :, 0] - a[None, :, 0]) / (b[None, :, 1] - a[None, :, 1] + 1e-12)
+            hit ^= ((c & (x < xi)).sum(1) % 2 == 1)
+        return hit.any()
+    def signed(dx):
+        """Closest distance from the y to the s moved left by dx; negative when they overlap."""
+        S_ = [q - [dx, 0] for q in s_pts]
+        over = inside_any(np.concatenate([dense(q) for q in S_]), y) or inside_any(np.concatenate([dense(q) for q in y]), S_)
+        return -1.0 if over else G(y, S_)
+    target = (G(s_pts, tt) + G(tt, e)) / 2
+    lo_, hi_ = -150.0, 150.0                 # dx where the gap is too big / overlapping
+    for _ in range(30):
+        mid = (lo_ + hi_) / 2
+        if signed(mid) > target: lo_ = mid
+        else: hi_ = mid
+    delta = lo_; before = signed(0)
     for d, x in P[1:]:
         lt = lt.replace(f'transform="translate({x} 0.0) scale(1.0000 -1.0000)"', f'transform="translate({float(x) - delta:.1f} 0.0) scale(1.0000 -1.0000)"')
     lt = re.sub(r'viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"', lambda m: f'viewBox="{m.group(1)} {m.group(2)} {float(m.group(3)) - delta:.1f} {m.group(4)}"', lt, count=1)
-    print(f'Archivo y-s: {gap(y, s_pts):.1f} -> {target:.1f} (moved {delta:.1f})')
+    print(f'Archivo y-s: {before:.1f} (-1 = overlapping) -> {signed(delta):.1f}, target {target:.1f} (moved {delta:.1f}); s-t {G(s_pts, tt):.1f}, t-e {G(tt, e):.1f}')
     return lt, f'translate({sx - delta:.1f} 0.0) scale(1.0000 -1.0000)', FACES['arch'][2]
 
 FACES['arch_tight'] = _arch_tight()
@@ -147,7 +175,7 @@ def neg_section():
             mats += f'<div class="mat"><span class="lab">{p.title()}</span><div class="cells">{cells}</div></div>'
         fn = sdeg.neg(*pick, face)
         note = ''
-        if face == 'arch': fn.lt_face = 'arch_tight'; note = '. The y&ndash;s gap closed to match the other letters'
+        if face == 'arch': fn.lt_face = 'arch_tight'; note = '. The y&ndash;s gap set to match the other letters&rsquo; closest distance'
         lts = ''.join(f'<div class="tile wide" style="{st}">{logotype(fn, f"n{face[0]}{p[0]}L")}</div>' for p, st in PAL.items())
         hdr = ''.join(f'<div class="tile hdr" style="{st}">{logotype(fn, f"n{face[0]}{p[0]}H")}</div>' for p, st in PAL.items())
         out += (f'<article class="card wide-card" id="neg-{face}"><header><h2>{title}</h2></header>'
