@@ -10,10 +10,10 @@ def s_path():
     return re.findall(r'<path d="([^"]*)" transform="translate\([^)]*\) scale\(0\.5000 -0\.5000\)"', h)[1]
 
 def polygon(d, n=10):
-    toks = re.findall(r'[MLQHVZ]|-?\d+\.?\d*', d); i = 0; cmd = None; pts = []; cur = (0, 0)
+    toks = re.findall(r'[MLQCHVZ]|-?\d+\.?\d*', d); i = 0; cmd = None; pts = []; cur = (0, 0)
     while i < len(toks):
         t = toks[i]
-        if t in 'MLQHVZ': cmd = t; i += 1
+        if t in 'MLQCHVZ': cmd = t; i += 1
         if cmd == 'Z': continue
         f = lambda k: float(toks[i + k])
         if cmd in 'ML': cur = (f(0), f(1)); pts.append(cur); i += 2
@@ -25,6 +25,12 @@ def polygon(d, n=10):
                 t_ = k / n; u = 1 - t_
                 pts.append((u*u*p0[0] + 2*u*t_*a[0] + t_*t_*b[0], u*u*p0[1] + 2*u*t_*a[1] + t_*t_*b[1]))
             cur = b; i += 4
+        elif cmd == 'C':
+            a, b, c = (f(0), f(1)), (f(2), f(3)), (f(4), f(5)); p0 = cur
+            for k in range(1, n + 1):
+                t_ = k / n; u = 1 - t_
+                pts.append(tuple(u**3*p0[j] + 3*u*u*t_*a[j] + 3*u*t_*t_*b[j] + t_**3*c[j] for j in range(2)))
+            cur = c; i += 6
     pts = np.array(pts); keep = np.r_[True, np.abs(np.diff(pts, axis=0)).sum(1) > 1e-6]
     pts = pts[keep]
     return pts[:-1] if np.abs(pts[0] - pts[-1]).sum() < 1e-6 else pts
@@ -81,3 +87,19 @@ def spine(start=(734, 740), heading=(0.05, 1), step=10, reach=60):
         new = cand[k]; nh = new - p; nh /= np.linalg.norm(nh); h = .6 * h + .4 * nh; h /= np.linalg.norm(h)
         p = new; pts.append(p.copy()); ws.append(dd[k])
     return np.array(pts), np.array(ws)
+
+def auto_spine(d, heading=(1, -.6)):
+    """Trace an s found by itself: start on the spine (the thickest point on the vertical through the
+    middle of the outline), trace back to the upper terminal and on to the lower one. Returns points,
+    half-widths and the index of the starting point."""
+    load(d)
+    x = (P[:, 0].min() + P[:, 0].max()) / 2; ys = np.linspace(P[:, 1].min(), P[:, 1].max(), 400)
+    q = np.stack([np.full_like(ys, x), ys], 1); ins = inside(q)
+    dd = np.where(ins, seg_dist(q), -1)
+    yc = (P[:, 1].min() + P[:, 1].max()) / 2
+    dd = dd - .002 * np.abs(ys - yc) * (dd > 0)            # prefer the middle of the letter
+    start = q[dd.argmax()]
+    h = np.array(heading, float)
+    back, wb = spine(start, -h); fwd, wf = spine(start, h)
+    pts = np.concatenate([back[::-1], fwd[1:]]); ws = np.concatenate([wb[::-1], wf[1:]])
+    return pts, ws, len(back) - 1

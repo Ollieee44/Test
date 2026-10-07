@@ -29,6 +29,30 @@ def _arch_lt():
 FACES = {'news': (LT, S_T, '-110 -1110 1010 1180'),
          'arch': (_arch_lt(), 'translate(986.6 0.0) scale(1.0000 -1.0000)', '-60 -575 650 650')}
 
+def _font_lt(key):
+    """The logotype re-set in another face: that face's "yster" (from fonts.json, scaled so its s matches the
+    Newsreader s's height) on default spacing, the y's ink starting where the Newsreader y's does, and
+    "therapeutics" moved to keep its place under the y's tail. Kerning is not applied."""
+    g = sdeg.FONTS[key]['glyphs']; lt = LT
+    news = re.findall(r'<path d="([^"]*)" transform="translate\(([\d.]+) 0\.0\) scale\(0\.5000 -0\.5000\)"/>', LT)
+    y_left = float(news[0][1]) + .5 * sdeg.sgeom.polygon(news[0][0])[:, 0].min()
+    x = y_left - .5 * g['y']['x0']; letters = ''; s_t = None
+    for ch in 'yster':
+        t = f'translate({x:.1f} 0.0) scale(0.5000 -0.5000)'
+        if ch == 's': s_t = t
+        if ch == 'y': y_end = x + .5 * g['y']['adv']
+        letters += f'<path d="{g[ch]["d"]}" transform="{t}"/>'; end = x + .5 * g[ch]['x1']; x += .5 * g[ch]['adv']
+    i = lt.index(f'<path d="{news[0][0]}"'); j = lt.index('/>', lt.index(f'<path d="{news[-1][0]}"')) + 2
+    lt = lt[:i] + letters + lt[j:]
+    dx = y_end - float(news[1][1])           # the Newsreader y ends where its s begins
+    lt = re.sub(r'translate\(([\d.]+) ([\d.]+)\) scale\(0\.1200', lambda m: f'translate({float(m.group(1)) + dx:.1f} {m.group(2)}) scale(0.1200', lt)
+    lt = re.sub(r'viewBox="([-\d.]+) ([-\d.]+) [\d.]+ ([\d.]+)"', lambda m: f'viewBox="{m.group(1)} {m.group(2)} {end + 30 - float(m.group(1)):.1f} {m.group(3)}"', lt, count=1)
+    cx = .5 * (g['s']['x0'] + g['s']['x1'])
+    return lt, s_t, f'{cx - 505:.0f} -1110 1010 1180'
+
+for _k in sdeg.FONTS:
+    FACES[_k] = _font_lt(_k)
+
 def logotype(fn, ns):
     lt, st, _ = FACES[getattr(fn, 'face', 'news')]
     el = re.search(r'<path d="[^"]*" transform="' + re.escape(st) + '"/>', lt).group(0)
@@ -50,15 +74,38 @@ def construction():
     return (f'<svg class="big" viewBox="-110 -1110 1010 1180" aria-hidden="true"><g transform="scale(1 -1)">'
             f'<path d="{sdeg.D}" fill="currentColor" opacity=".18"/><polyline points="{line}" fill="none" stroke="currentColor" stroke-width="6"/>{dots}</g></svg>')
 
+NOTES = {
+    'fraunces': 'Serif. Soft and warm, with rounded terminals; the halves keep a friendly weight.',
+    'sourceserif': 'Serif. Sturdier and lower in contrast than Newsreader, so the two halves stay even.',
+    'literata': 'Serif. Bookish and close to the current face, but calmer; the nearest like-for-like swap.',
+    'lora': 'Serif. Calligraphic, with flared terminals; more personality, less clinical.',
+    'youngserif': 'Serif. Heavy and soft; the clasp stays legible at header size.',
+    'dmserif': 'Serif. High contrast like Newsreader, so the cut s edges back towards the apple core.',
+    'instrument': 'Serif. Condensed and elegant; the clasp gets small at header size.',
+    'inter': 'Sans. Neutral and clean; the split reads as two simple hooks.',
+    'dmsans': 'Sans. Geometric and friendly, with an open s.',
+    'manrope': 'Sans. Modern, slightly rounded geometric; even halves.',
+    'plexsans': 'Sans. Technical and scientific in tone, with angled terminals.',
+    'spacegrotesk': 'Sans. Quirky and techy; the most start-up of the set.',
+    'sora': 'Sans. Wide and geometric; the s is broad, which suits the clasp.',
+    'outfit': 'Sans. Round geometric; light-hearted, the least pharma of the set.',
+    'arch': 'Sans. The Tidepool logotype&rsquo;s face.',
+}
+FONT_CARDS = [('', '08 in other faces', 'The same treatment, the seam eased apart with the clasp in the pearl colour, on the s of other faces. Each is drawn from the font&rsquo;s own outlines, scaled to the height of the current s, and set in the logotype on the font&rsquo;s default spacing (no kerning or optical spacing yet, which the current logotype has). Serifs first, then sans.', None),
+              ('08', 'Newsreader 500 (current)', 'The logotype&rsquo;s face, for reference.', sdeg.v_seam_apart)]
+for n, (key, v) in enumerate(sorted(sdeg.FONTS.items(), key=lambda kv: kv[1]['kind'] == 'sans'), 1):
+    FONT_CARDS.append((f'F{n:02d}', v['name'], NOTES.get(key, v['kind'].title() + '.'), sdeg.on(key, sdeg.v_seam_apart)))
+FONT_CARDS.append((f'F{n + 1:02d}', 'Archivo 700', NOTES.get('arch', 'Sans. The Tidepool logotype&rsquo;s face.'), sdeg.on('arch', sdeg.v_seam_apart)))
+
 cards = ''
-for num, name, idea, fn in sdeg.VARIANTS:
+for num, name, idea, fn in sdeg.VARIANTS + FONT_CARDS:
     if fn is None:
         cards += f'<div class="grp"><h2>{name}</h2><p>{idea}</p></div>'; continue
-    k = f'v{num}'
+    k = f'v{num}' if fn is not sdeg.v_seam_apart or num != '08' or not cards.count('id="s08"') else 'v08r'
     bigs = ''.join(f'<div class="tile sq" style="{st}" title="{p.title()}">{big(fn, f"{k}{p[0]}b")}</div>' for p, st in PAL.items())
     lts = ''.join(f'<div class="tile wide" style="{st}">{logotype(fn, f"{k}{p[0]}l")}</div>' for p, st in PAL.items())
     hdr = ''.join(f'<div class="tile hdr" style="{st}">{logotype(fn, f"{k}{p[0]}h")}</div>' for p, st in PAL.items())
-    cards += (f'<article class="card{" ref" if num == "00" else ""}" id="s{num}"><header><b>{num}</b><h2>{name}</h2></header><p>{idea}</p>'
+    cards += (f'<article class="card{" ref" if num == "00" else ""}" id="s{k[1:]}"><header><b>{num}</b><h2>{name}</h2></header><p>{idea}</p>'
               f'<div class="row bigs">{bigs}</div><div class="row">{lts}</div><span class="lab">Header size, 42px</span><div class="row">{hdr}</div></article>')
 
 CSS = '''
