@@ -108,6 +108,34 @@ for num, name, idea, fn in sdeg.VARIANTS + FONT_CARDS:
     cards += (f'<article class="card{" ref" if num == "00" else ""}" id="s{k[1:]}"><header><b>{num}</b><h2>{name}</h2></header><p>{idea}</p>'
               f'<div class="row bigs">{bigs}</div><div class="row">{lts}</div><span class="lab">Header size, 42px</span><div class="row">{hdr}</div></article>')
 
+# Negative-space heads: 08's clasp heads cut out of the letter, the bond in the pearl colour, tried at three head
+# sizes and three distances from the seam, on Newsreader (08) and Archivo (F15).
+SIZES = [(.30, 'Small head'), (.38, 'Medium head'), (.46, 'Large head')]
+DISTS = [(.55, 'Close'), (.80, 'Middle'), (1.05, 'Far')]
+def neg_section():
+    out = ''
+    for face, title, pick in (('news', '08 &middot; Newsreader 500', (.38, .80)), ('arch', 'F15 &middot; Archivo 700', (.38, .80))):
+        mats = ''
+        for p, st in PAL.items():
+            cells = '<span></span>' + ''.join(f'<span class="ax">{lab}</span>' for _, lab in DISTS)
+            for r, rl in SIZES:
+                cells += f'<span class="ax ay">{rl}</span>'
+                for c, cl in DISTS:
+                    fn = sdeg.neg(r, c, face); ns = f'n{face[0]}{p[0]}{int(r * 100)}{int(c * 100)}'
+                    on = ' on' if (r, c) == pick else ''
+                    cells += f'<div class="tile sq{on}" style="{st}" title="{rl}, {cl.lower()}">{big(fn, ns)}</div>'
+            mats += f'<div class="mat"><span class="lab">{p.title()}</span><div class="cells">{cells}</div></div>'
+        fn = sdeg.neg(*pick, face)
+        lts = ''.join(f'<div class="tile wide" style="{st}">{logotype(fn, f"n{face[0]}{p[0]}L")}</div>' for p, st in PAL.items())
+        hdr = ''.join(f'<div class="tile hdr" style="{st}">{logotype(fn, f"n{face[0]}{p[0]}H")}</div>' for p, st in PAL.items())
+        out += (f'<article class="card wide-card" id="neg-{face}"><header><h2>{title}</h2></header>'
+                f'<div class="mats">{mats}</div><span class="lab">In the logotype: medium head, middle distance (outlined above)</span>'
+                f'<div class="row">{lts}</div><span class="lab">Header size, 42px</span><div class="row">{hdr}</div></article>')
+    return (f'<section class="neg"><div class="grp"><h2>Negative-space heads</h2><p>The two finalists, 08 and F15, with the clasp&rsquo;s '
+            f'round heads cut out of the letter, one in each half, and the bond between them in the logo&rsquo;s pearl colour. Rows change the '
+            f'size of the heads; columns move them further from the seam, so further apart. Sizes and distances are fractions of the spine&rsquo;s '
+            f'thickness, so the two fonts are like for like.</p></div>{out}</section>')
+
 CSS = '''
 :root { --bg: #F3EEEB; --surface: #FBF8F6; --ink: #241D28; --muted: #6A5E6C; --line: rgba(36,29,40,.13); --accent: #8C5572;
   --serif: "Newsreader", Georgia, serif; --sans: "Archivo", "Helvetica Neue", Arial, sans-serif; --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace; color-scheme: light; }
@@ -142,6 +170,14 @@ h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.04; margin-top: 12px; }
 .grp { grid-column: 1 / -1; margin-top: 28px; }
 .grp h2 { font-size: clamp(28px, 3vw, 38px); }
 .grp p { color: var(--muted); max-width: 72ch; margin: 8px 0 0; }
+.neg { display: grid; gap: 18px; margin-top: 8px; }
+.mats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 760px) { .mats { grid-template-columns: minmax(0, 1fr); } }
+.mat { display: grid; gap: 8px; min-width: 0; }
+.cells { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); gap: 6px; align-items: center; }
+.ax { font: 500 10px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.ay { writing-mode: vertical-rl; transform: rotate(180deg); }
+.tile.on { outline: 2px solid var(--accent); outline-offset: 2px; }
 footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
 code { font-family: var(--mono); font-size: .92em; }
 '''
@@ -166,6 +202,8 @@ html = f'''<!doctype html>
     </div>
     <div class="tile sq" style="{PAL['nacre']}" title="Construction">{construction()}</div>
   </div>
+  {neg_section()}
+  <div class="grp"><h2>All options so far</h2></div>
   <div class="grid">{cards}</div>
   <footer>Construction (top right): the s outline from the logotype export, its traced centreline, and the three cuts every option uses: the two shoulders where the serifs start and the middle of the spine. Rings are generic, as in the 3D story. Built by <code>oyster/brand/sdeg/build_sdeg.py</code>.</footer>
 </main>

@@ -153,13 +153,14 @@ def _inside(poly, q):
         if (y1 > y) != (y2 > y) and x < x1 + (y - y1) * (x2 - x1) / (y2 - y1): c = not c
     return c
 
-def halves(ns, g, d):
+def halves(ns, g, d, holes=()):
     """The s cut at the middle of the spine with a gap g, each half moved d along the spine's tangent away
     from the other. The halves are the outline itself split in two, so every serif stays with its half."""
     t = at(S_MID)[1]; up, lo = split_outline()
     box = 'maskUnits="userSpaceOnUse" x="-400" y="-400" width="1800" height="1900"'
     out = (f'<defs><mask id="{ns}c" {box}><rect x="-400" y="-400" width="1800" height="1900" fill="#fff"/>'
-           f'<g fill="#000">{band(S_MID - g / 2, S_MID + g / 2)}</g></mask></defs>')
+           f'<g fill="#000">{band(S_MID - g / 2, S_MID + g / 2)}'
+           + ''.join(f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r)}"/>' for x, y, r in holes) + '</g></mask></defs>')
     poly = lambda P: 'M' + ' L'.join(f'{f(x)} {f(y)}' for x, y in P) + 'Z'
     out += (f'<path d="{poly(up)}" transform="translate({f(-t[0] * d)} {f(-t[1] * d)})" mask="url(#{ns}c)"/>'
             f'<path d="{poly(lo)}" transform="translate({f(t[0] * d)} {f(t[1] * d)})" mask="url(#{ns}c)"/>')
@@ -187,6 +188,22 @@ def v_seam_apart(ns, d=.22):
     out, _, _ = halves(ns, .3 * W_MID, dd)
     a = at(S_MID - .62 * W_MID)[0] - t * dd; b = at(S_MID + .62 * W_MID)[0] + t * dd
     return out + clasp_at(a, b, .4 * W_MID, .3 * W_MID, 'var(--pearl)')
+
+def v_neg(ns, r=.38, c=.8, d=.22, g=.3):
+    """08 with the clasp's round heads cut out of the letter as negative space, one in each half, and the
+    bond between them in the logo's pearl colour. r: head radius and c: distance from the seam to each
+    head's centre, both as fractions of the spine's half-width."""
+    t = at(S_MID)[1]; w = W_MID; dd = d * w
+    pa, pb = at(S_MID - (g / 2 + c) * w)[0], at(S_MID + (g / 2 + c) * w)[0]
+    out, _, _ = halves(ns, g * w, dd, holes=[(pa[0], pa[1], r * w), (pb[0], pb[1], r * w)])
+    A, B = pa - t * dd, pb + t * dd; u = (B - A) / np.linalg.norm(B - A); A, B = A + u * r * w, B - u * r * w
+    return out + (f'<line x1="{f(A[0])}" y1="{f(A[1])}" x2="{f(B[0])}" y2="{f(B[1])}" style="stroke:var(--pearl)" '
+                  f'stroke-width="{f(.26 * w)}" stroke-linecap="butt"/>')
+
+def neg(r, c, face='news'):
+    """A v_neg variant with fixed settings, drawn on a face."""
+    fn = lambda ns: v_neg(ns, r, c)
+    return on(face, fn) if face != 'news' else fn
 
 def on(face, fn):
     """A variant drawn on another face's s (the builder reads .face to pick that face's logotype)."""
