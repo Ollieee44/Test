@@ -41,6 +41,11 @@ def mark_parts(ns):
     assert n == 1, 'lid not found'
     m, n = re.subn(r'<circle (cx="[^"]*" cy="[^"]*" r="[^"]*" fill="#000")/>', r'<circle class="hole" \1/>', m, count=1)
     assert n == 1, 'pearl hole not found'
+    # the closed lid: the same fan, solid (a white fill and a wide white edge, like the lower valve), drawn last so it
+    # sits over the lower valve and the pearl. It is flat until the hover swings it down, face down, over the pearl
+    lid = re.search(r'<g class="lid">(.*?)</g></g>', m, re.S).group(1) + '</g>'
+    d = re.search(r'<path d="([^"]*)"', lid).group(1)
+    m = m.replace('</mask>', f'<g class="lidf"><path d="{d}" fill="#fff" stroke="#fff" stroke-width="6.0"/>{lid}</g></mask>', 1)
     return m, sym[NAME].replace('style="fill:var(--p1)"', 'class="pearl" style="fill:var(--pearl)"')
 def fanify(h):
     """Every old mark in the page becomes the fan mark, each with its own mask ids."""
