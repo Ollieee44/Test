@@ -2,12 +2,21 @@
 with the SELFTAC clasp where the halves meet. Each variant returns SVG in glyph units (y up), to be
 placed with the s's own transform. Ink is currentColor; the clasp is var(--clasp); linker pearls are
 var(--bead) on a var(--strand) strand. Masks take a namespace so a page can hold many copies.
+use(face) switches between the logotype's Newsreader s and, for comparison, the Archivo s.
 """
-import math
+import math, os, re
 import numpy as np
-from sgeom import s_path, spine, seg_dist
+import sgeom
+B = os.path.dirname(os.path.abspath(__file__)) + '/../'
 
-D = s_path()
+def _arch_s():
+    h = open(B + 'oyster-logotype-tidepool.svg').read()
+    return re.findall(r'<path d="([^"]*)" transform="translate\(986\.6 0\.0\) scale\(1\.0000 -1\.0000\)"', h)[0]
+
+# Per face: the s outline, where the trace starts (just inside the upper terminal) and its heading, and hints
+# for the spine's middle and the two shoulders where the terminals begin.
+FACES = {'news': (sgeom.s_path(), (734, 740), (0.05, 1), (460, 535), (668, 975), (170, 75)),
+         'arch': (_arch_s(), (435, 385), (0, 1), (288, 253), (440, 470), (150, 120))}
 
 def _resample(c, w, step=4.0):
     k = 7; pad = lambda a: np.concatenate([a[:1].repeat(k // 2, 0), a, a[-1:].repeat(k // 2, 0)])
@@ -18,30 +27,31 @@ def _resample(c, w, step=4.0):
     t = np.arange(0, s[-1], step)
     return np.stack([np.interp(t, s, c[:, 0]), np.interp(t, s, c[:, 1])], 1), np.interp(t, s, w), t
 
-C, W, S = _resample(*spine())
-L = S[-1]
-
 def at(s):
     """Point, unit tangent, normal and half-width at arc length s (straight on past either end)."""
     sc = min(max(s, 0), L - 1e-6); i = min(int(sc / 4.0), len(C) - 2); f = sc / 4.0 - i
     p = C[i] * (1 - f) + C[i + 1] * f; t = C[i + 1] - C[i]; t = t / np.linalg.norm(t)
     return p + t * (s - sc), t, np.array([-t[1], t[0]]), W[i] * (1 - f) + W[i + 1] * f
 
-# The spine's middle: where the centreline passes closest to the middle of the letter.
-S_MID = float(S[np.argmin(np.linalg.norm(C - np.array([460, 535]), axis=1))])
-W_MID = at(S_MID)[3]
-# Shoulders where the serifs begin (found from the traced centreline; see the sheet's construction view).
-S_TOP = float(S[np.argmin(np.linalg.norm(C - np.array([668, 975]), axis=1))])
-S_BOT = float(S[np.argmin(np.linalg.norm(C - np.array([170, 75]), axis=1))])
+def use(face):
+    """Point every drawing function at one face's s."""
+    global D, C, W, S, L, S_MID, W_MID, S_TOP, S_BOT, FACE
+    d, start, heading, mid, top, bot = FACES[face]; FACE = face
+    sgeom.load(d); D = d
+    C, W, S = _resample(*sgeom.spine(start, heading)); L = S[-1]
+    near = lambda q: float(S[np.argmin(np.linalg.norm(C - np.array(q), axis=1))])
+    S_MID = near(mid); W_MID = at(S_MID)[3]; S_TOP = near(top); S_BOT = near(bot)
+
+use('news')
 
 f = lambda v: f'{v:.1f}'
 pts = lambda a: ' '.join(f'{f(x)},{f(y)}' for x, y in a)
 
-def band(s0, s1, extra=1.7, half=None):
+def band(s0, s1, extra=1.7, half=None, floor=0):
     """A polygon covering the stroke between arc lengths s0 and s1, cut square to the centreline
     (half-width: extra times the stroke's, or a fixed half in glyph units)."""
     ss = np.linspace(s0, s1, max(2, int(abs(s1 - s0) / 8)))
-    hw = lambda s: half if half else at(s)[3] * extra
+    hw = lambda s: half if half else max(at(s)[3] * extra, floor * W_MID)
     left = [at(s)[0] + at(s)[2] * hw(s) for s in ss]
     right = [at(s)[0] - at(s)[2] * hw(s) for s in ss]
     return f'<polygon points="{pts(left + right[::-1])}"/>'
@@ -114,8 +124,11 @@ def halves(ns, g, d):
     """The s cut at the middle of the spine with a gap g, each half moved d along the spine's tangent away
     from the other. Each half is the cut letter clipped to a band that follows its own stroke."""
     t = at(S_MID)[1]; cut = band(S_MID - g / 2, S_MID + g / 2)
-    out = (f'<defs><clipPath id="{ns}u">{band(-200, S_MID, half=None, extra=1.9)}</clipPath>'
-           f'<clipPath id="{ns}l">{band(S_MID, L + 200, extra=1.9)}</clipPath></defs>')
+    # Archivo's terminals are thick where the trace starts thin, so its clips get a minimum width; Newsreader's
+    # bowls sit close to the other half, so its clips follow the stroke.
+    fl = 1.1 if FACE == 'arch' else 0
+    out = (f'<defs><clipPath id="{ns}u">{band(-200, S_MID, extra=1.9, floor=fl)}</clipPath>'
+           f'<clipPath id="{ns}l">{band(S_MID, L + 200, extra=1.9, floor=fl)}</clipPath></defs>')
     g_ = glyph(ns + "m", cuts=[cut])
     out += (f'<g transform="translate({f(-t[0] * d)} {f(-t[1] * d)})"><g clip-path="url(#{ns}u)">{g_}</g></g>'
             f'<g transform="translate({f(t[0] * d)} {f(t[1] * d)})"><g clip-path="url(#{ns}l)">{g_.replace(f'id="{ns}m"', f'id="{ns}m2"').replace(f'url(#{ns}m)', f'url(#{ns}m2)')}</g></g>')
@@ -129,6 +142,27 @@ def v_split(ns, d=.55):
 def v_open(ns, d=.55):
     out, a, b = halves(ns, 1.25 * W_MID, d * W_MID)
     return out + clasp_at(a, b, .5 * W_MID, 0)
+
+def v_seam(ns):
+    """The letter's outline kept whole: a hairline seam across the spine, the clasp straddling it."""
+    g = .14 * W_MID; t = at(S_MID)[1]
+    a = at(S_MID - .58 * W_MID)[0]; b = at(S_MID + .58 * W_MID)[0]
+    return glyph(ns, cuts=[band(S_MID - g / 2, S_MID + g / 2, extra=1.4)]) + clasp_at(a, b, .4 * W_MID, .3 * W_MID)
+
+def v_seam_apart(ns, d=.22):
+    """The seam opened a little, each half eased away along the spine: halves read, outline nearly whole."""
+    dd = d * W_MID; t = at(S_MID)[1]
+    out, _, _ = halves(ns, .3 * W_MID, dd)
+    a = at(S_MID - .62 * W_MID)[0] - t * dd; b = at(S_MID + .62 * W_MID)[0] + t * dd
+    return out + clasp_at(a, b, .4 * W_MID, .3 * W_MID)
+
+def on(face, fn):
+    """A variant drawn on another face's s (the builder reads .face to pick that face's logotype)."""
+    def g(ns):
+        use(face)
+        try: return fn(ns)
+        finally: use('news')
+    g.face = face; return g
 
 def linker(ns, half, cuts=()):
     s0, s1 = S_MID - half, S_MID + half; r = .3 * W_MID; g = 1.1 * W_MID; rc = .46 * W_MID
@@ -168,4 +202,9 @@ VARIANTS = [  # number, name, idea, function
     ('04', 'Ring ends', 'The serifs become open rings, the generic ligand rings of the 3D story, with the clasp in the spine.', v_rings),
     ('05', 'Full degrader', 'Ring ends and the pearl linker together: ligand, linker, clasp, linker, ligand, still read as an s.', v_full),
     ('06', 'Monoline', 'The s redrawn as one even tube, like the story&rsquo;s degrader, with ring ends and a pearl linker. Furthest from the type.', v_mono),
+    ('', 'The apple core, and fixes', 'Cutting the serif s at its thickest point leaves two heavy curved pieces pinched at the middle, and the gold pearls read as pips: from a distance, an apple core. Two ways out: keep the letter&rsquo;s outline whole and show the halves with a seam, or use a sans s, whose even stroke cuts into two clean hooks.', None),
+    ('07', 'Seam', 'Newsreader. The outline stays whole; a hairline seam crosses the spine and the clasp straddles it. Two halves, no bite out of the letter.', v_seam),
+    ('08', 'Seam, eased apart', 'Newsreader. The seam opened just enough to see, each half nudged away along the spine; the letter&rsquo;s outline is nearly intact.', v_seam_apart),
+    ('09', 'Archivo, halves apart', 'The Archivo s (the Tidepool logotype&rsquo;s face) with 02b: an even stroke splits into two hooks rather than two bulbs.', on('arch', v_split)),
+    ('10', 'Archivo, seam', 'The Archivo s with the seam: the quietest version, the clasp doing all the work.', on('arch', v_seam)),
 ]

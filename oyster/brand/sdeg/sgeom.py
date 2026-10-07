@@ -31,6 +31,11 @@ def polygon(d, n=10):
 
 P = polygon(s_path())
 
+def load(d):
+    """Switch the outline every function here works on."""
+    global P
+    P = polygon(d)
+
 def seg_dist(q):
     """Distance from points q (N,2) to the outline."""
     a = P; b = np.roll(P, -1, 0); ab = b - a

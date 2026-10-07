@@ -10,16 +10,35 @@ SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--pearl:#C99BB0;--clasp:#D9A443;--strand:#8C5572;--bead:#F6EEF1',
        'tidepool': 'color:#EAF3EF;background:#0F4C4A;--pearl:#F2B84B;--clasp:#F27D62;--strand:#B6D3CB;--bead:#EAF3EF'}
 LT = re.search(r'<svg class="lt"[^>]*>.*?</svg>', open(SITE).read(), re.S).group(0)
-S_EL = re.search(r'<path d="[^"]*" transform="translate\(949\.8 0\.0\) scale\(0\.5000 -0\.5000\)"/>', LT).group(0)
+S_T = 'translate(949.8 0.0) scale(0.5000 -0.5000)'
+
+def _arch_lt():
+    """The Archivo logotype (brand/oyster-logotype-tidepool.svg) recoloured through currentColor, with the
+    new fan mark (11.7) from the Newsreader logotype put in its mark box (both marks share the same box)."""
+    a = open(D + '../oyster-logotype-tidepool.svg').read()
+    head = '<g transform="translate(-17.1 -583.4) scale(6.3571)">'
+    # each mark group closes just before the y's outline
+    i = LT.index(head) + len(head); j = LT.rfind('</g><path d=', 0, LT.index('transform="translate(488.1 0.0)'))
+    fan = LT[i:j]
+    a_head = '<g transform="translate(-14.4 -600.2) scale(6.5476)">'
+    k = a.index(a_head) + len(a_head); m = a.rfind('</g><path d=', 0, a.index('transform="translate(530.6 0.0)'))
+    a = a[:k] + fan + a[m:]
+    a = a.replace('fill="#0F4C4A"', 'fill="currentColor"')
+    return re.sub(r'<svg[^>]*?(viewBox="[^"]+")[^>]*>', r'<svg class="lt" \1>', a, count=1)
+
+FACES = {'news': (LT, S_T, '-110 -1110 1010 1180'),
+         'arch': (_arch_lt(), 'translate(986.6 0.0) scale(1.0000 -1.0000)', '-60 -575 650 650')}
 
 def logotype(fn, ns):
-    s = LT.replace(S_EL, f'<g transform="translate(949.8 0.0) scale(0.5000 -0.5000)">{fn(ns + "s")}</g>')
-    for i in set(re.findall(r'id="([^"]+)"', LT)):
+    lt, st, _ = FACES[getattr(fn, 'face', 'news')]
+    el = re.search(r'<path d="[^"]*" transform="' + re.escape(st) + '"/>', lt).group(0)
+    s = lt.replace(el, f'<g transform="{st}">{fn(ns + "s")}</g>')
+    for i in set(re.findall(r'id="([^"]+)"', lt)):
         s = s.replace(f'id="{i}"', f'id="{ns}{i}"').replace(f'url(#{i})', f'url(#{ns}{i})')
     return re.sub(r'<svg class="lt"[^>]*?(viewBox="[^"]+")[^>]*>', r'<svg class="lt" \1 aria-hidden="true">', s, count=1)
 
 def big(fn, ns):
-    return f'<svg class="big" viewBox="-110 -1110 1010 1180" aria-hidden="true"><g transform="scale(1 -1)" fill="currentColor">{fn(ns)}</g></svg>'
+    return f'<svg class="big" viewBox="{FACES[getattr(fn, "face", "news")][2]}" aria-hidden="true"><g transform="scale(1 -1)" fill="currentColor">{fn(ns)}</g></svg>'
 
 def construction():
     """The traced centreline, the spine's middle and the two shoulders over the outline."""
@@ -33,6 +52,8 @@ def construction():
 
 cards = ''
 for num, name, idea, fn in sdeg.VARIANTS:
+    if fn is None:
+        cards += f'<div class="grp"><h2>{name}</h2><p>{idea}</p></div>'; continue
     k = f'v{num}'
     bigs = ''.join(f'<div class="tile sq" style="{st}" title="{p.title()}">{big(fn, f"{k}{p[0]}b")}</div>' for p, st in PAL.items())
     lts = ''.join(f'<div class="tile wide" style="{st}">{logotype(fn, f"{k}{p[0]}l")}</div>' for p, st in PAL.items())
@@ -71,6 +92,9 @@ h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.04; margin-top: 12px; }
 .big { width: 100%; height: 100%; display: block; }
 .lt { width: 100%; height: auto; display: block; }
 .hdr .lt { width: auto; height: 42px; max-width: 100%; }
+.grp { grid-column: 1 / -1; margin-top: 28px; }
+.grp h2 { font-size: clamp(28px, 3vw, 38px); }
+.grp p { color: var(--muted); max-width: 72ch; margin: 8px 0 0; }
 footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
 code { font-family: var(--mono); font-size: .92em; }
 '''
