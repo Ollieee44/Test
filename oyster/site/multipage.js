@@ -13,7 +13,10 @@ const toStart = () => {
   const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
   if (target) target.scrollIntoView({ behavior: 'instant' }); else scrollTo({ top: 0, left: 0, behavior: 'instant' });
 };
-toStart(); requestAnimationFrame(toStart); addEventListener('load', toStart, { once: true });
+// (once more when everything has loaded, unless you have started scrolling yourself by then)
+let userMoved = false;
+['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(t => addEventListener(t, () => { userMoved = true; }, { once: true, passive: true }));
+toStart(); requestAnimationFrame(toStart); addEventListener('load', () => { if (!userMoved) toStart(); }, { once: true });
 addEventListener('pageshow', e => { if (e.persisted) toStart(); });
 
 // the palette shows in the switch, the browser chrome and the address bar, and rides along on every

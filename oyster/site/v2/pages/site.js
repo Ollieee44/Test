@@ -69,6 +69,13 @@ document.querySelectorAll('.copy-btn').forEach(b => b.addEventListener('click', 
   setTimeout(() => { b.textContent = 'Copy'; if (status) status.textContent = ''; }, 1800);
 }));
 
+// ---------- v2: replay each move's little loop on hover ----------
+document.querySelectorAll('.move').forEach(m => {
+  const play = () => { m.classList.remove('play'); void m.offsetWidth; m.classList.add('play'); };
+  new IntersectionObserver((es, o) => es.forEach(e => { if (e.isIntersecting) { play(); o.disconnect(); } }), { rootMargin: '0px 0px -15% 0px' }).observe(m);
+  m.addEventListener('mouseenter', play);
+});
+
 
 // ---------- ternary complex wallpaper (from the main site), behind the sections after the story ----------
 function hexToRgb(h) { h = h.trim().replace('#', ''); const v = parseInt(h, 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; }

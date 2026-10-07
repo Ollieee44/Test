@@ -27,6 +27,7 @@ python build_landing.py                        # landing.html (the standalone st
 cd ../site && python build_site.py             # site index.html (always rebuild after landing changes)
 python build_palettes.py                       # palettes.html, the six-palette explorer
 python build_pages.py                          # pages/, the multi-page site (after build_palettes.py)
+python v2/build_v2.py                          # v2/pages/, Website v2: fan mark, longer story, fuller pages, hover motion
 cd ../intro && python build_intro.py           # the intro site (rebuild after any site change)
 ```
 
@@ -73,6 +74,7 @@ URL, so the client's link stays the same:
 | Fan-mark intro, Nacre (`intro/fan-nacre.html`) | https://claude.ai/artifact/7dgMtsG9wGQ18WXi8d6J73 |
 | Fan-mark website, no intro (`intro/fan-site.html`) | https://claude.ai/artifact/NSRLa7dnMy96W1ViKGfjHc |
 | **Multi-page site** (`site/pages/index.html`; publish with `files` mapping each other page plus `oyster.css` and `oyster.js`) | https://claude.ai/artifact/QVr3B1xEHBfEsFQDmtSgU2 |
+| **Website v2** (`site/v2/pages/index.html`; publish with `files` mapping each other page plus `site.css` and `site.js`) | https://claude.ai/artifact/QDNhDiXarQizvhVyZTPQQT |
 | Palette explorer (`site/palettes.html`) | https://claude.ai/artifact/AfzgUFchFXjBXQWcboMYMy |
 | Current website (`site/index.html`) | https://claude.ai/artifact/9pFqdk4otTS46U21phpLCk |
 | 3D story (`landing/landing.html`) | https://claude.ai/artifact/9aJKZGFD5fzeHUrQu9EPTk |
