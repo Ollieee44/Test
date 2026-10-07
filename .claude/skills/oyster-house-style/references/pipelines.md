@@ -72,6 +72,7 @@ URL, so the client's link stays the same:
 | Fan-mark intro, Tidepool (`intro/fan-tidepool.html`; `intro/build_fan.py` + `intro_fan.js` build all three fan pages; test hook `window.__intro.at(ms)`) | https://claude.ai/artifact/FdQsz8x3zDvkPnTZvowc1s |
 | Fan-mark intro, Nacre (`intro/fan-nacre.html`) | https://claude.ai/artifact/7dgMtsG9wGQ18WXi8d6J73 |
 | Fan-mark website, no intro (`intro/fan-site.html`) | https://claude.ai/artifact/NSRLa7dnMy96W1ViKGfjHc |
+| **Multi-page site** (`site/pages/index.html`; publish with `files` mapping each other page plus `oyster.css` and `oyster.js`) | https://claude.ai/artifact/QVr3B1xEHBfEsFQDmtSgU2 |
 | Palette explorer (`site/palettes.html`) | https://claude.ai/artifact/AfzgUFchFXjBXQWcboMYMy |
 | Current website (`site/index.html`) | https://claude.ai/artifact/9pFqdk4otTS46U21phpLCk |
 | 3D story (`landing/landing.html`) | https://claude.ai/artifact/9aJKZGFD5fzeHUrQu9EPTk |
