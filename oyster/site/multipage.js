@@ -6,6 +6,16 @@ const palBtns = [...document.querySelectorAll('.pal button')], paln = document.g
 const PAL_KEY = 'oyster-palette';
 root.lang = 'en';
 
+// every page opens at its top (or at the #section its link names): the browser, and the viewer around
+// an artifact, would otherwise keep the scroll position of the page you came from
+try { history.scrollRestoration = 'manual'; } catch (e) {}
+const toStart = () => {
+  const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+  if (target) target.scrollIntoView({ behavior: 'instant' }); else scrollTo({ top: 0, left: 0, behavior: 'instant' });
+};
+toStart(); requestAnimationFrame(toStart); addEventListener('load', toStart, { once: true });
+addEventListener('pageshow', e => { if (e.persisted) toStart(); });
+
 // the palette shows in the switch, the browser chrome and the address bar, and rides along on every
 // link to another page (and in storage) so the next page opens in the same one
 function showPal(k) {
