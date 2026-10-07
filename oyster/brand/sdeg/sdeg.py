@@ -100,6 +100,36 @@ def v_gap(ns):
     g = 1.25 * W_MID
     return glyph(ns, cuts=[band(S_MID - g / 2, S_MID + g / 2)]) + clasp(S_MID, g, .5 * W_MID, .36 * W_MID)
 
+def clasp_at(a, b, r, bond):
+    """The clasp between two given points (bond omitted when bond is 0: the clasp open)."""
+    line = (f'<line x1="{f(a[0])}" y1="{f(a[1])}" x2="{f(b[0])}" y2="{f(b[1])}" stroke-width="{f(bond)}" stroke-linecap="round"/>' if bond else '')
+    return (f'<g style="fill:var(--clasp);stroke:var(--clasp)">{line}<circle cx="{f(a[0])}" cy="{f(a[1])}" r="{f(r)}" stroke="none"/>'
+            f'<circle cx="{f(b[0])}" cy="{f(b[1])}" r="{f(r)}" stroke="none"/></g>')
+
+def v_gap_wide(ns):
+    g = 2.0 * W_MID
+    return glyph(ns, cuts=[band(S_MID - g / 2, S_MID + g / 2)]) + clasp(S_MID, g, .5 * W_MID, .3 * W_MID)
+
+def halves(ns, g, d):
+    """The s cut at the middle of the spine with a gap g, each half moved d along the spine's tangent away
+    from the other. Each half is the cut letter clipped to a band that follows its own stroke."""
+    t = at(S_MID)[1]; cut = band(S_MID - g / 2, S_MID + g / 2)
+    out = (f'<defs><clipPath id="{ns}u">{band(-200, S_MID, half=None, extra=1.9)}</clipPath>'
+           f'<clipPath id="{ns}l">{band(S_MID, L + 200, extra=1.9)}</clipPath></defs>')
+    g_ = glyph(ns + "m", cuts=[cut])
+    out += (f'<g transform="translate({f(-t[0] * d)} {f(-t[1] * d)})"><g clip-path="url(#{ns}u)">{g_}</g></g>'
+            f'<g transform="translate({f(t[0] * d)} {f(t[1] * d)})"><g clip-path="url(#{ns}l)">{g_.replace(f'id="{ns}m"', f'id="{ns}m2"').replace(f'url(#{ns}m)', f'url(#{ns}m2)')}</g></g>')
+    a = at(S_MID - g / 2)[0] - t * d; b = at(S_MID + g / 2)[0] + t * d
+    return out, a, b
+
+def v_split(ns, d=.55):
+    out, a, b = halves(ns, 1.25 * W_MID, d * W_MID)
+    return out + clasp_at(a, b, .5 * W_MID, .3 * W_MID)
+
+def v_open(ns, d=.55):
+    out, a, b = halves(ns, 1.25 * W_MID, d * W_MID)
+    return out + clasp_at(a, b, .5 * W_MID, 0)
+
 def linker(ns, half, cuts=()):
     s0, s1 = S_MID - half, S_MID + half; r = .3 * W_MID; g = 1.1 * W_MID; rc = .46 * W_MID
     return (glyph(ns, cuts=list(cuts) + [band(s0, s1)]) + strand(s0, s1, r, .12 * W_MID, g / 2 + rc + .25 * r + r)
@@ -131,6 +161,9 @@ VARIANTS = [  # number, name, idea, function
     ('00', 'Current', 'The Newsreader s as it is today, for comparison.', v_current),
     ('01', 'Inset clasp', 'The letter untouched; the gold clasp sits in the spine, where the two halves of a SELFTAC meet.', v_inset),
     ('02', 'Clasp gap', 'The spine is cut square and the halves are held by the clasp: each half keeps its pearl, as in the story.', v_gap),
+    ('02a', 'Clasp gap, longer bond', 'As 02, with the cut widened so the bond between the two clasp pearls shows clearly: two halves, held apart and joined.', v_gap_wide),
+    ('02b', 'Clasp gap, halves apart', 'As 02, with each half eased away from the other along the spine, so the letter itself reads as two pieces held by the clasp.', v_split),
+    ('02c', 'Clasp open', 'As 02b with the bond left out: the two halves apart, each with its pearl, as when a SELFTAC is split. For contrast with the closed clasp.', v_open),
     ('03', 'Pearl linker', 'The ends stay as letter (the two ligands); the spine becomes the linker, a strand of pearls with the clasp at its middle.', v_linker),
     ('04', 'Ring ends', 'The serifs become open rings, the generic ligand rings of the 3D story, with the clasp in the spine.', v_rings),
     ('05', 'Full degrader', 'Ring ends and the pearl linker together: ligand, linker, clasp, linker, ligand, still read as an s.', v_full),
