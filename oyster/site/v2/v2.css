@@ -20,8 +20,13 @@
 
 /* ---------- the fan mark ---------- */
 .fm { display: block; height: auto; overflow: visible; }
-.fm .pearl, .wm .pearl, .lt .pearl, .lt2 .pearl { transform-box: fill-box; transform-origin: 50% 50%; transition: transform .6s var(--spring); }
-.head .home:hover .pearl, .foot-home:hover .pearl, .hero .lt:hover .pearl { transform: translateY(-22%) scale(1.18); }
+/* hovering a logo closes the shell: the lid folds down onto the lower valve and the pearl is tucked away inside;
+   moving off opens it again and the pearl comes back. Only the logotypes (header, hero, footer) do this */
+.lid, .hole, .fm .pearl, .wm .pearl, .lt .pearl, .lt2 .pearl { transform-box: fill-box; }
+.lid { transform-origin: 50% 100%; transition: transform .6s var(--spring) .05s; }
+.hole, .fm .pearl, .wm .pearl, .lt .pearl, .lt2 .pearl { transform-origin: 50% 50%; transition: transform .45s var(--spring) .18s; }
+.head .home:hover .lid, .foot-home:hover .lid, .hero .lt:hover .lid { transform: scaleY(var(--shut, .22)); transition: transform .38s var(--ease); }
+.head .home:hover :is(.hole, .pearl), .foot-home:hover :is(.hole, .pearl), .hero .lt:hover :is(.hole, .pearl) { transform: scale(0); transition: transform .22s var(--ease); }
 .head .home .wm { transition: transform .4s var(--ease); }
 .head .home:hover .wm { transform: translateY(-1px); }
 
@@ -201,6 +206,6 @@ a:hover .arr svg { animation: hop .55s var(--ease); }
 @media (prefers-reduced-motion: reduce) {
   .loader .fm, .hero .lt .pearl { animation: none; }
   .pic *, a:hover .arr svg { animation: none !important; }
-  .btn::before, .btn svg, .explore a, .person, .mono, .move, .card, .markrule .fm, .strandnav a::before, .miles li::before, .menu-btn, .skip, .end a, .links a, .items li, .terms div, .fm .pearl, .wm .pearl, .lt .pearl, .lt2 .pearl { transition: none !important; }
-  .explore a:hover, .person:hover, .move:hover, .card:hover, .person:hover .mono, .markrule:hover .fm, .menu-btn:hover, .skip:hover, .end a:hover, .head .home:hover .pearl, .foot-home:hover .pearl, .hero .lt:hover .pearl { transform: none; }
+  .btn::before, .btn svg, .explore a, .person, .mono, .move, .card, .markrule .fm, .strandnav a::before, .miles li::before, .menu-btn, .skip, .end a, .links a, .items li, .terms div, .lid, .hole, .fm .pearl, .wm .pearl, .lt .pearl, .lt2 .pearl { transition: none !important; }
+  .explore a:hover, .person:hover, .move:hover, .card:hover, .person:hover .mono, .markrule:hover .fm, .menu-btn:hover, .skip:hover, .end a:hover { transform: none; }
 }

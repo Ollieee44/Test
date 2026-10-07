@@ -33,8 +33,15 @@ n_ids = [0]
 def uid():
     n_ids[0] += 1; return f'fan{n_ids[0]}-'
 def mark_parts(ns):
+    """The mark's mask and drawing, with its parts named for the hover: the lid (the fan outline and its ribs),
+    the hole the pearl sits in, and the pearl."""
     masks, sym = linepearl.build(ns)
-    return masks[NAME], sym[NAME].replace('style="fill:var(--p1)"', 'class="pearl" style="fill:var(--pearl)"')
+    m = masks[NAME]
+    m, n = re.subn(r'(<path d="[^"]*" fill="none" stroke="#000"[^>]*/><g clip-path="url\(#[^)]*\)">.*?</g>)', r'<g class="lid">\1</g>', m, count=1, flags=re.S)
+    assert n == 1, 'lid not found'
+    m, n = re.subn(r'<circle (cx="[^"]*" cy="[^"]*" r="[^"]*" fill="#000")/>', r'<circle class="hole" \1/>', m, count=1)
+    assert n == 1, 'pearl hole not found'
+    return m, sym[NAME].replace('style="fill:var(--p1)"', 'class="pearl" style="fill:var(--pearl)"')
 def fanify(h):
     """Every old mark in the page becomes the fan mark, each with its own mask ids."""
     def swap(m):
