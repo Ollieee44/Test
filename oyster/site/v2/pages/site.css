@@ -543,3 +543,13 @@ a:hover .arr svg { animation: hop .55s var(--ease); }
   .btn::before, .btn svg, .explore a, .person, .mono, .move, .card, .markrule .fm, .strandnav a::before, .miles li::before, .menu-btn, .skip, .end a, .links a, .items li, .terms div, .lid, .lidf, .hole, .fm .pearl, .wm .pearl, .lt .pearl, .lt2 .pearl { transition: none !important; }
   .explore a:hover, .person:hover, .move:hover, .card:hover, .person:hover .mono, .markrule:hover .fm, .menu-btn:hover, .skip:hover, .end a:hover { transform: none; }
 }
+
+/* phones: the copy card sits low, just above the pearl rail, and the scroll cue moves up under the header, where
+   the stage is empty (the molecule is framed from about a third of the way down) */
+@media (max-width: 760px) {
+  .copy { bottom: calc(52px + env(safe-area-inset-bottom, 0px)); }
+  .hint { top: calc(118px + env(safe-area-inset-top, 0px)); bottom: auto; grid-auto-flow: column; align-items: center; gap: 10px; }
+  .hint span { white-space: nowrap; }
+  .hint i { width: 16px; height: 24px; border-radius: 9px; flex: none; }
+  .hint i::after { top: 5px; width: 3px; height: 5px; margin-left: -1.5px; }
+}
