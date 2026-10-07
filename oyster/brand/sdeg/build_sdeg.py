@@ -54,7 +54,7 @@ for _k in sdeg.FONTS:
     FACES[_k] = _font_lt(_k)
 
 def logotype(fn, ns):
-    lt, st, _ = FACES[getattr(fn, 'face', 'news')]
+    lt, st, _ = FACES[getattr(fn, 'lt_face', getattr(fn, 'face', 'news'))]
     el = re.search(r'<path d="[^"]*" transform="' + re.escape(st) + '"/>', lt).group(0)
     s = lt.replace(el, f'<g transform="{st}">{fn(ns + "s")}</g>')
     for i in set(re.findall(r'id="([^"]+)"', lt)):
@@ -108,6 +108,26 @@ for num, name, idea, fn in sdeg.VARIANTS + FONT_CARDS:
     cards += (f'<article class="card{" ref" if num == "00" else ""}" id="s{k[1:]}"><header><b>{num}</b><h2>{name}</h2></header><p>{idea}</p>'
               f'<div class="row bigs">{bigs}</div><div class="row">{lts}</div><span class="lab">Header size, 42px</span><div class="row">{hdr}</div></article>')
 
+def _arch_tight():
+    """The Archivo logotype for the negative-space mock-ups, with s, t, e and r moved left together so the
+    closest distance from the y to the s as drawn there (halves eased apart) matches the mean closest
+    distance of s-t and t-e. The y, the mark and "therapeutics" stay put."""
+    lt = FACES['arch'][0]
+    P = re.findall(r'<path d="([^"]*)" transform="translate\(([\d.]+) 0\.0\) scale\(1\.0000 -1\.0000\)"/>', lt)
+    pts = lambda d, x: np.concatenate([sdeg.sgeom.polygon(c, 16) + [float(x), 0] for c in re.findall(r'M[^M]*', d)])
+    sdeg.use('arch'); up, lo = sdeg.split_outline(); t = sdeg.at(sdeg.S_MID)[1]; dd = .22 * sdeg.W_MID; sdeg.use('news')
+    sx = float(P[1][1]); s_pts = np.concatenate([np.array(up) - t * dd, np.array(lo) + t * dd]) + [sx, 0]
+    gap = lambda A, B: np.sqrt(((A[:, None] - B[None]) ** 2).sum(-1)).min()
+    y, tt, e = pts(*P[0]), pts(*P[2]), pts(*P[3])
+    target = (gap(s_pts, tt) + gap(tt, e)) / 2; delta = gap(y, s_pts) - target
+    for d, x in P[1:]:
+        lt = lt.replace(f'transform="translate({x} 0.0) scale(1.0000 -1.0000)"', f'transform="translate({float(x) - delta:.1f} 0.0) scale(1.0000 -1.0000)"')
+    lt = re.sub(r'viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"', lambda m: f'viewBox="{m.group(1)} {m.group(2)} {float(m.group(3)) - delta:.1f} {m.group(4)}"', lt, count=1)
+    print(f'Archivo y-s: {gap(y, s_pts):.1f} -> {target:.1f} (moved {delta:.1f})')
+    return lt, f'translate({sx - delta:.1f} 0.0) scale(1.0000 -1.0000)', FACES['arch'][2]
+
+FACES['arch_tight'] = _arch_tight()
+
 # Negative-space heads: 08's clasp heads cut out of the letter, the bond in the pearl colour, tried at three head
 # sizes and three distances from the seam, on Newsreader (08) and Archivo (F15).
 SIZES = [(.30, 'Small head'), (.38, 'Medium head'), (.46, 'Large head')]
@@ -126,10 +146,12 @@ def neg_section():
                     cells += f'<div class="tile sq{on}" style="{st}" title="{rl}, {cl.lower()}">{big(fn, ns)}</div>'
             mats += f'<div class="mat"><span class="lab">{p.title()}</span><div class="cells">{cells}</div></div>'
         fn = sdeg.neg(*pick, face)
+        note = ''
+        if face == 'arch': fn.lt_face = 'arch_tight'; note = '. The y&ndash;s gap closed to match the other letters'
         lts = ''.join(f'<div class="tile wide" style="{st}">{logotype(fn, f"n{face[0]}{p[0]}L")}</div>' for p, st in PAL.items())
         hdr = ''.join(f'<div class="tile hdr" style="{st}">{logotype(fn, f"n{face[0]}{p[0]}H")}</div>' for p, st in PAL.items())
         out += (f'<article class="card wide-card" id="neg-{face}"><header><h2>{title}</h2></header>'
-                f'<div class="mats">{mats}</div><span class="lab">In the logotype: medium head, middle distance (outlined above)</span>'
+                f'<div class="mats">{mats}</div><span class="lab">In the logotype: medium head, middle distance (outlined above){note}</span>'
                 f'<div class="row">{lts}</div><span class="lab">Header size, 42px</span><div class="row">{hdr}</div></article>')
     return (f'<section class="neg"><div class="grp"><h2>Negative-space heads</h2><p>The two finalists, 08 and F15, with the clasp&rsquo;s '
             f'round heads cut out of the letter, one in each half, and the bond between them in the logo&rsquo;s pearl colour. Rows change the '
