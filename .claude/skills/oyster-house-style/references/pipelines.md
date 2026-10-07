@@ -13,6 +13,7 @@ All work is on branch `claude/blissful-heisenberg-oewalt` of the repo, under `oy
 | `oyster/molecule/` | 2D molecule studies and the SELFTAC icon used in the first sites |
 | `oyster/landing/` | The 3D scroll story: `build_meshes.py` → `data/meshes.json`; `js/molecule.js` (generic degrader, pearls, clasp); `landing_template.html` → `build_landing.py` → `landing.html`; `frames_template.html` → `frames.html` (model viewer) |
 | `oyster/site/` | The current website: `build_site.py` combines the landing template + `sections.html` + `site.css` + `site.js` + `wallpaper.js` → `index.html` |
+| `oyster/site/pages/` | The multi-page site: `build_pages.py` splits `palettes.html` into Home, Science (the 3D story + live clasp), Pipeline, Team, Investors, News and Contact pages sharing `oyster.css` / `oyster.js` (from `multipage.css` / `multipage.js` + `wallpaper.js`). The palette carries between pages via `?palette=` and local storage |
 | `oyster/intro/` | The website opened by an intro (3D oyster opens, pearl becomes the 'o', logotype settles into the header): `intro.js` + `intro.css`, `build_intro.py` wraps `../site/index.html` → `index.html`. Test hook `window.__intro.at(ms)` |
 | `oyster/deck/` | PowerPoint Morph deck: `bg.py`, `exporter.html`, `build.js`, `post.py` → `oyster-selftac-morph.pptx`; `models/*.glb` |
 
@@ -25,6 +26,7 @@ cd oyster/landing && python build_meshes.py   # only when geometry changes (need
 python build_landing.py                        # landing.html (the standalone story)
 cd ../site && python build_site.py             # site index.html (always rebuild after landing changes)
 python build_palettes.py                       # palettes.html, the six-palette explorer
+python build_pages.py                          # pages/, the multi-page site (after build_palettes.py)
 cd ../intro && python build_intro.py           # the intro site (rebuild after any site change)
 ```
 
