@@ -183,7 +183,7 @@ clasp = site_js[site_js.index('// ---------- the live clasp'):]
 a = module.index('// ---------- site: header state'); b = module.index('\nwindow.__story = {')
 module = module[:a] + clasp + module[b:]
 # a longer glide behind the scroll
-module = once(module, '1 - Math.exp(-dt / .22)', '1 - Math.exp(-dt / .42)')
+module = once(module, '1 - Math.exp(-dt / .22)', '1 - Math.exp(-dt / .3)')
 # redraw only when the picture changes, and lift the loading mark once the first frame is up
 module = once(module, '  if (storyOn) { frame(prog); if (renderer) renderer.render(scene, camera); }',
               "  const sig = prog.toFixed(5) + '|' + spin.toFixed(4) + '|' + pal + '|' + stage.clientWidth + 'x' + stage.clientHeight;\n"
@@ -216,9 +216,12 @@ science = (story + '\n' + block('why') + '\n'
            + band('versus', eyebrow('The difference') + '<h2 class="say rv">The same degrader, made small enough to travel.</h2>' + versus)
            + RULE()
            + band('terms', eyebrow('Terms') + '<h2 class="say rv">The words behind the story.</h2>' + terms))
+# the import map goes in the head, ahead of the preloads: Safari and Firefox ignore an import map that comes after
+# any module has started loading, and the story's script then cannot find three.js at all
 page('science', 'Science | Oyster Therapeutics', PAGES[0][2], science,
-     after=meshes + '\n' + importmap + '\n<script type="module">' + module + '</script>\n', skipto='#why',
-     extra='\n<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>\n<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js">'
+     after=meshes + '\n<script type="module">' + module + '</script>\n', skipto='#why',
+     extra='\n<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>\n' + importmap +
+           '\n<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js">'
            '\n<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/geometries/RoundedBoxGeometry.js">')
 
 # ---------- pipeline ----------

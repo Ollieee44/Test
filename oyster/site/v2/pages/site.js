@@ -76,6 +76,16 @@ document.querySelectorAll('.move').forEach(m => {
   m.addEventListener('mouseenter', play);
 });
 
+// ---------- v2: if the 3D story's script could not run, say so instead of leaving the loading mark up ----------
+const stageEl = document.getElementById('stage');
+if (stageEl) addEventListener('load', () => {
+  if (window.__story) return;
+  stageEl.classList.add('ready');
+  const d = document.createElement('div'); d.className = 'nogl';
+  d.textContent = 'The 3D story could not load. Reload the page to try again, or skip the story.';
+  stageEl.appendChild(d);
+}, { once: true });
+
 
 // ---------- ternary complex wallpaper (from the main site), behind the sections after the story ----------
 function hexToRgb(h) { h = h.trim().replace('#', ''); const v = parseInt(h, 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; }
