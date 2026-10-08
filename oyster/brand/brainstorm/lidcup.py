@@ -15,7 +15,7 @@ def _rot(p, about, deg):
     return about + np.array([p[0] * math.cos(a) - p[1] * math.sin(a), p[0] * math.sin(a) + p[1] * math.cos(a)])
 
 def lid_cup(ns, split=False, ang=45, lid=(31, 25), cup=(33, 31), r_in=13.5, pr=10, tilt=0, bond=5, zig=False,
-            frill=1.1, growth=True, ring=1.0, colour='var(--pearl)'):
+            frill=1.1, growth=True, ring=1.0, colour='var(--pearl)', raw=False):
     c = np.array([50.0, 50.0]); g = 6 if split else 0
     L0, L1, C0, C1 = 196, 344, 16, 164
     la = min(max(ang + 180, L0 + 8), L1 - 8); ca = min(max(ang, C0 + 8), C1 - 8)
@@ -49,10 +49,16 @@ def lid_cup(ns, split=False, ang=45, lid=(31, 25), cup=(33, 31), r_in=13.5, pr=1
     pts = np.array([tip_a, tip_b, c + [-cup[0], 0], c + [cup[0], 0], c + [0, -lid[1] - g - 2], c + [0, cup[1] + g + 2],
                     _rot(c + [lid[0], -lid[1] * .4], hinge, -tilt)])
     lo, hi = pts.min(0), pts.max(0); s = min(1.0, 90 / max(hi - lo)); mid = (lo + hi) / 2
+    if raw:
+        # the shell alone (lid, pearl and cup), for setting it at the letters' height, and everything
+        lid_pts = np.array([_rot(_on(c + [0, -g], lid[0], lid[1], a), hinge, -tilt) for a in np.linspace(L0, L1, 40)])
+        cup_pts = np.array([_on(c + [0, g], cup[0], cup[1], a) for a in np.linspace(C0, C1, 40)])
+        sh = np.vstack([lid_pts, cup_pts]); allp = np.vstack([sh, pts])
+        return body, (*sh.min(0), *sh.max(0)), (*allp.min(0), *allp.max(0))
     return f'<g transform="translate({f(50 - mid[0] * s)} {f(50 - mid[1] * s)}) scale({f(s)})">{body}</g>'
 
 def V(**kw):
-    fn = lambda ns, split=False: lid_cup(ns, split, **kw); return fn
+    fn = lambda ns, split=False: lid_cup(ns, split, **kw); fn.kw = kw; return fn
 
 CONCEPTS = [
     ('ref', '02', 'Lid and cup, as it was', V(),

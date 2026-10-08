@@ -15,6 +15,32 @@ def mark(fn, ns, split=False, size=None, cls='mk'):
     sz = f' width="{size}" height="{size}"' if size else ''
     return f'<svg class="{cls}" viewBox="0 0 100 100"{sz} aria-hidden="true"><g fill="currentColor">{fn(ns, split)}</g></svg>'
 
+def _bounds(d):
+    """Ink bounds (x0, y0, x1, y1) of a glyph path in its own units, y up."""
+    import sys; sys.path.insert(0, D + '../sdeg'); import sgeom
+    p = sgeom.polygon(d, 12); return (*p.min(0), *p.max(0))
+
+def lockup_xheight(fn, ns, gap_em=.06):
+    """The logotype with the mark's shell (lid, pearl and cup) set exactly at the letters' x-height, from the
+    baseline to the top of the e, a letter gap from the y; the ligands reach beyond it, like the y's tail and
+    the t's top. The viewBox grows to take them."""
+    import lidcup
+    body, (sx0, sy0, sx1, sy1), (ax0, ay0, ax1, ay1) = lidcup.lid_cup(ns + 'k', False, raw=True, **fn.kw)
+    P = dict((x, d) for d, x in re.findall(r'<path d="([^"]*)" transform="translate\(([\d.]+) 0\.0\) scale\(0\.5000 -0\.5000\)"/>', LT))
+    e = _bounds(P['1596.9']); yb = _bounds(P['488.1'])
+    top, bot = -.5 * e[3], -.5 * e[1]                    # the e's top and bottom (overshoots included), page units
+    k = (bot - top) / (sy1 - sy0)
+    y_left = 488.1 + .5 * yb[0]; gap = gap_em * (bot - top)
+    tx = y_left - gap - k * sx1; ty = top - k * sy0
+    i = LT.index(HEAD); j = LT.rfind('</g><path d=', 0, LT.index('transform="translate(488.1 0.0)')) + 4
+    s = LT[:i] + f'<g transform="translate({tx:.1f} {ty:.1f}) scale({k:.4f})">{body}</g>' + LT[j:]
+    vx, vy, vw, vh = map(float, re.search(r'viewBox="([^"]+)"', LT).group(1).split())
+    nx0 = min(vx, k * ax0 + tx - 40); ny0 = min(vy, k * ay0 + ty - 40); ny1 = max(vy + vh, k * ay1 + ty + 40)
+    s = s.replace(f'viewBox="{vx} {vy} {vw} {vh}"', f'viewBox="{nx0:.1f} {ny0:.1f} {vx + vw - nx0:.1f} {ny1 - ny0:.1f}"', 1)
+    for q in set(re.findall(r'id="([^"]+)"', s)):
+        s = s.replace(f'id="{q}"', f'id="{ns}{q}"').replace(f'url(#{q})', f'url(#{ns}{q})')
+    return re.sub(r'<svg class="lt"[^>]*?(viewBox="[^"]+")[^>]*>', r'<svg class="lt" \1 aria-hidden="true">', s, count=1)
+
 def lockup(fn, ns):
     """The logotype with the concept in the mark's box (the same box the current mark uses)."""
     i = LT.index(HEAD) + len(HEAD); j = LT.rfind('</g><path d=', 0, LT.index('transform="translate(488.1 0.0)'))
@@ -30,10 +56,11 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
         tiles = ''.join(f'<div class="tile sq" style="{st}" title="{p.title()}, {lab.lower()}">{mark(fn, f"{key}{p[0]}{int(split)}", split)}</div>' for p, st in PAL.items())
         states += f'<div class="state"><span class="lab">{lab}</span><div class="row">{tiles}</div></div>'
     small = ''.join(f'<div class="tile sm" style="{st}">' + ''.join(mark(fn, f'{key}{p[0]}s{px}', size=px, cls='px') for px in (16, 24, 32, 48)) + '</div>' for p, st in PAL.items())
-    lock = ''.join(f'<div class="tile wide" style="{st}">{lockup(fn, f"{key}{p[0]}L")}</div>' for p, st in PAL.items())
+    lk = lockup_xheight if hasattr(fn, 'kw') else lockup
+    lock = ''.join(f'<div class="tile wide" style="{st}">{lk(fn, f"{key}{p[0]}L")}</div>' for p, st in PAL.items())
     cards += (f'<article class="card" id="c{num}"><header><b>{num}</b><h2>{name}</h2></header><p>{idea}</p>{f'<p class="why">{why}</p>' if why else ''}'
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
-              f'<span class="lab">With the logotype</span><div class="row">{lock}</div></article>')
+              f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
 OUT = 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
 if ROUND6:
