@@ -4,7 +4,7 @@ sizes, and locked up with the logotype in place of the current mark. Usage: pyth
 import os, re
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62'}
@@ -35,8 +35,18 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">With the logotype</span><div class="row">{lock}</div></article>')
 
-OUT = 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND3:
+OUT = 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND4:
+    import geo as R3
+    TITLE, EYEBROW, H1 = 'Oyster SELFTAC O', 'brandmark brainstorm, round four', 'The SELFTAC, curled into an O'
+    LEDE = ('<p class="lede"><b>Another approach: start from the molecule, not the shell.</b> A SELFTAC is two halves, each a ligand on a linker, '
+            'joined by the clasp. Curl it into an O and shape the O as an oyster side on: the hinge on the left, where the two halves meet in the '
+            'gold clasp; the mouth on the right, where each half ends in its ligand, drawn as a generic open ring. The trick that makes it an oyster '
+            'is a serif o&rsquo;s own contrast: a thin top and a heavy bottom are a flat lid on a deep cup, and a faint frill on the outside edge '
+            'makes it shell. Thin, even-weight versions read as a bracelet or a horseshoe, so the bold O leads.</p>')
+    REF = ('<div class="ref"><span class="lab">Kept from round three</span><div class="refrow">'
+           f'<div class="tile" style="{PAL["nacre"]}">{mark(R3.growth, "r3g")}</div><span>01 Growth rings: the gold hinge</span></div></div>')
+elif ROUND3:
     import concepts as R2
     TITLE, EYEBROW, H1 = 'Oyster Mark Constructions', 'brandmark brainstorm, round three', 'Built, not drawn'
     LEDE = ('<p class="lede"><b>A different approach: construction instead of illustration.</b> Round two drew the oyster&rsquo;s anatomy, '

@@ -90,6 +90,7 @@ URL, so the client's link stays the same:
 | The s as a degrader, wordmark study (`brand/sdegrader.html`, built by `brand/sdeg/build_sdeg.py`; `sdeg/sgeom.py` traces the s centreline) | https://claude.ai/artifact/KXm7bbQ1u74asr3iBF8iif |
 | Brandmark brainstorm: SELFTAC from the oyster's anatomy (`brand/brainstorm.html`, built by `brand/brainstorm/build_brainstorm.py`; shells from `shell.py`, concepts in `concepts.py`) | https://claude.ai/artifact/HgZZLcATukNJDspAFSTcRt |
 | Brandmark brainstorm round three, constructed marks (`brand/construct.html`, built by `brand/brainstorm/build_brainstorm.py geo`; concepts in `geo.py`) | https://claude.ai/artifact/AUA3XefcmA7xPpxzmbkuHu |
+| Brandmark brainstorm round four, the SELFTAC as an O (`brand/selftac-o.html`, built by `brand/brainstorm/build_brainstorm.py selftac_o`; concepts in `selftac_o.py`) | https://claude.ai/artifact/XZgyxPyxDN9szFqd6jKyPD |
 | **Mark catalogue, every mark numbered** (`brand/catalogue.html`, rebuild with `build_catalogue.py` after adding marks) | https://claude.ai/artifact/AJUpcjMJuGVzcQt5ZAfNrK |
 
 The deck is delivered as a file (send it to the user), not an artifact. Commit and push after each
