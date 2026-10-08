@@ -2,7 +2,9 @@
 SELFTAC story with the oyster's own anatomy. Each shown clasped and split in Nacre and Tidepool, at small
 sizes, and locked up with the logotype in place of the current mark. Usage: python3 build_brainstorm.py"""
 import os, re
-import concepts as C
+import sys, importlib
+C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
+ROUND3 = C.__name__ == "geo"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62'}
@@ -32,6 +34,27 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
     cards += (f'<article class="card" id="c{num}"><header><b>{num}</b><h2>{name}</h2></header><p>{idea}</p><p class="why">{why}</p>'
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">With the logotype</span><div class="row">{lock}</div></article>')
+
+OUT = 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND3:
+    import concepts as R2
+    TITLE, EYEBROW, H1 = 'Oyster Mark Constructions', 'brandmark brainstorm, round three', 'Built, not drawn'
+    LEDE = ('<p class="lede"><b>A different approach: construction instead of illustration.</b> Round two drew the oyster&rsquo;s anatomy, '
+            'frills and all. These are built from simple geometry only, circles, arcs, bars and dots on a strict system, the way a '
+            'modernist symbol is made: sturdier at small sizes, easier to animate, and harder to mistake for clip art. They keep the two clasp '
+            'devices you picked from round two, the gold hinge and the gold seam, and the same idea underneath: the oyster&rsquo;s two '
+            'valves are the SELFTAC&rsquo;s two halves.</p>')
+    REF = ('<div class="ref"><span class="lab">Kept from round two</span><div class="refrow">'
+           + ''.join(f'<div class="tile" style="{PAL["nacre"]}">{mark(fn, "r2" + k)}</div><span>{n}</span>'
+                     for k, n, fn in (('h', '01 The ligament: the gold hinge', R2.gold_hinge), ('k', '05 Kintsugi: the gold seam', R2.kintsugi)))
+           + '</div></div>')
+else:
+    TITLE, EYEBROW, H1, REF = 'Oyster Mark Brainstorm', 'brandmark brainstorm', 'The oyster is already a SELFTAC', ''
+    LEDE = ('<p class="lede"><b>An oyster is two separate halves, its valves, held together by one reversible joint, the hinge ligament.</b> '
+            'A SELFTAC is two halves that clasp back together. So none of these adds a pearl or a molecule to a shell: the valves are the two '
+            'halves, and the hinge, the lip or the seam between them carries the clasp, in the clasp colour. Every shell is drawn with a frilled '
+            'edge and growth layers, which is what makes an oyster read as an oyster and not a clam, a cowrie or a coffee bean (smooth first '
+            'sketches read as all three). Each is shown clasped and split: the split state is for motion, the halves coming together in the intro.</p>')
 
 CSS = '''
 :root { --bg: #F3EEEB; --surface: #FBF8F6; --ink: #241D28; --muted: #6A5E6C; --line: rgba(36,29,40,.13); --accent: #8C5572;
@@ -64,6 +87,10 @@ h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.04; margin-top: 12px; }
 .mk { width: 100%; height: 100%; display: block; }
 .px { display: block; flex: none; }
 .lt { width: 100%; height: auto; display: block; }
+.ref { margin-top: 22px; display: grid; gap: 8px; }
+.refrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
+.refrow .tile { width: 64px; height: 64px; padding: 8px; }
+.refrow span { margin-right: 18px; }
 footer { margin-top: 40px; color: var(--muted); font-size: 13px; max-width: 80ch; }
 code { font-family: var(--mono); font-size: .92em; }
 '''
@@ -72,7 +99,7 @@ html = f'''<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Oyster Mark Brainstorm</title>
+<title>{TITLE}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
@@ -80,14 +107,14 @@ html = f'''<!doctype html>
 </head>
 <body>
 <main class="wrap">
-  <span class="eyebrow">Oyster Therapeutics &middot; brandmark brainstorm</span>
-  <h1>The oyster is already a SELFTAC</h1>
-  <p class="lede"><b>An oyster is two separate halves, its valves, held together by one reversible joint, the hinge ligament.</b> A SELFTAC is two halves that clasp back together. So none of these adds a pearl or a molecule to a shell: the valves are the two halves, and the hinge, the lip or the seam between them carries the clasp, in the clasp colour. Every shell is drawn with a frilled edge and growth layers, which is what makes an oyster read as an oyster and not a clam, a cowrie or a coffee bean (smooth first sketches read as all three). Each is shown clasped and split: the split state is for motion, the halves coming together in the intro.</p>
+  <span class="eyebrow">Oyster Therapeutics &middot; {EYEBROW}</span>
+  <h1>{H1}</h1>
+  {LEDE}{REF}
   <div class="grid">{cards}</div>
-  <footer>Rough concepts for choosing a direction, not finished artwork: the frills, layers and clasp proportions would all be redrawn for the chosen idea, and a small-size cut made for favicons. Built by <code>oyster/brand/brainstorm/build_brainstorm.py</code> from <code>concepts.py</code> and <code>shell.py</code>.</footer>
+  <footer>Rough concepts for choosing a direction, not finished artwork: the frills, layers and clasp proportions would all be redrawn for the chosen idea, and a small-size cut made for favicons. Built by <code>oyster/brand/brainstorm/build_brainstorm.py {C.__name__}</code> from <code>{C.__name__}.py</code>.</footer>
 </main>
 </body>
 </html>
 '''
-open(D + '../brainstorm.html', 'w').write(html)
-print('brainstorm.html', len(html) // 1024, 'KB')
+open(D + '../' + OUT, 'w').write(html)
+print(OUT, len(html) // 1024, 'KB')
