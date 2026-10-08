@@ -2,6 +2,7 @@
 SELFTAC story with the oyster's own anatomy. Each shown clasped and split in Nacre and Tidepool, at small
 sizes, and locked up with the logotype in place of the current mark. Usage: python3 build_brainstorm.py"""
 import os, re
+import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
 ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"
@@ -20,18 +21,40 @@ def _bounds(d):
     import sys; sys.path.insert(0, D + '../sdeg'); import sgeom
     p = sgeom.polygon(d, 12); return (*p.min(0), *p.max(0))
 
-def lockup_xheight(fn, ns, gap_em=.06):
+def _letter_ink(d, x):
+    """A logotype letter's outline in page units (y down), densified, from its path and x offset."""
+    import sys; sys.path.insert(0, D + '../sdeg'); import sgeom
+    out = []
+    for c in re.findall(r'M[^M]*', d):
+        q = sgeom.polygon(c, 12); q = np.vstack([q, q[:1]])
+        for a, b in zip(q[:-1], q[1:]):
+            n = max(1, int(np.linalg.norm(b - a) / 1.0)); out.append(a + (b - a) * np.arange(n)[:, None] / n)
+    p = np.vstack(out); return np.stack([x + .5 * p[:, 0], -.5 * p[:, 1]], 1)
+
+def _gap(A, B):
+    return min(np.sqrt(((A[i:i + 1500, None] - B[None]) ** 2).sum(-1)).min() for i in range(0, len(A), 1500))
+
+def lockup_xheight(fn, ns):
     """The logotype with the mark's shell (lid, pearl and cup) set exactly at the letters' x-height, from the
-    baseline to the top of the e, a letter gap from the y; the ligands reach beyond it, like the y's tail and
-    the t's top. The viewBox grows to take them."""
+    baseline to the top of the e. Its spacing is set per mark: moved until the closest distance from any of
+    its ink (shell, bonds, ligand rings) to the y equals the closest distance from the y to the s, so the
+    mark sits as tight to the y as the s does. The viewBox grows to take the ligands."""
     import lidcup
-    body, (sx0, sy0, sx1, sy1), (ax0, ay0, ax1, ay1) = lidcup.lid_cup(ns + 'k', False, raw=True, **fn.kw)
+    body, (sx0, sy0, sx1, sy1), (ax0, ay0, ax1, ay1), ink = lidcup.lid_cup(ns + 'k', False, raw=True, **fn.kw)
     P = dict((x, d) for d, x in re.findall(r'<path d="([^"]*)" transform="translate\(([\d.]+) 0\.0\) scale\(0\.5000 -0\.5000\)"/>', LT))
-    e = _bounds(P['1596.9']); yb = _bounds(P['488.1'])
+    e = _bounds(P['1596.9'])
     top, bot = -.5 * e[3], -.5 * e[1]                    # the e's top and bottom (overshoots included), page units
-    k = (bot - top) / (sy1 - sy0)
-    y_left = 488.1 + .5 * yb[0]; gap = gap_em * (bot - top)
-    tx = y_left - gap - k * sx1; ty = top - k * sy0
+    k = (bot - top) / (sy1 - sy0); ty = top - k * sy0
+    y_ink, s_ink = _letter_ink(P['488.1'], 488.1), _letter_ink(P['949.8'], 949.8)
+    target = _gap(y_ink, s_ink) + k * 1.4               # the y-s gap, plus half the mark's stroke
+    m = ink * k + [0, ty]
+    lo_, hi_ = 488.1 - 900.0, 488.1 + 200.0             # tx: far left (too loose) .. overlapping
+    for _ in range(28):
+        mid = (lo_ + hi_) / 2
+        if _gap(m + [mid, 0], y_ink) > target: lo_ = mid
+        else: hi_ = mid
+    tx = lo_
+    print(f'{ns}: gap to y {_gap(m + [tx, 0], y_ink) - k * 1.4:.1f} (y-s {target - k * 1.4:.1f})')
     i = LT.index(HEAD); j = LT.rfind('</g><path d=', 0, LT.index('transform="translate(488.1 0.0)')) + 4
     s = LT[:i] + f'<g transform="translate({tx:.1f} {ty:.1f}) scale({k:.4f})">{body}</g>' + LT[j:]
     vx, vy, vw, vh = map(float, re.search(r'viewBox="([^"]+)"', LT).group(1).split())

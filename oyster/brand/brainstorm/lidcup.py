@@ -54,8 +54,27 @@ def lid_cup(ns, split=False, ang=45, lid=(31, 25), cup=(33, 31), r_in=13.5, pr=1
         lid_pts = np.array([_rot(_on(c + [0, -g], lid[0], lid[1], a), hinge, -tilt) for a in np.linspace(L0, L1, 40)])
         cup_pts = np.array([_on(c + [0, g], cup[0], cup[1], a) for a in np.linspace(C0, C1, 40)])
         sh = np.vstack([lid_pts, cup_pts]); allp = np.vstack([sh, pts])
-        return body, (*sh.min(0), *sh.max(0)), (*allp.min(0), *allp.max(0))
+        # every drawn coordinate (outlines, rings, bonds), the lid's turned with it, for measuring spacing
+        ink = np.vstack([_rot(q, hinge, -tilt) for q in _coords(lid_svg + arm_a)] + list(_coords(cup_svg + arm_b)))
+        return body, (*sh.min(0), *sh.max(0)), (*allp.min(0), *allp.max(0)), ink
     return f'<g transform="translate({f(50 - mid[0] * s)} {f(50 - mid[1] * s)}) scale({f(s)})">{body}</g>'
+
+def _coords(svg):
+    """The points of every polygon, polyline and line in an SVG string, densified along their edges, leaving
+    out masks (their cuts lie inside the shapes)."""
+    import re
+    svg = re.sub(r'<mask.*?</mask>', '', svg, flags=re.S); out = []
+    for m in re.finditer(r'<(polygon|polyline)[^>]*points="([^"]+)"', svg):
+        q = np.array([[float(v) for v in p.split(',')] for p in m.group(2).split()])
+        if m.group(1) == 'polygon': q = np.vstack([q, q[:1]])
+        out.append(q)
+    for m in re.finditer(r'<line x1="([-\d.]+)" y1="([-\d.]+)" x2="([-\d.]+)" y2="([-\d.]+)"', svg):
+        a, b, c, d = map(float, m.groups()); out.append(np.array([[a, b], [c, d]]))
+    dense = []
+    for q in out:
+        for a, b in zip(q[:-1], q[1:]):
+            n = max(1, int(np.linalg.norm(b - a) / .5)); dense.append(a + (b - a) * np.arange(n)[:, None] / n)
+    return np.vstack(dense)
 
 def V(**kw):
     fn = lambda ns, split=False: lid_cup(ns, split, **kw); fn.kw = kw; return fn
