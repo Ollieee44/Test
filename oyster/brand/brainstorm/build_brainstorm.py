@@ -4,10 +4,10 @@ sizes, and locked up with the logotype in place of the current mark. Usage: pyth
 import os, re
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
-PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62'}
+PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62;--pearl:#F2B84B'}
 LT = re.search(r'<svg class="lt"[^>]*>.*?</svg>', open(SITE).read(), re.S).group(0)
 HEAD = '<g transform="translate(-17.1 -583.4) scale(6.3571)">'
 
@@ -35,8 +35,15 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">With the logotype</span><div class="row">{lock}</div></article>')
 
-OUT = 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND4:
+OUT = 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND5:
+    TITLE, EYEBROW, H1, REF = 'Oyster Bifunctional', 'brandmark brainstorm, round five', 'The mark is the molecule', ''
+    LEDE = ('<p class="lede"><b>Your brief: a stylised bifunctional with the halves of an oyster in the middle of the linker, and the pearl as '
+            'the secret sauce.</b> So each mark is a degrader: a different ligand at each end (a heterobifunctional&rsquo;s ends differ; both '
+            'are invented ring systems, per the generic-degrader rule), the linker between them, and at its middle the two valves of an oyster '
+            'with the pearl cupped between them as the reversible clasp. Split, the valves part and the pearl parts with them, each valve '
+            'keeping half. The valves round the pearl make a loose O. The pearl is in the logo&rsquo;s pearl colour.</p>')
+elif ROUND4:
     import geo as R3
     TITLE, EYEBROW, H1 = 'Oyster SELFTAC O', 'brandmark brainstorm, round four', 'The SELFTAC, curled into an O'
     LEDE = ('<p class="lede"><b>Another approach: start from the molecule, not the shell.</b> A SELFTAC is two halves, each a ligand on a linker, '
