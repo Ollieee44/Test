@@ -4,7 +4,7 @@ sizes, and locked up with the logotype in place of the current mark. Usage: pyth
 import os, re
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62;--pearl:#F2B84B'}
@@ -31,12 +31,18 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
         states += f'<div class="state"><span class="lab">{lab}</span><div class="row">{tiles}</div></div>'
     small = ''.join(f'<div class="tile sm" style="{st}">' + ''.join(mark(fn, f'{key}{p[0]}s{px}', size=px, cls='px') for px in (16, 24, 32, 48)) + '</div>' for p, st in PAL.items())
     lock = ''.join(f'<div class="tile wide" style="{st}">{lockup(fn, f"{key}{p[0]}L")}</div>' for p, st in PAL.items())
-    cards += (f'<article class="card" id="c{num}"><header><b>{num}</b><h2>{name}</h2></header><p>{idea}</p><p class="why">{why}</p>'
+    cards += (f'<article class="card" id="c{num}"><header><b>{num}</b><h2>{name}</h2></header><p>{idea}</p>{f'<p class="why">{why}</p>' if why else ''}'
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">With the logotype</span><div class="row">{lock}</div></article>')
 
-OUT = 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND5:
+OUT = 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND6:
+    TITLE, EYEBROW, H1, REF = 'Oyster Lid and Cup', 'brandmark brainstorm, round six', 'Variations on Lid and cup', ''
+    LEDE = ('<p class="lede"><b>Round five&rsquo;s 02, pushed in nine directions.</b> The idea stays the same: a heterobifunctional degrader whose '
+            'linker runs through an oyster, a flat lid over a deep cup, with the pearl between them as the reversible clasp. Each variation '
+            'changes one or two things: the angle the molecule runs at, where the ligands leave the shell, how far the lid is open, the '
+            'linker&rsquo;s form, the pearl&rsquo;s size, the shell&rsquo;s texture and the pearl&rsquo;s colour. 02 itself is first, for reference.</p>')
+elif ROUND5:
     TITLE, EYEBROW, H1, REF = 'Oyster Bifunctional', 'brandmark brainstorm, round five', 'The mark is the molecule', ''
     LEDE = ('<p class="lede"><b>Your brief: a stylised bifunctional with the halves of an oyster in the middle of the linker, and the pearl as '
             'the secret sauce.</b> So each mark is a degrader: a different ligand at each end (a heterobifunctional&rsquo;s ends differ; both '

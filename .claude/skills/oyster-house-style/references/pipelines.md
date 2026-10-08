@@ -92,6 +92,7 @@ URL, so the client's link stays the same:
 | Brandmark brainstorm round three, constructed marks (`brand/construct.html`, built by `brand/brainstorm/build_brainstorm.py geo`; concepts in `geo.py`) | https://claude.ai/artifact/AUA3XefcmA7xPpxzmbkuHu |
 | Brandmark brainstorm round four, the SELFTAC as an O (`brand/selftac-o.html`, built by `brand/brainstorm/build_brainstorm.py selftac_o`; concepts in `selftac_o.py`) | https://claude.ai/artifact/XZgyxPyxDN9szFqd6jKyPD |
 | Brandmark brainstorm round five, the mark is the molecule (`brand/bifunctional.html`, built by `brand/brainstorm/build_brainstorm.py bifunctional`; concepts in `bifunctional.py`) | https://claude.ai/artifact/M4z4dRp4Eb3iP5wjd5eHFi |
+| Brandmark brainstorm round six, variations on Lid and cup (`brand/lidcup.html`, built by `brand/brainstorm/build_brainstorm.py lidcup`; `lidcup.py` exposes every choice) | https://claude.ai/artifact/1qWhE8Tar7YpeDnwgc6vjU |
 | **Mark catalogue, every mark numbered** (`brand/catalogue.html`, rebuild with `build_catalogue.py` after adding marks) | https://claude.ai/artifact/AJUpcjMJuGVzcQt5ZAfNrK |
 
 The deck is delivered as a file (send it to the user), not an artifact. Commit and push after each
