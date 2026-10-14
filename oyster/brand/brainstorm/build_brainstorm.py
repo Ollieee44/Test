@@ -104,7 +104,10 @@ def lockup(fn, ns):
     return re.sub(r'<svg class="lt"[^>]*?(viewBox="[^"]+")[^>]*>', r'<svg class="lt" \1 aria-hidden="true">', s, count=1)
 
 cards = ''
-for key, num, name, fn, idea, why in C.CONCEPTS:
+for key, num, name, fn, *rest in C.CONCEPTS:
+    idea, why = (rest + ['', ''])[:2]
+    if fn is None:   # a group heading spanning the grid
+        cards += f'<div class="grp"><h2>{name}</h2><p>{idea}</p></div>'; continue
     states = ''
     for split, lab in ((False, 'Clasped'), (True, 'Split')):
         tiles = ''.join(f'<div class="tile sq" style="{st}" title="{p.title()}, {lab.lower()}">{mark(fn, f"{key}{p[0]}{int(split)}", split)}</div>' for p, st in PAL.items())
@@ -294,6 +297,9 @@ h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.04; margin-top: 12px; }
 .refrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 14px; }
 .refrow .tile { width: 64px; height: 64px; padding: 8px; }
 .refrow span { margin-right: 18px; }
+.grp { grid-column: 1 / -1; margin-top: 22px; }
+.grp h2 { font-size: clamp(26px, 2.8vw, 34px); }
+.grp p { color: var(--muted); max-width: 72ch; margin: 6px 0 0; }
 footer { margin-top: 40px; color: var(--muted); font-size: 13px; max-width: 80ch; }
 code { font-family: var(--mono); font-size: .92em; }
 '''
