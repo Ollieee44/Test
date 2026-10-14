@@ -186,6 +186,8 @@ def story_turn(centres, target, ligase):
     """The turn the story applies: the target-to-ligase axis onto -x (as three.js setFromUnitVectors does)."""
     a = np.asarray(centres[target]) - np.asarray(centres[ligase]); a = a / np.linalg.norm(a)
     v = np.cross(a, [-1.0, 0, 0]); c = -a[0]
+    if c < -1 + 1e-9:                            # already pointing the other way: half a turn about y
+        return np.diag([-1.0, 1, -1])
     vx = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
     return np.eye(3) + vx + vx @ vx / (1 + c)
 
@@ -230,7 +232,11 @@ def degrader(atoms, origin, cfg, turn):
     d = cfg['degrader']
     lig = {a['name']: a for a in atoms if a['res'] == d['residue'] and a['chain'] == d['chain']}
     if not lig:
-        sys.exit(f"no atoms of ligand {d['residue']} in chain {d['chain']}")
+        found = sorted({(a['res'], a['chain']) for a in atoms if a['record'] == 'HETATM'})
+        sys.exit(f"no atoms of ligand {d['residue']} in chain {d['chain']} (ligands here: {', '.join(r + '/' + c for r, c in found)})")
+    missing = [n for n in d['linker_atoms'] + [h['attach'] for h in d['halves'].values()] if n not in lig]
+    if missing:
+        sys.exit(f"ligand {d['residue']} has no atoms named {', '.join(missing)} (check linker_atoms and attach)")
     for a in lig.values():
         a['xyz'] = a['xyz'] - origin
     bonds = [(a, b, o, ar) for a, b, o, ar in ligand_bonds(d['residue']) if a in lig and b in lig]
@@ -296,14 +302,19 @@ def main():
     print('complex', s['structure'])
     atoms = read_pdb(structure_path(s['structure']))
     prot = [a for a in atoms if a['record'] == 'ATOM']
-    origin = np.mean([a['xyz'] for a in prot if a['chain'] in s['origin_chains']], 0)
+    chains_here = sorted({a['chain'] for a in prot})
+    centre_atoms = [a['xyz'] for a in prot if a['chain'] in s['origin_chains']]
+    if not centre_atoms:
+        sys.exit(f"origin_chains {s['origin_chains']!r}: none of these chains has protein atoms (chains here: {', '.join(chains_here)})")
+    origin = np.mean(centre_atoms, 0)
     print('  origin (centroid of chains %s):' % s['origin_chains'], origin.round(3))
     for key, chain in s['chains'].items():
         if not want(key):
             continue
-        xyz = np.array([a['xyz'] for a in prot if a['chain'] == chain]) - origin
+        xyz = np.array([a['xyz'] for a in prot if a['chain'] == chain]).reshape(-1, 3)
         if not len(xyz):
-            sys.exit(f'no protein atoms in chain {chain} for {key}')
+            sys.exit(f"{key}: chain {chain!r} has no protein atoms in {s['structure']} (chains here: {', '.join(chains_here)})")
+        xyz = xyz - origin
         v, f = protein_surface(xyz, cfg['surface'])
         out['parts'][key] = encode(v, f); out['centres'][key] = xyz.mean(0).round(3).tolist()
         print(f'  {key}: chain {chain}, {len(xyz)} atoms -> {len(v)} vertices')
@@ -320,7 +331,9 @@ def main():
         if not want(key):
             continue
         print(key, t['structure'])
-        xyz = np.array([a['xyz'] for a in read_pdb(structure_path(t['structure'])) if a['record'] == 'ATOM' and a['chain'] in t['chains']])
+        xyz = np.array([a['xyz'] for a in read_pdb(structure_path(t['structure'])) if a['record'] == 'ATOM' and a['chain'] in t['chains']]).reshape(-1, 3)
+        if not len(xyz):
+            sys.exit(f"{key}: chains {t['chains']!r} have no protein atoms in {t['structure']}")
         xyz = xyz - xyz.mean(0)
         v, f = protein_surface(xyz, cfg['surface'])
         out['parts'][key] = encode(v, f)
