@@ -1,0 +1,48 @@
+{
+  "_about": "Settings for tools/build_meshes.py. Structures are PDB ids (fetched from RCSB into tools/cache) or paths to local .pdb files. Part names (brd4, vhl, elob, eloc, ub, warhead, e3lig) are what the story script looks for: keep them, and change what they are built from.",
+
+  "complex": {
+    "structure": "5T35",
+    "_structure": "BRD4 bromodomain 2 + MZ1 + VHL/Elongin B/Elongin C. The file holds two copies of the complex; chains A-D are the first.",
+    "chains": { "brd4": "A", "elob": "B", "eloc": "C", "vhl": "D" },
+    "origin_chains": "ABCD"
+  },
+
+  "surface": {
+    "_about": "Protein surfaces: a Gaussian blob per atom (sigma, A), cut at 'level', on a grid of 'grid' A, then smoothed. Lower level or larger sigma = puffier and smoother; smaller grid = more vertices.",
+    "grid": 1.6,
+    "sigma": 1.7,
+    "level": 0.55,
+    "smooth": 8
+  },
+
+  "degrader": {
+    "residue": "759",
+    "chain": "D",
+    "_residue": "MZ1, bound in chain D's copy of the complex.",
+    "linker_atoms": ["CBU", "NBL", "CAW", "CAX", "OBO", "CAY", "CAZ", "OBP", "CBA", "CBB", "OBQ", "CBD", "CBT"],
+    "_linker_atoms": "The PEG linker, in order from the warhead side. Cutting these out leaves the two halves.",
+    "halves": {
+      "warhead": { "attach": "CBE", "_": "JQ1, the half that holds the target (BRD4)" },
+      "e3lig": { "attach": "NBN", "_": "the VHL ligand, the half that holds the E3 ligase" }
+    },
+    "layout": "drawn",
+    "_layout": "'drawn': a flat textbook drawing of each half laid into its crystal pose (the website's look). 'crystal': the real 3D bond geometry.",
+    "outline": {
+      "_about": "Each half is a tube along every bond, joined smoothly. scale shrinks or grows the drawing (1 = 1.5 A bonds); tube_radius and blend in A.",
+      "facing": [0, 0.3, 1],
+      "_facing": "Which way each drawing faces, in the story's frame (x right, y up, z toward the viewer at the start). null fits the drawing to the crystal in 3D instead.",
+      "trim_ends": true,
+      "_trim_ends": "Leave out end atoms (methyls, Cl, =O, -OH) so the outline shows the rings and chains.",
+      "scale": 0.95,
+      "grid": 0.16,
+      "tube_radius": 0.4,
+      "blend": 0.1,
+      "smooth": 4
+    }
+  },
+
+  "tags": {
+    "ub": { "structure": "1UBQ", "chains": "A", "_": "ubiquitin; also used, squashed, as the stand-in E2" }
+  }
+}

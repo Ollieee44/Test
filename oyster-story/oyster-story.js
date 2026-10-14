@@ -11,7 +11,9 @@ const root = document.documentElement, stage = document.getElementById('stage'),
 let DATA;
 try {
   const inline = document.getElementById('meshes');
-  DATA = inline ? JSON.parse(inline.textContent) : await (await fetch(new URL('meshes.json', import.meta.url))).json();
+  // <section class="story" data-meshes="other.json"> tries another set of shapes without touching meshes.json
+  const src = document.getElementById('story').dataset.meshes;
+  DATA = inline ? JSON.parse(inline.textContent) : await (await fetch(src ? new URL(src, location.href) : new URL('meshes.json', import.meta.url))).json();
 } catch (e) {
   stage.classList.add('ready');
   const d = document.createElement('div'); d.className = 'nogl'; d.textContent = 'The 3D story could not load its shapes (meshes.json).'; stage.appendChild(d);
@@ -29,6 +31,19 @@ const PAL = {
     sky: [['#1B6763', '#0F4C4A'], ['#1D615D', '#0E4543'], ['#155A57', '#0A3836']] },
 };
 Object.assign(PAL, {"pearlink": {"ring": "#120F16", "ink": "#120F16", "brd4": "#E6D3B3", "vhl": "#C4BCCB", "elob": "#3A3541", "eloc": "#322E39", "warhead": "#C9A877", "e3lig": "#968CA0", "linker": "#EDE8E0", "brk": "#D8B98A", "ub": "#E6D3B3", "pearl3d": "#F6F2EC", "clasp": "#D8B98A", "e2": "#A79FB0", "prot": "#4E4857", "wall": "#555057", "flash": "#D8B98A", "sky": [["#2B2731", "#1D1A22"], ["#2D2830", "#1A171F"], ["#26232F", "#16131B"]], "cell": "#605A66"}, "shellcoral": {"ring": "#2F6B5E", "ink": "#2A1410", "brd4": "#F2B9A9", "vhl": "#B9D3C8", "elob": "#EEE2D3", "eloc": "#E3D5C4", "warhead": "#B16959", "e3lig": "#2F6B5E", "linker": "#2F6B5E", "brk": "#2A1410", "ub": "#F0A08F", "pearl3d": "#FFF8EF", "clasp": "#E26D5A", "e2": "#C9DDD4", "prot": "#B7A595", "wall": "#E9D7C2", "flash": "#2F6B5E", "sky": [["#F8EDE0", "#EAD5BE"], ["#F7E8DA", "#EDCDB8"], ["#F1EADF", "#DCD9C8"]], "cell": "#BFCDC4"}, "abyssmint": {"ring": "#061A19", "ink": "#061A19", "brd4": "#D6EDE5", "vhl": "#8FC0B4", "elob": "#2C5A55", "eloc": "#254F4B", "warhead": "#B7D8CF", "e3lig": "#70A59B", "linker": "#E9F5F0", "brk": "#9FF0D0", "ub": "#B8F3DD", "pearl3d": "#F0FAF6", "clasp": "#9FF0D0", "e2": "#7DAFA4", "prot": "#3E7A70", "wall": "#325B58", "flash": "#9FF0D0", "sky": [["#1A403E", "#0E2B2A"], ["#1B3D3B", "#0C2726"], ["#163A3A", "#0A2221"]], "cell": "#3B6964"}, "charcoalviolet": {"ring": "#0F0E14", "ink": "#0F0E14", "brd4": "#D9D0FF", "vhl": "#9A93AC", "elob": "#3A3546", "eloc": "#322E3D", "warhead": "#A08BFF", "e3lig": "#928DA7", "linker": "#EEEAF6", "brk": "#7B5CFF", "ub": "#C4B6FF", "pearl3d": "#F6F4FB", "clasp": "#7B5CFF", "e2": "#9D97B2", "prot": "#4A4458", "wall": "#53505C", "flash": "#7B5CFF", "sky": [["#2A2733", "#1A1820"], ["#2B2632", "#17151D"], ["#25223A", "#14121B"]], "cell": "#5F5A6F"}});
+// ---------- the scene: sizes of the barrier, the neuron and the proteasome (Angstrom, like the proteins) ----------
+// Change these to restage the story. The halves' path down through the membranes is worked out from them (see HY
+// below), so they still pause inside the barrier and at the neuron's membrane. Colours are in PAL above.
+const SCENE = {
+  // the blood-brain barrier: a row of endothelial cells, seen from just above as the halves sink through
+  barrier: { cells: 3, width: 118, height: 16, depth: 96, gap: 2, corner: 7, y: -52, contour: 2.4, opacity: .42, outline: .35 },
+  // the neuron: the top of a large cell body below the barrier, its membrane drawn as a bilayer of two shells
+  // (`bilayer` apart); `cap` is how much of the sphere is drawn (radians from the top; Math.PI is all of it)
+  neuron: { top: -82, radius: 140, bilayer: 6, cap: 1.25, contour: 2.6, opacity: .5, inner: .6, outline: .3, below: 30 },
+  // the proteasome: a stand-in barrel of stacked rings with a lumpy cap at each end
+  proteasome: { rings: 4, ringRadius: 10, ringTube: 5.2, ringGap: 10, cap: 11, contour: 1.2 },
+};
+
 // starts in the palette named on <html data-palette="...">, else Nacre
 let pal = PAL[root.getAttribute('data-palette')] ? root.getAttribute('data-palette') : 'nacre';
 
@@ -96,10 +111,11 @@ const ubs = [0, 1, 2, 3].map(() => { const mat = cmat('ub', 1.4, ubGeo.boundingS
 const e2 = (() => { const mat = cmat('e2', 1.6, ubGeo.boundingSphere.center.clone()); mats.push(mat); const m = new THREE.Mesh(ubGeo, mat); m.scale.set(.9, .75, .8); addOutline(m, .45); scene.add(m); return m; })();
 // proteasome: a stand-in barrel of four stacked rings with a lumpy cap at each end
 const prot = new THREE.Group(); scene.add(prot);
-for (let i = 0; i < 4; i++) { const mat = cmat('prot', 1.2); mats.push(mat); const r = new THREE.Mesh(new THREE.TorusGeometry(10, 5.2, 24, 48), mat);
-  r.rotation.y = Math.PI / 2; r.position.x = -15 + i * 10; addOutline(r, .4); prot.add(r); }
-for (const s of [-1, 1]) { const mat = cmat('prot', 1.2); mats.push(mat); const c = new THREE.Mesh(new THREE.IcosahedronGeometry(11, 3), mat);
-  c.scale.set(.55, 1.05, 1.05); c.position.x = s * 27; addOutline(c, .4); prot.add(c); }
+{ const S = SCENE.proteasome, half = (S.rings - 1) / 2 * S.ringGap;
+  for (let i = 0; i < S.rings; i++) { const mat = cmat('prot', S.contour); mats.push(mat); const r = new THREE.Mesh(new THREE.TorusGeometry(S.ringRadius, S.ringTube, 24, 48), mat);
+    r.rotation.y = Math.PI / 2; r.position.x = -half + i * S.ringGap; addOutline(r, .4); prot.add(r); }
+  for (const s of [-1, 1]) { const mat = cmat('prot', S.contour); mats.push(mat); const c = new THREE.Mesh(new THREE.IcosahedronGeometry(S.cap, 3), mat);
+    c.scale.set(.55, 1.05, 1.05); c.position.x = s * (half + S.cap * 1.09); addOutline(c, .4); prot.add(c); } }
 // the see-through membranes must not hide each other through the depth buffer, even when faded almost to
 // nothing (a near-invisible barrier outline was clipping the neuron), and they draw in a fixed order from the
 // bottom up: inner neuron shell, outer neuron shell, then the barrier on top
@@ -108,14 +124,16 @@ function seeThrough(outline, mesh, order) {
 }
 // the blood-brain barrier: three endothelial cells side by side, seen from just above
 const wall = new THREE.Group(); scene.add(wall);
-for (let i = -1; i <= 1; i++) { const mat = cmat('wall', 2.4); mat.transparent = true; mat.depthWrite = false; mats.push(mat);
-  const b = new THREE.Mesh(new RoundedBoxGeometry(118, 16, 96, 6, 7), mat); b.position.x = i * 120; seeThrough(addOutline(b, .5), b, 5); wall.add(b); }
-wall.position.y = -52;
+{ const S = SCENE.barrier;
+  for (let i = 0; i < S.cells; i++) { const mat = cmat('wall', S.contour); mat.transparent = true; mat.depthWrite = false; mats.push(mat);
+    const b = new THREE.Mesh(new RoundedBoxGeometry(S.width, S.height, S.depth, 6, S.corner), mat);
+    b.position.x = (i - (S.cells - 1) / 2) * (S.width + S.gap); seeThrough(addOutline(b, .5), b, 5); wall.add(b); }
+  wall.position.y = S.y; }
 // the neuron: a large cell body below the barrier; its membrane is drawn as a bilayer of two faint shells
-const CELL_TOP = -82, CELL_R = 140;
+const CELL_TOP = SCENE.neuron.top, CELL_R = SCENE.neuron.radius;
 const cell = new THREE.Group(); scene.add(cell); cell.position.set(0, CELL_TOP - CELL_R, 0);
-for (const [rad, a] of [[CELL_R, 1], [CELL_R - 6, .6]]) { const mat = cmat('cell', 2.6, new THREE.Vector3(0, CELL_R, 0)); mat.transparent = true; mat.depthWrite = false; mat.userData.a = a; mats.push(mat);
-  const m = new THREE.Mesh(new THREE.SphereGeometry(rad, 96, 64, 0, Math.PI * 2, 0, 1.25), mat); seeThrough(addOutline(m, .5), m, rad < CELL_R ? 1 : 3); cell.add(m); }
+for (const [rad, a] of [[CELL_R, 1], [CELL_R - SCENE.neuron.bilayer, SCENE.neuron.inner]]) { const mat = cmat('cell', SCENE.neuron.contour, new THREE.Vector3(0, CELL_R, 0)); mat.transparent = true; mat.depthWrite = false; mat.userData.a = a; mats.push(mat);
+  const m = new THREE.Mesh(new THREE.SphereGeometry(rad, 96, 64, 0, Math.PI * 2, 0, SCENE.neuron.cap), mat); seeThrough(addOutline(m, .5), m, rad < CELL_R ? 1 : 3); cell.add(m); }
 
 // ---------- the degrader: two soft outlined halves joined by a string of pearls ----------
 // Each half is a smooth outline traced along its bonds: it reads as a small molecule without showing
@@ -296,7 +314,7 @@ const bump = (p, a, b) => { const t = clamp((p - a) / (b - a), 0, 1); return Mat
 // ---------- the story ----------
 // Screen-aligned offsets in angstroms. In the crystal frame the degrader sits near the origin, BRD4 to
 // its left and VHL to its right. Y is the depth of the scene: the halves sink through the barrier.
-const Yn = -112;                      // neuron level
+const Yn = CELL_TOP - SCENE.neuron.below;   // neuron level: where the complex forms, inside the neuron
 const GAP = 12;                       // each side is pulled out this far so the degrader shows in the complex
 const SPREAD = 7;                     // the degrader alone is shown slightly opened so its linker reads
 const BEATS = [[0, .13], [.13, .26], [.26, .4], [.4, .6], [.6, .767], [.767, .883], [.883, 1]];
@@ -315,8 +333,10 @@ const vhlTop = (() => { const g = P.vhl.children[0].geometry, pos = g.attributes
   for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyQuaternion(Q); const s = v.y - .4 * v.x; if (s > bs) { bs = s; best = v.clone(); } } return best; })();
 const PROT_AT = new THREE.Vector3(-118, Yn - 62, 0);
 const degC = S('warhead').add(S('e3lig')).multiplyScalar(.5);
-// the halves' depth against the scroll: the barrier is -44 to -60, the neuron's membrane at -82
-const HY = curve([[.255, 0], [.31, -40], [.345, -46], [.385, -62], [.42, -67], [.46, -80], [.5, -84], [.55, -94], [.62, Yn]]);
+// the halves' depth against the scroll: in over the barrier's top, slowly through it, out under it, then slowly
+// through the neuron's membrane and down to the neuron level (with the default scene: barrier -44 to -60, membrane -82)
+const B_TOP = SCENE.barrier.y + SCENE.barrier.height / 2, B_BOT = SCENE.barrier.y - SCENE.barrier.height / 2;
+const HY = curve([[.255, 0], [.31, B_TOP + 4], [.345, B_TOP - 2], [.385, B_BOT - 2], [.42, B_BOT - 7], [.46, CELL_TOP + 2], [.5, CELL_TOP - 2], [.55, CELL_TOP - 12], [.62, Yn]]);
 // the camera: one smooth curve per setting, keyed on the scroll. Close on the degrader, back for the split,
 // over the barrier looking down, riding down with the halves through both membranes, round to the side
 // for the complex once the neuron has faded, across to the proteasome, and out for the end card.
@@ -437,10 +457,10 @@ function frame(p0) {
   // the barrier fades out, the neuron fades in and the ground turns to the neuron's, all together (38-44%),
   // so everything has settled before the halves reach the membrane
   const wa = kf(p, [[.27, 0], [.32, 1]]) * (1 - ease(clamp((p0 - .38) / .06, 0, 1))); wall.visible = wa > .01;
-  wall.children.forEach(b => { b.material.uniforms.alpha.value = .42 * wa; b.children[0].material.uniforms.alpha.value = .35 * wa; });
+  wall.children.forEach(b => { b.material.uniforms.alpha.value = SCENE.barrier.opacity * wa; b.children[0].material.uniforms.alpha.value = SCENE.barrier.outline * wa; });
   // the neuron rises into view under the barrier and fades once the halves are inside
   const ca = kf(p0, [[.37, 0], [.44, 1], [.57, 1], [.64, 0]]); cell.visible = ca > .01;
-  cell.children.forEach(m => { m.material.uniforms.alpha.value = .5 * m.material.userData.a * ca; m.children[0].material.uniforms.alpha.value = .3 * ca; });
+  cell.children.forEach(m => { m.material.uniforms.alpha.value = SCENE.neuron.opacity * m.material.userData.a * ca; m.children[0].material.uniforms.alpha.value = SCENE.neuron.outline * ca; });
   // camera: close on the degrader, back for the split, down with the halves, wide on the complex, across to the proteasome, out for the end
   // portrait screens have no room beside the copy: pull back until the subject fits the width
   const narrow = camera.aspect < .9, fitW = narrow ? Math.max(1, 1.1 / camera.aspect) : 1;

@@ -37,8 +37,16 @@
   .files span { grid-column: 1; font-size: 14px; }
   .files .acts { grid-column: 2; display: flex; gap: 6px; }
   .files .acts > * { font: 500 13px/1 var(--sans); padding: 10px 14px; border-radius: 999px; text-decoration: none; white-space: nowrap; cursor: pointer; border: 1px solid var(--ink); }
-  .files .copy { color: var(--paper); background: var(--ink); }
-  .files .acts a { color: var(--ink); background: transparent; }
+  .files .copyfile { color: var(--paper); background: var(--ink); }
+  .files .view { color: var(--ink); background: transparent; }
+  .viewer { margin-top: 16px; }
+  .viewer textarea { width: 100%; height: 360px; box-sizing: border-box; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: color-mix(in srgb, var(--ink) 6%, var(--paper)); color: var(--ink); font: 400 12px/1.5 var(--mono); resize: vertical; }
+  .viewer p { margin: 0 0 8px; font-size: 14px; }
+  .zip { margin: 22px 0 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .zip button { font: 500 14px/1 var(--sans); padding: 14px 20px; border-radius: 999px; border: 0; background: var(--ink); color: var(--paper); cursor: pointer; }
+  .zip button:hover { background: var(--accent); }
+  .zip button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .zip span { font-size: 14px; color: var(--muted); }
   .files .acts > *:hover { background: var(--accent); border-color: var(--accent); color: var(--paper); }
   .files .acts > *:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .status { min-height: 1.5em; font: 500 12px/1.5 var(--mono); color: var(--accent); margin: 10px 0 0; }
@@ -80,15 +88,20 @@
 <section class="reuse" id="reuse">
   <span class="k">Reuse it</span>
   <h2>Put this scroll story on another site.</h2>
-  <p>This is the 3D story from the Science page of Website v2, on its own. It runs on <b>three.js</b> (loaded from a CDN) and plays as its section scrolls past. Everything it needs is in the four files below. <b>Copy</b> puts a file's full text on your clipboard, to paste into a new file of the same name.</p>
+  <p>This is the 3D story from the Science page of Website v2, on its own. It runs on <b>three.js</b> (loaded from a CDN) and plays as its section scrolls past. The first four files below are all it needs; the tool rebuilds the shapes. Download them together as a zip, or use <b>Copy</b> and <b>View</b> to take one file at a time.</p>
+  <div class="zip" id="zipRow"><button type="button" id="zipBtn">Download the kit (.zip)</button><span>All the files below, in one folder.</span></div>
   <h3>The files</h3>
   <ul class="files">
-    <li><span><b>oyster-story.js</b>: the scene, the camera path and the scroll timeline (about 500 lines)</span><div class="acts"><button type="button" class="copy" data-file="oyster-story.js">Copy</button><a href="oyster-story.js" target="_blank" rel="noopener">Open</a></div></li>
-    <li><span><b>oyster-story.css</b>: the pinned stage, copy, rail, end card and the six palettes</span><div class="acts"><button type="button" class="copy" data-file="oyster-story.css">Copy</button><a href="oyster-story.css" target="_blank" rel="noopener">Open</a></div></li>
-    <li><span><b>meshes.json</b>: the protein and molecule shapes, traced from PDB 5T35 (about 770 KB)</span><div class="acts"><button type="button" class="copy" data-file="meshes.json">Copy</button><a href="meshes.json" target="_blank" rel="noopener">Open</a></div></li>
-    <li><span><b>story-markup.html</b>: the story's HTML, to paste where it should appear</span><div class="acts"><button type="button" class="copy" data-file="story-markup.html">Copy</button><a href="story-markup.html" target="_blank" rel="noopener">Open</a></div></li>
+    <li><span><b>oyster-story.js</b>: the scene, the camera path and the scroll timeline (about 500 lines)</span><div class="acts"><button type="button" class="copyfile" data-file="oyster-story.js">Copy</button><button type="button" class="view" data-file="oyster-story.js" aria-expanded="false">View</button></div></li>
+    <li><span><b>oyster-story.css</b>: the pinned stage, copy, rail, end card and the six palettes</span><div class="acts"><button type="button" class="copyfile" data-file="oyster-story.css">Copy</button><button type="button" class="view" data-file="oyster-story.css" aria-expanded="false">View</button></div></li>
+    <li><span><b>meshes.json</b>: the protein and molecule shapes, traced from PDB 5T35 (about 770 KB)</span><div class="acts"><button type="button" class="copyfile" data-file="meshes.json">Copy</button><button type="button" class="view" data-file="meshes.json" aria-expanded="false">View</button></div></li>
+    <li><span><b>story-markup.html</b>: the story's HTML, to paste where it should appear</span><div class="acts"><button type="button" class="copyfile" data-file="story-markup.html">Copy</button><button type="button" class="view" data-file="story-markup.html" aria-expanded="false">View</button></div></li>
+    <li><span><b>tools/build_meshes.py</b>: rebuilds meshes.json from protein structures (Python)</span><div class="acts"><button type="button" class="copyfile" data-file="tools/build_meshes.py">Copy</button><button type="button" class="view" data-file="tools/build_meshes.py" aria-expanded="false">View</button></div></li>
+    <li><span><b>tools/meshes.config.json</b>: what the shapes are built from, and how</span><div class="acts"><button type="button" class="copyfile" data-file="tools/meshes.config.json">Copy</button><button type="button" class="view" data-file="tools/meshes.config.json" aria-expanded="false">View</button></div></li>
+    <li><span><b>README.md</b>: the full guide, including everything below</span><div class="acts"><button type="button" class="copyfile" data-file="README.md">Copy</button><button type="button" class="view" data-file="README.md" aria-expanded="false">View</button></div></li>
   </ul>
   <p class="status" id="copyStatus" role="status"></p>
+  <div class="viewer" id="viewer" hidden><p id="viewerName"></p><textarea id="viewerText" readonly spellcheck="false" aria-labelledby="viewerName"></textarea></div>
   <h3>Three steps</h3>
   <pre><code>&lt;!-- 1. in &lt;head&gt; --&gt;
 &lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500&amp;display=swap&quot;&gt;
@@ -103,6 +116,19 @@
 
 &lt;!-- 3. before &lt;/body&gt;; meshes.json sits next to oyster-story.js --&gt;
 &lt;script type=&quot;module&quot; src=&quot;oyster-story.js&quot;&gt;&lt;/script&gt;</code></pre>
+  <h3>Change the 3D shapes</h3>
+  <p>The proteins and the degrader come from crystal structure <b>5T35</b> (BRD4, MZ1 and VHL with Elongin B and C), and ubiquitin from <b>1UBQ</b>. <code>tools/build_meshes.py</code> rebuilds <code>meshes.json</code> from them, following <code>tools/meshes.config.json</code>:</p>
+  <pre><code>pip install numpy scipy scikit-image rdkit
+python3 tools/build_meshes.py --out meshes-new.json</code></pre>
+  <ul>
+    <li><b>Proteins:</b> a soft surface about 3&nbsp;&Aring; outside each protein's atoms, from a Gaussian blob per atom, then smoothed.</li>
+    <li><b>The two halves:</b> MZ1 cut at its PEG linker; each half drawn flat, textbook style, as a tube along every bond, facing the viewer where it binds.</li>
+    <li><b>Try before you swap:</b> put <code>data-meshes="meshes-new.json"</code> on the story's <code>&lt;section&gt;</code> to load the new file, and rename it to <code>meshes.json</code> once you like it.</li>
+    <li><b>Another structure or degrader:</b> change the PDB id, the chains, the ligand code and its linker atoms in the config. The guide in <code>README.md</code> covers each setting.</li>
+  </ul>
+  <p>The shipped <code>meshes.json</code> is the website's original. The tool matches its proteins to within about 0.6&nbsp;&Aring;; the halves come out in the same style but not identical.</p>
+  <h3>Change the barrier, neuron and proteasome</h3>
+  <p>These are drawn by the script, from the <code>SCENE</code> block near the top of <code>oyster-story.js</code>: the number and size of the barrier's cells and how far down it sits, the neuron's membrane height, radius and bilayer gap, and the proteasome's rings and caps. The halves' path down through the membranes follows these numbers, so they still pause inside each one. Colours are in the <code>PAL</code> table above it.</p>
   <h3>Good to know</h3>
   <ul>
     <li><b>Palette:</b> set <code>data-palette</code> on <code>&lt;html&gt;</code> to <code>nacre</code>, <code>tidepool</code>, <code>pearlink</code>, <code>shellcoral</code>, <code>abyssmint</code> or <code>charcoalviolet</code>. Any <code>.pal button[data-pal]</code> on the page switches it live.</li>
@@ -121,14 +147,43 @@ const barSolid = () => bar.classList.toggle('solid', storyEl.getBoundingClientRe
 addEventListener('scroll', barSolid, { passive: true }); addEventListener('resize', barSolid); barSolid();
 // copy buttons: each file is fetched up front, so the click can write it straight to the clipboard
 const texts = {};
-document.querySelectorAll('.copy[data-file]').forEach(b => fetch(b.dataset.file).then(r => r.text()).then(t => { texts[b.dataset.file] = t; }).catch(() => {}));
-document.querySelectorAll('.copy[data-file]').forEach(b => b.addEventListener('click', () => {
+document.querySelectorAll('.copyfile[data-file]').forEach(b => fetch(b.dataset.file).then(r => r.text()).then(t => { texts[b.dataset.file] = t; }).catch(() => {}));
+document.querySelectorAll('.copyfile[data-file]').forEach(b => b.addEventListener('click', () => {
   const f = b.dataset.file, st = document.getElementById('copyStatus');
   if (!texts[f]) { st.textContent = f + ' is still loading. Try again in a moment, or use Open.'; return; }
   navigator.clipboard.writeText(texts[f]).then(() => { b.textContent = 'Copied'; st.textContent = f + ' copied. Paste it into a file named ' + f + '.'; },
     () => { st.textContent = 'Copying was blocked here. Use Open, then select all and copy.'; });
   setTimeout(() => { b.textContent = 'Copy'; }, 1800);
 }));
+// view: show a file's full text on the page, selected, ready to copy by hand
+document.querySelectorAll('.view[data-file]').forEach(b => b.addEventListener('click', () => {
+  const f = b.dataset.file, v = document.getElementById('viewer'), t = document.getElementById('viewerText');
+  const open = !v.hidden && v.dataset.file === f;
+  document.querySelectorAll('.view').forEach(x => { x.textContent = 'View'; x.setAttribute('aria-expanded', 'false'); });
+  if (open) { v.hidden = true; return; }
+  v.hidden = false; v.dataset.file = f; b.textContent = 'Hide'; b.setAttribute('aria-expanded', 'true');
+  document.getElementById('viewerName').textContent = f + (texts[f] ? '' : ' (loading)');
+  t.value = texts[f] || ''; t.focus(); t.select();
+  if (!texts[f]) fetch(f).then(r => r.text()).then(x => { texts[f] = x; if (v.dataset.file === f) { t.value = x; document.getElementById('viewerName').textContent = f; t.select(); } });
+}));
+// the zip: handed to the viewer through the downloads capability (the viewer confirms the save)
+let downloads = null;
+const zipBtn = document.getElementById('zipBtn');
+window.claude?.use?.('downloads').then(d => { downloads = d; }, () => {});
+zipBtn.addEventListener('click', async () => {
+  const st = document.getElementById('copyStatus');
+  if (!downloads || !window.JSZip) { st.textContent = 'Downloads are not available in this view. Use Copy or View for each file.'; return; }
+  try {
+    // built here from the published files, since an artifact cannot host a .zip
+    const zip = new JSZip(), names = [...document.querySelectorAll('.copyfile[data-file]')].map(b => b.dataset.file);
+    for (const f of names) zip.file('oyster-story/' + f, texts[f] || await (await fetch(f)).text());
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    await downloads.save({ filename: 'oyster-story.zip', data: blob });
+    st.textContent = 'oyster-story.zip saved.';
+  } catch (e) {
+    st.textContent = e && e.code === 'declined' ? 'Download cancelled.' : 'The download did not go through. Use Copy or View for each file.';
+  }
+});
 // if the story's script could not start (no network for three.js, say), show a note instead of the loading mark
 addEventListener('load', () => setTimeout(() => {
   if (window.__storyStarted) return;
@@ -136,5 +191,6 @@ addEventListener('load', () => setTimeout(() => {
   const d = document.createElement('div'); d.className = 'nogl'; d.textContent = 'The 3D story could not load. Reload the page to try again.'; s.appendChild(d);
 }, 1500), { once: true });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script type="module" src="oyster-story.js"></script>
 </html>
