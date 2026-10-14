@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"; ROUND13 = C.__name__ == "blobby"; ROUND14 = C.__name__ == "filled"; ROUND15 = C.__name__ == "wavy"; ROUND16 = C.__name__ == "undulate"; ROUND17 = C.__name__ == "nacre"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"; ROUND13 = C.__name__ == "blobby"; ROUND14 = C.__name__ == "filled"; ROUND15 = C.__name__ == "wavy"; ROUND16 = C.__name__ == "undulate"; ROUND17 = C.__name__ == "nacre"; ROUND18 = C.__name__ == "disc"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0;--brd4:#E7C9D6;--vhl:#D6CBE6;--ring:#8C5572;--outline:#2B2230',
@@ -109,7 +109,7 @@ for key, num, name, fn, *rest in C.CONCEPTS:
     if fn is None:   # a group heading spanning the grid: (key, heading, text, None)
         cards += f'<div class="grp"><h2>{num}</h2><p>{name}</p></div>'; continue
     states = ''
-    for split, lab in ((False, 'Clasped'), (True, 'Split')):
+    for split, lab in (((False, 'Clasped'),) if getattr(fn, 'clasped_only', False) else ((False, 'Clasped'), (True, 'Split'))):
         tiles = ''.join(f'<div class="tile sq" style="{st}" title="{p.title()}, {lab.lower()}">{mark(fn, f"{key}{p[0]}{int(split)}", split)}</div>' for p, st in PAL.items())
         states += f'<div class="state"><span class="lab">{lab}</span><div class="row">{tiles}</div></div>'
     small = ''.join(f'<div class="tile sm" style="{st}">' + ''.join(mark(fn, f'{key}{p[0]}s{px}', size=px, cls='px') for px in (16, 24, 32, 48)) + '</div>' for p, st in PAL.items())
@@ -119,8 +119,14 @@ for key, num, name, fn, *rest in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'nacre.html' if ROUND17 else 'undulate.html' if ROUND16 else 'wavy.html' if ROUND15 else 'filled.html' if ROUND14 else 'blobby.html' if ROUND13 else 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND17:
+OUT = 'disc.html' if ROUND18 else 'nacre.html' if ROUND17 else 'undulate.html' if ROUND16 else 'wavy.html' if ROUND15 else 'filled.html' if ROUND14 else 'blobby.html' if ROUND13 else 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND18:
+    TITLE, EYEBROW, H1, REF = 'Oyster Pearl Disc', 'brandmark brainstorm, round eighteen', 'Mother-of-pearl on a dark disc', ''
+    LEDE = ('<p class="lede"><b>Round seventeen&rsquo;s Akoya and Rose mother-of-pearl, set on a near-black disc</b>, as the earlier Inside Out '
+            'logo sat in its disc. Clasped only from here on. For each colourway: the mark roomy in the disc, tight to it, breaking out past '
+            'the edge, and with a fine pearl ring inside the rim. The disc is the same near-black on both palettes, so the pearl colours read '
+            'the same. Structures: PDB 5T35, Gadd et al., Nat. Chem. Biol. 2017; the degrader is drawn generically.</p>')
+elif ROUND17:
     import undulate as R16
     TITLE, EYEBROW, H1 = 'Oyster Nacre Proteins', 'brandmark brainstorm, round seventeen', 'Textures, and mother-of-pearl'
     LEDE = ('<p class="lede"><b>Round sixteen&rsquo;s 02, four broad waves, two ways.</b> First with the textures and shading from earlier rounds, in '
