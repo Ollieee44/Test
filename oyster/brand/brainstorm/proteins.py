@@ -386,7 +386,7 @@ def round_right(L, C, amount, pc, pr, gap, w, start=.45):
         L, C = push_out(L, pc, pr + pg), push_out(C, pc, pr + pg)
     return _resample(L, 1.0), _resample(C, 1.0)
 
-def pearl_linker(c, r, angle, split, link=(.62, .34), seam=.09, ns='p'):
+def pearl_linker(c, r, angle, split, link=(.62, .34), seam=.09, ns='p', nacre=None):
     """The pearl split along the shell's seam into two halves, one by each protein, held by a short, thick linker
     cut out of it as negative space across the split. link = (length, thickness) as fractions of the radius."""
     ll, lw = link[0] * r, link[1] * r; hg = seam * r; g = 4 if split else 0
@@ -396,6 +396,18 @@ def pearl_linker(c, r, angle, split, link=(.62, .34), seam=.09, ns='p'):
          f'<rect x="{f(c[0] - lw / 2)}" y="{f(c[1] - ll / 2)}" width="{f(lw)}" height="{f(ll)}" rx="{f(lw / 2)}" fill="#000"/></mask>')
     halves = (f'<g transform="translate(0 {-g})"><path d="M{f(c[0] - r)} {f(c[1])} A {f(r)} {f(r)} 0 0 1 {f(c[0] + r)} {f(c[1])} Z" style="fill:var(--pearl)" mask="url(#{ns})"/></g>'
               f'<g transform="translate(0 {g})"><path d="M{f(c[0] - r)} {f(c[1])} A {f(r)} {f(r)} 0 0 0 {f(c[0] + r)} {f(c[1])} Z" style="fill:var(--pearl)" mask="url(#{ns})"/></g>')
+    if nacre:   # a photographic pearl: body gradient, overtone, dark rim and a specular highlight, through the same split/linker mask
+        P_ = NACRE[nacre]; gid = ns + 'pg'; oid = ns + 'po'
+        defs = (f'<radialGradient id="{gid}" gradientUnits="userSpaceOnUse" cx="{f(c[0] - r * .3)}" cy="{f(c[1] - r * .35)}" r="{f(r * 1.25)}">'
+                f'<stop offset="0" stop-color="#ffffff"/><stop offset=".22" stop-color="{P_["pearl"][0]}"/>'
+                f'<stop offset=".7" stop-color="{P_["pearl"][1]}"/><stop offset="1" stop-color="{P_["pearl"][2]}"/></radialGradient>'
+                f'<radialGradient id="{oid}" gradientUnits="userSpaceOnUse" cx="{f(c[0] + r * .35)}" cy="{f(c[1] + r * .4)}" r="{f(r * .9)}">'
+                f'<stop offset="0" stop-color="{P_["overtone"]}" stop-opacity=".55"/><stop offset="1" stop-color="{P_["overtone"]}" stop-opacity="0"/></radialGradient>')
+        halves = halves.replace('style="fill:var(--pearl)"', f'fill="url(#{gid})"')
+        over = (f'<g transform="translate(0 {-g})"><path d="M{f(c[0] - r)} {f(c[1])} A {f(r)} {f(r)} 0 0 1 {f(c[0] + r)} {f(c[1])} Z" fill="url(#{oid})" mask="url(#{ns})"/></g>'
+                f'<g transform="translate(0 {g})"><path d="M{f(c[0] - r)} {f(c[1])} A {f(r)} {f(r)} 0 0 0 {f(c[0] + r)} {f(c[1])} Z" fill="url(#{oid})" mask="url(#{ns})"/></g>')
+        spec = f'<ellipse cx="{f(c[0] - r * .38)}" cy="{f(c[1] - r * .42)}" rx="{f(r * .2)}" ry="{f(r * .13)}" transform="rotate(-35 {f(c[0] - r * .38)} {f(c[1] - r * .42)})" fill="#fff" opacity=".85"/>'
+        return f'<defs>{defs}</defs><g transform="rotate({angle} {f(c[0])} {f(c[1])})">{m}{halves}{over}</g>' + ('' if split else spec)
     return f'<g transform="rotate({angle} {f(c[0])} {f(c[1])})">{m}{halves}</g>'
 
 def textured2(ns, split=False, angle=-32, rnd=.6, link=(.7, .44), seam=.09, gap=1.8, overlap=14, pose=0, w=3.0, light=(-1, -1)):
@@ -569,11 +581,15 @@ def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.
             inner = (f'<clipPath id="{ns}{nm}"><path d="{_d(inset(P, 3) if inset(P, 3) is not None else P)}"/></clipPath>'
                      f'<g clip-path="url(#{ns}{nm})"><path d="{_d(q)}" fill="none" stroke="currentColor" stroke-width="{w * .45:.2f}" stroke-linejoin="round"/></g>')
         off = seam_n * g * s
+        if fill and fill.startswith('nacre:'):
+            body += f'<g transform="translate({f(off[0])} {f(off[1])})">' + _nacre_fill(P, key, fill[6:], ns + nm, w) + '</g>'
+            continue
         if fill:
             body += f'<g transform="translate({f(off[0])} {f(off[1])})">' + _filled(P, key, fill, ns + nm, w, lumps=lumps, tint=tint, seed=3 if key == "target" else 7) + '</g>'
             continue
         body += (f'<g transform="translate({f(off[0])} {f(off[1])})"><path d="{_d(P)}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>{inner}</g>')
-    return body + pearl_linker(c0, pr_, angle, split, link, seam, ns + 'p')
+    nac = fill[6:] if fill and fill.startswith('nacre:') else None
+    return body + pearl_linker(c0, pr_, angle, split, link, seam, ns + 'p', nacre=nac)
 
 def _filled(P, key, style, ns, w, light=(-1, -1), lumps=0, tint=False, seed=0):
     """A protein filled in the 3D story's colours (var(--brd4) / var(--vhl)) with an ink outline (var(--outline)),
@@ -704,3 +720,43 @@ def undulate(P, n=5, depth=3.5, phase=0.0, sharp=1.0, other=None, pc=None, pr=0.
     k = np.convolve(np.r_[k[-15:], k, k[:15]], np.ones(31) / 31, 'valid')     # smooth the fade
     Q = P + _normals(P) * (depth * wv * k)[:, None]
     return _relax(_resample(Q, .8), .3, 2)
+
+
+# ---- Round seventeen: mother-of-pearl colourways. The proteins as iridescent nacre, the pearl photographic.
+NACRE = {
+    'akoya':    dict(bands=['#F5EFF2', '#EADBE6', '#DDE8EE', '#F3EADF', '#E7DDEE', '#F7F1EE'], edge='#8E7C8C', shade='#B8A8BC',
+                     pearl=['#FBF6F7', '#EDE3E8', '#C9B9C4'], overtone='#F4C6D8'),
+    'rose':     dict(bands=['#F8E4E8', '#E9D2F0', '#D3EDE6', '#F6E7D2', '#EFD5E8', '#DDE6F4'], edge='#9A7A90', shade='#C3A6BC',
+                     pearl=['#FBEFF2', '#F0D9E2', '#C9A9B9'], overtone='#C9E8DC'),
+    'southsea': dict(bands=['#F6E4B2', '#EBCB8C', '#F8EDCF', '#DDBB7A', '#F3DCA9', '#E8D3A6'], edge='#8C6A30', shade='#C9A35E',
+                     pearl=['#FBF0D2', '#EBCB86', '#B98F47'], overtone='#F6E7B8'),
+    'tahitian': dict(bands=['#3E4C55', '#5E726C', '#6F5D7B', '#476E7C', '#808C68', '#525A6E'], edge='#151B1E', shade='#22292C',
+                     pearl=['#A8B4B4', '#4E5C61', '#1F2629'], overtone='#7FAF92'),
+    'abalone':  dict(bands=['#3F7F8F', '#5DA79C', '#6B61A3', '#3E70A0', '#8CC2AA', '#4F8FB6'], edge='#173640', shade='#24505C',
+                     pearl=['#E9F3F2', '#B7D0D3', '#6F8F9A'], overtone='#9FD6C6'),
+}
+
+def _nacre_fill(P, key, name, ns, w, light=(-1, -1)):
+    """A protein as mother-of-pearl: iridescent colour bands across it (each protein at its own angle), a fine
+    fibrous nacre sheen from turbulence, a soft highlight toward the light and shade away from it, a thin rim."""
+    N_ = NACRE[name]; d = _d(P); c = P.mean(0); r = np.ptp(P, 0).max() * .6
+    lt = np.array(light, float); lt /= np.linalg.norm(lt)
+    ang = 25 if key == 'target' else 115
+    a = math.radians(ang); x1, y1 = c - r * np.array([math.cos(a), math.sin(a)]); x2, y2 = c + r * np.array([math.cos(a), math.sin(a)])
+    stops = ''.join(f'<stop offset="{i / (len(N_["bands"]) - 1):.2f}" stop-color="{col}"/>' for i, col in enumerate(N_['bands']))
+    hx, hy = c + lt * r * .45; sx, sy = c - lt * r * .55
+    seed = 3 if key == 'target' else 9
+    defs = (f'<linearGradient id="{ns}b" gradientUnits="userSpaceOnUse" x1="{f(x1)}" y1="{f(y1)}" x2="{f(x2)}" y2="{f(y2)}">{stops}</linearGradient>'
+            f'<radialGradient id="{ns}h" gradientUnits="userSpaceOnUse" cx="{f(hx)}" cy="{f(hy)}" r="{f(r * .8)}">'
+            f'<stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
+            f'<radialGradient id="{ns}s" gradientUnits="userSpaceOnUse" cx="{f(sx)}" cy="{f(sy)}" r="{f(r * .9)}">'
+            f'<stop offset="0" stop-color="{N_["shade"]}" stop-opacity=".55"/><stop offset="1" stop-color="{N_["shade"]}" stop-opacity="0"/></radialGradient>'
+            f'<filter id="{ns}f" x="-10%" y="-10%" width="120%" height="120%">'
+            f'<feTurbulence type="fractalNoise" baseFrequency="0.035 0.18" numOctaves="3" seed="{seed}"/>'
+            f'<feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 1.4 0 -0.55"/></filter>'
+            f'<clipPath id="{ns}k"><path d="{d}"/></clipPath>')
+    sheen = (f'<g clip-path="url(#{ns}k)"><rect x="{f(c[0] - r * 1.2)}" y="{f(c[1] - r * 1.2)}" width="{f(r * 2.4)}" height="{f(r * 2.4)}" '
+             f'filter="url(#{ns}f)" opacity=".38" transform="rotate({ang + 60} {f(c[0])} {f(c[1])})"/></g>')
+    return (f'<defs>{defs}</defs><path d="{d}" fill="url(#{ns}b)"/>{sheen}'
+            f'<path d="{d}" fill="url(#{ns}s)"/><path d="{d}" fill="url(#{ns}h)"/>'
+            f'<path d="{d}" fill="none" stroke="{N_["edge"]}" stroke-width="{w * .7:.2f}" stroke-linejoin="round" opacity=".9"/>')
