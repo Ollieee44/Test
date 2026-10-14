@@ -222,13 +222,20 @@ def DV(**kw):
 # ---- Round nine: 04 (docked, hairline gap) turned so the seam runs on a diagonal, with texture lines for depth.
 
 def docked_geom(pose=0, overlap=14, gap=1.8, pr=11, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), w=3.0,
-                flip_lid=True, flip_cup=False, hinge=4):
+                flip_lid=True, flip_cup=False, hinge=4, balance=None):
+    """balance (a number): place each protein so it reaches that far past the pearl's centre line before docking
+    (lid downward, cup upward), so the seam runs through the pearl and each protein takes half of it."""
     pc = np.array([54.0, 52.0]); lk, lw, lh, lt = lid; ck, cw, ch, ct = cup
     def place(key, box, rot, flip):
         v = POSES[pose][key]; tf = _frame(v['outer'], box[2], box[3], rot, np.array(box[:2]), flip)
         return tf(smooth(v['outer'])), tf
     L0, tl = place(lk, (pc[0] - hinge, pc[1] - lh * .5 - pr * .35 + overlap / 2, lw, lh), lt, flip_lid)
     C0, tc = place(ck, (pc[0] - hinge, pc[1] + ch * .5 + pr * .2 - overlap / 2, cw, ch), ct, flip_cup)
+    if balance is not None:
+        near = lambda P: P[np.abs(P[:, 0] - pc[0]) < pr * 1.6]
+        dl = (pc[1] + balance) - near(L0)[:, 1].max(); dc = (pc[1] - balance) - near(C0)[:, 1].min()
+        L0 = L0 + [0, dl]; C0 = C0 + [0, dc]
+        tl0, tc0 = tl, tc; tl = lambda q, f=tl0, d=dl: f(q) + [0, d]; tc = lambda q, f=tc0, d=dc: f(q) + [0, d]
     L, C = dock(L0, C0, pc, pr, gap, w=w)
     return L, C, pc, tl, tc
 
@@ -483,3 +490,93 @@ def circle_pair(ns, split=False, R=38.0, amp=.12, wave=4.0, angle=-32, pose=0, g
 
 def CP(**kw):
     fn = lambda ns, split=False: circle_pair(ns, split, **kw); fn.kw = kw; return fn
+
+# ---- Round twelve: two proteins first. Real traced outlines (no circle, no shell lines), drawn as molecular
+# surfaces (overlapping round bumps), docked along their whole facing side round the pearl. The oyster is only in
+# the silhouette the pair makes together.
+
+def close_mouth(L, C, reach=16.0, iters=60, gap=1.8, w=3.0, pc=None, pr=11.0, relax=True):
+    """Pull each protein's facing surface toward the other wherever they are within `reach`, then clear back to
+    the gap, so the open mouth closes and the two meet along their whole facing side."""
+    g2, pg = gap + w, gap + w / 2
+    for i in range(iters):
+        for A, B, which in ((L, C, 0), (C, L, 1)):
+            n, d = _nearest(B, A)
+            wt = np.clip(1 - (d - g2) / (reach - g2), 0, 1) ** 1.5 * (d > g2)
+            A = A + (n - A) * (wt * .12)[:, None]
+            if which == 0: L = A
+            else: C = A
+        L, _ = _clear(L, C, g2, .5); C, _ = _clear(C, L, g2, .5)
+        if pc is not None: L, C = push_out(L, pc, pr + pg), push_out(C, pc, pr + pg)
+        if relax and i % 6 == 5: L, C = _relax(_resample(L, .8), .25, 1), _relax(_resample(C, .8), .25, 1)
+    return _resample(L, .8) if relax else L, _resample(C, .8) if relax else C
+
+def molecular(P, r=3.2, seed=0, vary=.28, res=.2):
+    """The outline redrawn as a molecular surface: the shape filled in, with round bumps of radius ~r set along
+    its edge, and the silhouette of the lot traced back out (scalloped, as space-filling surfaces are)."""
+    from matplotlib.path import Path as _MP
+    from skimage import measure
+    rng = np.random.default_rng(seed)
+    lo = P.min(0) - 2 * r; hi = P.max(0) + 2 * r
+    xs = np.arange(lo[0], hi[0], res); ys = np.arange(lo[1], hi[1], res); X, Y = np.meshgrid(xs, ys)
+    pts = np.stack([X.ravel(), Y.ravel()], 1)
+    core = inset(P, r * .9)
+    field = _MP(core if core is not None else P).contains_points(pts).reshape(X.shape).astype(float)
+    ring = _resample(P if core is None else core, r * 1.15)
+    for c in ring:
+        rr = r * (1 + vary * (rng.random() - .5) * 2)
+        field = np.maximum(field, ((X - c[0]) ** 2 + (Y - c[1]) ** 2 <= rr * rr).astype(float))
+    cs = measure.find_contours(field, .5); cc = max(cs, key=len)
+    Q = np.stack([lo[0] + cc[:, 1] * res, lo[1] + cc[:, 0] * res], 1)
+    return _resample(Q, .6)
+
+def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.8, pose=0, reach=16.0,
+                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None):
+    L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w, lid=lid, cup=cup, balance=balance)
+    if reach > 0: L, C = close_mouth(L, C, reach, gap=gap, w=w, pc=pc, pr=pr)
+    if bump > 0:
+        L, C = molecular(L, bump, 1), molecular(C, bump, 2)
+        if reach > 0: L, C = close_mouth(L, C, max(8.0, bump * 3), 30, gap=gap, w=w, pc=pc, pr=pr, relax=False)   # re-dock after the bumps
+    g2, pg = gap + w, gap + w / 2
+    for _ in range(14):                                         # keep the gap and the pocket exact after the bumps
+        L, _ = _clear(L, C, g2, .5); C, _ = _clear(C, L, g2, .5)
+        L, C = push_out(L, pc, pr + pg), push_out(C, pc, pr + pg)
+    a = math.radians(angle); Rm = np.array([[math.cos(a), -math.sin(a)], [math.sin(a), math.cos(a)]])
+    L, C = (L - pc) @ Rm.T, (C - pc) @ Rm.T
+    allp = np.vstack([L, C]); lo, hi = allp.min(0) - w, allp.max(0) + w
+    sc = min(1.0, 92 / max(hi - lo)); mid = (lo + hi) / 2
+    fit = lambda P: (np.asarray(P) - mid) * sc + 50
+    L, C = fit(L), fit(C); c0 = fit(np.zeros(2)); pr_ = pr * sc
+    seam_n = Rm @ np.array([0, 1.0]); g = 5 if split else 0
+    body = ''
+    for P, key, tf, s, nm in ((L, 'target', tl, -1, 'a'), (C, 'e3', tc, 1, 'b')):
+        inner = ''
+        if contour:   # one real surface contour from the trace, as a quiet interior line
+            q = fit((tf(smooth(POSES[pose][key]['inner'][0])) - pc) @ Rm.T)
+            inner = (f'<clipPath id="{ns}{nm}"><path d="{_d(inset(P, 3) if inset(P, 3) is not None else P)}"/></clipPath>'
+                     f'<g clip-path="url(#{ns}{nm})"><path d="{_d(q)}" fill="none" stroke="currentColor" stroke-width="{w * .45:.2f}" stroke-linejoin="round"/></g>')
+        off = seam_n * g * s
+        body += (f'<g transform="translate({f(off[0])} {f(off[1])})"><path d="{_d(P)}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>{inner}</g>')
+    return body + pearl_linker(c0, pr_, angle, split, link, seam, ns + 'p')
+
+_TP_CACHE = {}
+def TP(**kw):
+    """A concept function for two_proteins with its settings fixed. The geometry is heavy (rasterised surfaces,
+    docking), so each (settings, split) is computed once and its ids renamed for each use."""
+    key0 = repr(sorted((k, repr(v)) for k, v in kw.items()))
+    def fn(ns, split=False):
+        k = (key0, split)
+        if k not in _TP_CACHE: _TP_CACHE[k] = two_proteins('NSX', split, **kw)
+        return _TP_CACHE[k].replace('NSX', ns)
+    fn.kw = kw; return fn
+
+def aspect(key, pose=0):
+    """A protein outline's natural height / width along its long axis (no squashing)."""
+    o = smooth(POSES[pose][key]['outer']); q = o - o.mean(0)
+    w_, v = np.linalg.eigh(np.cov(q.T)); ax = v[:, np.argmax(w_)]; a = -math.atan2(ax[1], ax[0])
+    R = np.array([[math.cos(a), -math.sin(a)], [math.sin(a), math.cos(a)]]); q = q @ R.T
+    return (q[:, 1].max() - q[:, 1].min()) / (q[:, 0].max() - q[:, 0].min())
+
+def natural(lw=58, cw=62, pose=0, lt=-9, ct=6, squash=1.0):
+    """lid / cup boxes at each protein's own proportions (squash < 1 flattens them toward a shell)."""
+    return dict(lid=('target', lw, lw * aspect('target', pose) * squash, lt), cup=('e3', cw, cw * aspect('e3', pose) * squash, ct))

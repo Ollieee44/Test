@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62;--pearl:#F2B84B'}
@@ -107,8 +107,16 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND11:
+OUT = 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND12:
+    TITLE, EYEBROW, H1, REF = 'Oyster Two Proteins', 'brandmark brainstorm, round twelve', 'Two proteins, one pearl', ''
+    LEDE = ('<p class="lede"><b>Proteins first, the oyster only in the silhouette.</b> Round eleven had drifted back to a shell: a circle, with lines '
+            'that read as growth rings. Here the circle and the shell lines are gone. BRD4 and VHL keep close to their real traced proportions and '
+            'are drawn as molecular surfaces, the scalloped edge of a space-filling model. Each is placed to hold half of the pearl, and the two are '
+            'docked along their whole facing side at a hairline gap, so the mouth is closed. Together they happen to make the rounded, lumpy shape '
+            'of an oyster. The pearl is split along the seam and held by its linker. Structures: PDB 5T35, Gadd et al., Nat. Chem. Biol. 2017; '
+            'the degrader is drawn generically.</p>')
+elif ROUND11:
     import rounded as R10
     TITLE, EYEBROW, H1 = 'Oyster Round Pair', 'brandmark brainstorm, round eleven', 'One round form, two proteins'
     LEDE = ('<p class="lede"><b>The pair closed into a round form, with each half more clearly a protein.</b> The two halves now make one rounded '
