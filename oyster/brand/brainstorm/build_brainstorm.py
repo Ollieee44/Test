@@ -37,9 +37,17 @@ def _ink_from_svg(svg):
     ignoring masks, clip paths and defs (they shape the ink but are not ink)."""
     svg = re.sub(r'<(mask|clipPath|defs)\b.*?</\1>', '', svg, flags=re.S); out = []
     for d in re.findall(r'<path[^>]* d="([^"]+)"', svg):
-        for sub in re.findall(r'M[^MZ]*', d):
-            v = [float(x) for x in re.findall(r'-?\d+\.?\d*', sub)]
-            if len(v) >= 4: out.append(np.array(v[:len(v) // 2 * 2]).reshape(-1, 2))
+        # walk the commands so arc parameters (radii, flags) are not mistaken for points: M/L give points, A gives its end point
+        pts, cur = [], None
+        for cmd, args in re.findall(r'([MLAZ])([^MLAZ]*)', d):
+            v = [float(x) for x in re.findall(r'-?\d+\.?\d*', args)]
+            if cmd in 'ML':
+                for i in range(0, len(v) - 1, 2): pts.append((v[i], v[i + 1]))
+            elif cmd == 'A':
+                for i in range(0, len(v) - 6, 7): pts.append((v[i + 5], v[i + 6]))
+            elif cmd == 'Z' and pts:
+                out.append(np.array(pts)); pts = []
+        if len(pts) > 1: out.append(np.array(pts))
     for q in re.findall(r'points="([^"]+)"', svg):
         out.append(np.array([[float(a) for a in p.split(',')] for p in q.split()]))
     for cx, cy, r in re.findall(r'<circle cx="([-\d.]+)" cy="([-\d.]+)" r="([-\d.]+)"', svg):
