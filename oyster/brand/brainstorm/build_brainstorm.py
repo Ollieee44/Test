@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"; ROUND13 = C.__name__ == "blobby"; ROUND14 = C.__name__ == "filled"; ROUND15 = C.__name__ == "wavy"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"; ROUND13 = C.__name__ == "blobby"; ROUND14 = C.__name__ == "filled"; ROUND15 = C.__name__ == "wavy"; ROUND16 = C.__name__ == "undulate"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0;--brd4:#E7C9D6;--vhl:#D6CBE6;--ring:#8C5572;--outline:#2B2230',
@@ -116,8 +116,17 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'wavy.html' if ROUND15 else 'filled.html' if ROUND14 else 'blobby.html' if ROUND13 else 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND15:
+OUT = 'undulate.html' if ROUND16 else 'wavy.html' if ROUND15 else 'filled.html' if ROUND14 else 'blobby.html' if ROUND13 else 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND16:
+    import wavy as R15
+    TITLE, EYEBROW, H1 = 'Oyster Big Waves', 'brandmark brainstorm, round sixteen', 'Fewer, bigger, deeper waves'
+    LEDE = ('<p class="lede"><b>Round fifteen with a few big undulations instead of many small lobes.</b> Each protein&rsquo;s outer edge is bent '
+            'into four to six smooth waves, as deep as you like; the waves fade out near the seam and the pearl, so the two proteins still fit each '
+            'other at a hairline gap and the pearl sits in a clean pocket. Fill colours are the 3D story&rsquo;s. Structures: PDB 5T35, Gadd et '
+            'al., Nat. Chem. Biol. 2017; the degrader is drawn generically.</p>')
+    REF = ('<div class="ref"><span class="lab">From round fifteen</span><div class="refrow">'
+           f'<div class="tile" style="{PAL["nacre"]}">{mark(R15.CONCEPTS[0][3], "r15w")}</div><span>01 Wavy</span></div></div>')
+elif ROUND15:
     import filled as R14
     TITLE, EYEBROW, H1 = 'Oyster Wavy Proteins', 'brandmark brainstorm, round fifteen', 'Wavy, not jaggy'
     LEDE = ('<p class="lede"><b>Round fourteen with softer, wavier outlines, after the illustration you shared.</b> Instead of many fine bumps, each '

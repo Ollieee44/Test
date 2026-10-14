@@ -539,13 +539,17 @@ def molecular(P, r=3.2, seed=0, vary=.28, res=.2, soften=0.0, spacing=1.15, sink
     return _resample(Q, .6)
 
 def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.8, pose=0, reach=16.0,
-                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None, soften=0.0, lumps=0, tint=False, spacing=1.15, sink=.9):
+                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None, soften=0.0, lumps=0, tint=False, spacing=1.15, sink=.9, waves=None):
     L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w, lid=lid, cup=cup, balance=balance, blob=blob)
     if reach > 0: L, C = close_mouth(L, C, reach, gap=gap, w=w, pc=pc, pr=pr)
     if bump > 0:
         L, C = (molecular(L, bump, 1, soften=soften, spacing=spacing, sink=sink),
                 molecular(C, bump, 2, soften=soften, spacing=spacing, sink=sink))
         if reach > 0: L, C = close_mouth(L, C, max(8.0, bump * 3), 30, gap=gap, w=w, pc=pc, pr=pr, relax=False)   # re-dock after the bumps
+    if waves:     # (n, depth, phase, sharp) per protein: a few big undulations, then re-dock
+        L0_, C0_ = L, C
+        L = undulate(L0_, *waves[0], other=C0_, pc=pc, pr=pr); C = undulate(C0_, *waves[1], other=L0_, pc=pc, pr=pr)
+        L, C = close_mouth(L, C, 10.0, 40, gap=gap, w=w, pc=pc, pr=pr, relax=False)
     g2, pg = gap + w, gap + w / 2
     for _ in range(14):                                         # keep the gap and the pocket exact after the bumps
         L, _ = _clear(L, C, g2, .5); C, _ = _clear(C, L, g2, .5)
@@ -681,3 +685,22 @@ def exaggerate(P, amp=1.2, keep=6, clefts=(), bulges=()):
         dt = np.angle(np.exp(1j * (th - math.radians(ang)))); k *= 1 + depth * np.exp(-(dt / math.radians(width)) ** 2)
     Q = c + d * k[:, None]
     return _relax(_resample(Q, .8), .3, 3)
+
+
+# ---- Round sixteen: a few big, deep undulations instead of many lobes.
+
+def undulate(P, n=5, depth=3.5, phase=0.0, sharp=1.0, other=None, pc=None, pr=0.0, near=4.0, fade=10.0):
+    """Push the outline in and out along its normal in exactly n smooth waves round its length.
+    sharp > 1 makes the crests rounder and the troughs tighter, like lobes with clefts between. Where the outline
+    is within `near` + `fade` of the other protein or the pearl, the waves fade out, so the seam and pocket stay put."""
+    P = _resample(np.asarray(P, float), .6); L = len(P)
+    t = np.arange(L) / L * 2 * np.pi * n + phase * 2 * np.pi
+    wv = np.sin(t); wv = np.sign(wv) * np.abs(wv) ** (1 / sharp) if sharp != 1 else wv
+    k = np.ones(L)
+    if other is not None:
+        _, d = _nearest(_resample(other, 1.0), P); k = np.minimum(k, np.clip((d - near) / fade, 0, 1))
+    if pc is not None:
+        d = np.linalg.norm(P - pc, axis=1) - pr; k = np.minimum(k, np.clip((d - near) / fade, 0, 1))
+    k = np.convolve(np.r_[k[-15:], k, k[:15]], np.ones(31) / 31, 'valid')     # smooth the fade
+    Q = P + _normals(P) * (depth * wv * k)[:, None]
+    return _relax(_resample(Q, .8), .3, 2)
