@@ -1,0 +1,118 @@
+/* Oyster Therapeutics: the SELFTAC 3D scroll story, extracted from the Science page of Website v2.
+   One pinned full-screen 3D stage that the scroll scrubs through seven beats, a short line of copy for
+   each beat, a pearl rail at the bottom and an end card. The stage sets its own colours from the palette
+   on <html data-palette="...">: nacre (default), tidepool, pearlink, shellcoral, abyssmint, charcoalviolet.
+   Fonts: Archivo, IBM Plex Mono and Newsreader from Google Fonts (see index.html). */
+
+/* ---------- palettes ---------- */
+:root {
+  --ink: #2B2230; --muted: #65586A; --accent: #8C5572; --line: rgba(43, 34, 48, .16); --paper: #EFE6E1;
+  --sky-a: #F6EEEC; --sky-b: #E3D3D8; --pearl: #C99BB0;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+:root { --clasp: #D9A443; --band: #F6EFEC; --card: rgba(255, 255, 255, .55); }
+:root { --ease: cubic-bezier(.2, .7, .2, 1); --spring: cubic-bezier(.34, 1.56, .64, 1); }
+:root[data-palette="tidepool"] { --pearl: #F2B84B; --ink: #EAF3EF; --muted: #B6D3CB; --accent: #F2B84B; --line: rgba(234, 243, 239, .18); --paper: #0F4C4A; color-scheme: dark; }
+:root[data-palette="tidepool"] { --clasp: #F27D62; --band: #0C4341; --card: rgba(255, 255, 255, .06); }
+:root[data-palette="pearlink"] { --ink: #EDE8E0; --muted: #B3ACB8; --accent: #D8B98A; --paper: #1D1A22; --band: #18151D; --pearl: #EDE8E0; --clasp: #D8B98A; --line: rgba(237, 232, 224, .16); --card: rgba(255, 255, 255, .05); color-scheme: dark; }
+:root[data-palette="shellcoral"] { --ink: #2A1410; --muted: #6B5446; --accent: #2F6B5E; --paper: #F3E3CF; --band: #F8EDDF; --pearl: #E26D5A; --clasp: #E26D5A; --line: rgba(42, 20, 16, .16); --card: rgba(255, 255, 255, .5); color-scheme: light; }
+:root[data-palette="abyssmint"] { --ink: #E9F5F0; --muted: #A9C9C0; --accent: #9FF0D0; --paper: #0E2B2A; --band: #0B2423; --pearl: #9FF0D0; --clasp: #9FF0D0; --line: rgba(233, 245, 240, .16); --card: rgba(255, 255, 255, .05); color-scheme: dark; }
+:root[data-palette="charcoalviolet"] { --ink: #EEEAF6; --muted: #ADA6BD; --accent: #A08BFF; --paper: #1A1820; --band: #16141B; --pearl: #7B5CFF; --clasp: #7B5CFF; --line: rgba(238, 234, 246, .16); --card: rgba(255, 255, 255, .05); color-scheme: dark; }
+
+/* ---------- the story ---------- */
+.story { position: relative; height: 1650vh; }
+.stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: radial-gradient(130% 120% at 68% 28%, var(--sky-a) 0%, var(--sky-b) 100%); }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.copy { position: absolute; left: clamp(16px, 4vw, 64px); top: 50%; transform: translateY(-50%); width: min(30vw, 430px); z-index: 2; }
+.beat { position: absolute; left: 0; top: 0; transform: translateY(-50%); opacity: 0; transition: none; }
+.beat .k { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.beat h1, .beat h2 { font: 500 clamp(30px, 3.2vw, 50px)/1.04 var(--serif); letter-spacing: -.015em; margin: 14px 0 0; text-wrap: balance; }
+.beat p { margin: 16px 0 0; color: var(--muted); font-size: clamp(15px, 1.15vw, 18px); max-width: 34ch; }
+.rail { position: absolute; left: clamp(16px, 3vw, 40px); right: clamp(16px, 3vw, 40px); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: 3fr 3fr 4fr 4fr 4fr 3fr 3fr; gap: 6px; z-index: 3; }
+.rail div { display: grid; gap: 8px; }
+.rail span { font: 500 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rail i { display: block; height: 2px; background: var(--line); position: relative; overflow: hidden; }
+.rail i b { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(var(--f, 0)); }
+.hint { position: absolute; left: 50%; bottom: 70px; transform: translateX(-50%); font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); z-index: 2; transition: opacity .5s; }
+.end { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 28px; text-align: center; z-index: 2; opacity: 0; pointer-events: none; }
+.end .lt { width: min(54vw, 760px); height: auto; color: var(--ink); }
+.end p { margin: 0; font: 400 clamp(18px, 1.5vw, 22px)/1.4 var(--serif); color: var(--muted); }
+.end a { pointer-events: auto; font: 500 14px/1 var(--sans); color: var(--paper); background: var(--ink); padding: 14px 20px; border-radius: 999px; text-decoration: none; }
+.end a:hover { background: var(--accent); }
+.end a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.sr-only { position: absolute; left: -9999px; } .sr-only:focus { left: 16px; top: 16px; z-index: 20; background: var(--paper); padding: 10px 14px; border-radius: 8px; }
+.nogl { position: absolute; inset: 0; display: grid; place-items: center; padding: 40px; text-align: center; font: 400 15px/1.5 var(--sans); color: var(--muted); }
+.rail div { grid-template-columns: 12px 1fr; column-gap: 6px; row-gap: 8px; align-items: center; }
+.rail span { grid-column: 1 / -1; }
+.rail div::before { content: ""; width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; border: 1.5px solid color-mix(in srgb, var(--ink) 45%, transparent); background: transparent; transition: background-color .3s, border-color .3s, box-shadow .3s; }
+.rail div.on::before { background: #fff; border-color: var(--ink); }
+.rail div:nth-child(5)::before { width: 14px; height: 14px; }
+.rail div:nth-child(5).on::before { background: var(--clasp); box-shadow: 0 0 0 5px color-mix(in srgb, var(--clasp) 28%, transparent); }
+.rail i { height: 2px; }
+.hint { display: grid; justify-items: center; gap: 10px; bottom: 76px; font-size: 12px; color: var(--ink); }
+.hint i { width: 22px; height: 34px; border: 1.5px solid var(--ink); border-radius: 12px; position: relative; }
+.hint i::after { content: ""; position: absolute; left: 50%; top: 7px; width: 4px; height: 7px; margin-left: -2px; border-radius: 2px; background: var(--clasp); animation: wheel 1.8s ease-in-out infinite; }
+@keyframes wheel { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 0; } }
+.skip { position: absolute; right: clamp(16px, 3vw, 40px); bottom: 76px; z-index: 4; display: inline-flex; align-items: center; gap: 8px; font: 500 13px/1 var(--sans); color: var(--ink); text-decoration: none;
+  padding: 11px 16px; border-radius: 999px; border: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 70%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: opacity .4s, background-color .3s; }
+.skip svg { width: 13px; height: 13px; }
+.skip:hover { background: var(--clasp); color: #2B2230; border-color: var(--clasp); }
+.skip:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.skip.gone { opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .hint i::after { animation: none; } }
+.end a { transition: transform .3s var(--spring), background-color .25s; }
+.end a:hover { transform: translateY(-2px); }
+.skip { transition: opacity .4s, background-color .3s, transform .3s var(--spring); }
+.skip:hover { transform: translateY(2px); }
+
+/* ---------- the load-in: the fan mark breathes while the molecules load, then its pearl flies to the clasp ---------- */
+.loader { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; background: radial-gradient(130% 120% at 68% 28%, var(--sky-a) 0%, var(--sky-b) 100%); transition: opacity .9s var(--ease), visibility 0s .9s; }
+.loader .fm { width: clamp(72px, 8vw, 112px); color: var(--ink); animation: breatheMark 2.4s ease-in-out infinite; }
+.loader span { position: absolute; left: 50%; top: calc(50% + clamp(56px, 6vw, 84px)); transform: translateX(-50%); font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.stage.ready .loader { opacity: 0; visibility: hidden; }
+@media (min-width: 761px) { .loader { padding-left: 34vw; } .loader span { left: calc(50% + 17vw); } }
+/* phones: the mark waits where the clasp will appear (about 40% down, above the copy card), so its pearl only has a short way to go */
+@media (max-width: 760px) { .loader { place-items: start center; padding-top: calc(40svh - 44px); } .loader .fm { width: 88px; } .loader span { top: calc(40svh + 60px); } }
+@keyframes breatheMark { 50% { transform: scale(1.06); opacity: .82; } }
+/* the load-in: the shell shrinks away while its pearl (a separate element, .lpearl) flies to the clasp */
+.stage.ready .loader .fm { animation: none; transform: scale(.82); opacity: 0; transition: transform .8s var(--ease), opacity .6s; }
+.loader .fm .pearl { transition: opacity .2s; }
+.lpearl { position: absolute; z-index: 2; border-radius: 50%; pointer-events: none; will-change: transform, opacity;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--clasp) 22%, transparent), 0 0 22px color-mix(in srgb, var(--clasp) 50%, transparent); }
+
+/* ---------- the fan mark in the loader and the end card's logotype (shown open, pearl in) ---------- */
+.fm { display: block; height: auto; overflow: visible; }
+.lid, .lidf, .hole, .fm .pearl, .lt .pearl { transform-box: fill-box; }
+.lid, .lidf { transform-origin: 50% 77%; }
+.hole, .fm .pearl, .lt .pearl { transform-origin: 50% 50%; }
+/* opening (and at rest): the closed lid folds up, then the open lid springs back, then the pearl */
+.lidf { transform: scaleY(0); transition: transform .18s cubic-bezier(.5, 0, .9, .5); }
+.lid { transition: transform .5s var(--spring) .18s; }
+.hole, .fm .pearl, .lt .pearl { transition: transform .4s var(--spring) .26s; }
+
+/* ---------- phones: a portrait cut. The scene is framed above the copy, the copy sits on a soft card low
+   on the screen, the rail keeps only its pearls and the scroll cue moves up ---------- */
+@media (max-width: 760px) {
+  .story { height: 1300vh; }
+  .copy { left: 12px; right: 12px; width: auto; top: auto; bottom: calc(52px + env(safe-area-inset-bottom, 0px)); transform: none; }
+  .beat { top: auto; bottom: 0; right: 0; transform: none !important; padding: 16px 18px 18px; border-radius: 18px;
+    background: color-mix(in srgb, var(--paper) 84%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .beat h2 { font-size: 25px; margin-top: 10px; }
+  .beat p { font-size: 15px; margin-top: 10px; }
+  .rail { bottom: 20px; }
+  .rail span { display: none; }
+  .hint { top: calc(118px + env(safe-area-inset-top, 0px)); bottom: auto; grid-auto-flow: column; align-items: center; gap: 10px; font-size: 11px; }
+  .hint span { white-space: nowrap; }
+  .hint i { width: 16px; height: 24px; border-radius: 9px; flex: none; }
+  .hint i::after { top: 5px; width: 3px; height: 5px; margin-left: -1.5px; }
+  .skip { top: 70px; bottom: auto; right: 12px; padding: 9px 13px; font-size: 12px; }
+  .end .lt { width: 86vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader .fm { animation: none; }
+  .skip, .end a, .lid, .lidf, .hole, .fm .pearl, .lt .pearl { transition: none !important; }
+  .skip:hover, .end a:hover { transform: none; }
+}
