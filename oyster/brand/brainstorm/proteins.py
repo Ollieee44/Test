@@ -149,3 +149,72 @@ CONCEPTS = [
      'The lid tilted further and the two proteins brought together on the left, so the hinge and the gaping mouth read clearly.',
      'The most oyster: the shape of a shell opening on its pearl.'),
 ]
+
+# ---- Round eight: docked. 02's pure outlines brought together until their facing surfaces fit each other, a
+# constant gap apart, as docked proteins do; the backs keep their traced shapes.
+
+def _resample(p, step=.8):
+    q = np.vstack([p, p[:1]]); s = np.r_[0, np.cumsum(np.linalg.norm(np.diff(q, axis=0), axis=1))]
+    t = np.arange(0, s[-1], step)
+    return np.stack([np.interp(t, s, q[:, 0]), np.interp(t, s, q[:, 1])], 1)
+
+def _inside(P, q):
+    a, b = P, np.roll(P, -1, 0); x, y = q[:, :1], q[:, 1:]
+    c = (a[None, :, 1] > y) != (b[None, :, 1] > y)
+    xi = a[None, :, 0] + (y - a[None, :, 1]) * (b[None, :, 0] - a[None, :, 0]) / (b[None, :, 1] - a[None, :, 1] + 1e-12)
+    return ((c & (x < xi)).sum(1) % 2) == 1
+
+def _nearest(P, q):
+    """Nearest point on polygon P's edge to each point of q."""
+    a, b = P, np.roll(P, -1, 0); ab = b - a
+    t = np.clip(((q[:, None] - a[None]) * ab[None]).sum(-1) / ((ab * ab).sum(-1)[None] + 1e-12), 0, 1)
+    n = a[None] + t[..., None] * ab[None]; d = np.linalg.norm(q[:, None] - n, axis=-1); k = d.argmin(1)
+    return n[np.arange(len(q)), k], d[np.arange(len(q)), k]
+
+def _clear(p, other, gap, share=.5):
+    """Move p's points that are inside `other` or nearer than gap to it out to exactly gap (by `share` of the way)."""
+    n, d = _nearest(other, p); ins = _inside(other, p)
+    bad = ins | (d < gap)
+    if not bad.any(): return p, 0
+    v = np.where(ins[:, None], n - p, p - n); v /= np.maximum(np.linalg.norm(v, axis=1, keepdims=True), 1e-9)
+    target = n + v * gap
+    p = p.copy(); p[bad] += (target[bad] - p[bad]) * share
+    return p, bad.sum()
+
+def _relax(p, k=.35, n=2):
+    for _ in range(n): p = p + k * ((np.roll(p, 1, 0) + np.roll(p, -1, 0)) / 2 - p)
+    return p
+
+def dock(lid_pts, cup_pts, pc, pr, gap, iters=80, w=0.0):
+    """Resolve the overlap: both proteins give way equally to each other, and fully to the pearl, until every
+    point is at least `gap` from the other protein and from the pearl; lightly smoothed as it goes."""
+    L, C = _resample(lid_pts), _resample(cup_pts)
+    pg = gap + w / 2; gap = gap + w          # gaps measured between the drawn lines' edges
+    for i in range(iters):
+        L2, nl = _clear(L, C, gap, .5); C2, nc = _clear(C, L, gap, .5)
+        L, C = push_out(L2, pc, pr + pg), push_out(C2, pc, pr + pg)
+        if i % 4 == 3: L, C = _relax(L, .3, 1), _relax(C, .3, 1)
+        if i > 20 and nl + nc == 0: break
+    # a last pass so the gap holds exactly after smoothing
+    for _ in range(6):
+        L, _ = _clear(L, C, gap, .5); C, _ = _clear(C, L, gap, .5)
+        L, C = push_out(L, pc, pr + pg), push_out(C, pc, pr + pg)
+    return _resample(L, 1.0), _resample(C, 1.0)
+
+def docked(ns, split=False, pose=0, overlap=8, gap=2.6, pr=11, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6),
+           w=3.0, flip_lid=True, flip_cup=False, pearl='halves', hinge=4):
+    """02 docked: the lid and cup placed `overlap` units into each other, then resolved to fit with a `gap`."""
+    pc = np.array([54.0, 52.0])
+    lk, lw, lh, lt = lid; ck, cw, ch, ct = cup
+    def place(key, box, rot, flip):
+        v = POSES[pose][key]; tf = _frame(v['outer'], box[2], box[3], rot, np.array(box[:2]), flip)
+        return tf(smooth(v['outer']))
+    L0 = place(lk, (pc[0] - hinge, pc[1] - lh * .5 - pr * .35 + overlap / 2, lw, lh), lt, flip_lid)
+    C0 = place(ck, (pc[0] - hinge, pc[1] + ch * .5 + pr * .2 - overlap / 2, cw, ch), ct, flip_cup)
+    L, C = dock(L0, C0, pc, pr, gap, w=w)
+    g = 5 if split else 0
+    path = lambda P, dy: f'<path d="M{" L".join(f"{f(x)} {f(y + dy)}" for x, y in P)} Z" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>'
+    return path(L, -g) + path(C, g) + pearl_molecule(pc, pr, split, pearl)
+
+def DV(**kw):
+    fn = lambda ns, split=False: docked(ns, split, **kw); fn.kw = kw; return fn

@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62;--pearl:#F2B84B'}
@@ -107,8 +107,17 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND7:
+OUT = 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND8:
+    import proteins as R7
+    TITLE, EYEBROW, H1 = 'Oyster Docked Shell', 'brandmark brainstorm, round eight', 'Docked'
+    LEDE = ('<p class="lede"><b>Round seven&rsquo;s 02, with the proteins brought together.</b> BRD4 (the lid) and VHL (the cup) now fit each other: '
+            'their facing surfaces are reshaped to follow one another an even gap apart, as docked proteins do, with the same gap round the pearl. '
+            'Their backs keep the shapes traced from PDB 5T35, so they still read as protein outlines. The variations change how far they dock, '
+            'the gap, the view and the mouth. Structures: PDB 5T35, Gadd et al., Nat. Chem. Biol. 2017; the degrader is drawn generically.</p>')
+    REF = ('<div class="ref"><span class="lab">From round seven</span><div class="refrow">'
+           f'<div class="tile" style="{PAL["nacre"]}">{mark(R7.CONCEPTS[1][3], "r7p")}</div><span>02 Pure outline</span></div></div>')
+elif ROUND7:
     TITLE, EYEBROW, H1, REF = 'Oyster Protein Shell', 'brandmark brainstorm, round seven', 'The shell is the complex', ''
     LEDE = ('<p class="lede"><b>Each half of the oyster is a protein from PDB 5T35, and the pearl is the SELFTAC.</b> BRD4, the target, is the lid; '
             'VHL, the ligase, is the cup. Their outlines are traced from the structure and smoothed into blobs, and where they meet the pearl '
