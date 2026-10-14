@@ -356,3 +356,63 @@ CONCEPTS9 = [
      'Layered, turned further, close to 45 degrees.',
      'The most dynamic angle; the pair reads as a single rounded form.'),
 ]
+
+# ---- Round ten: round nine's 02, rounder at the right, with the pearl split along the seam and a short, thick
+# linker cut out of it.
+
+def round_right(L, C, amount, pc, pr, gap, w, start=.45):
+    """Smooth the pair progressively more toward the right (the mouth), then restore the even gap."""
+    if amount <= 0: return L, C
+    allp = np.vstack([L, C]); x0, x1 = allp[:, 0].min(), allp[:, 0].max(); xs = x1 - start * (x1 - x0)
+    def sm(P):
+        wt = np.clip((P[:, 0] - xs) / (x1 - xs), 0, 1) ** 1.2 * amount
+        for _ in range(int(60 * amount) + 10):
+            P = P + .5 * wt[:, None] * ((np.roll(P, 1, 0) + np.roll(P, -1, 0)) / 2 - P)
+        return _resample(P, 1.0)
+    L, C = sm(L), sm(C)
+    pg, g = gap + w / 2, gap + w
+    for _ in range(30):
+        L, _ = _clear(L, C, g, .5); C, _ = _clear(C, L, g, .5)
+        L, C = push_out(L, pc, pr + pg), push_out(C, pc, pr + pg)
+    return _resample(L, 1.0), _resample(C, 1.0)
+
+def pearl_linker(c, r, angle, split, link=(.62, .34), seam=.09, ns='p'):
+    """The pearl split along the shell's seam into two halves, one by each protein, held by a short, thick linker
+    cut out of it as negative space across the split. link = (length, thickness) as fractions of the radius."""
+    ll, lw = link[0] * r, link[1] * r; hg = seam * r; g = 4 if split else 0
+    m = (f'<mask id="{ns}" maskUnits="userSpaceOnUse" x="{f(c[0] - 2 * r)}" y="{f(c[1] - 2 * r)}" width="{f(4 * r)}" height="{f(4 * r)}">'
+         f'<rect x="{f(c[0] - 2 * r)}" y="{f(c[1] - 2 * r)}" width="{f(4 * r)}" height="{f(4 * r)}" fill="#fff"/>'
+         f'<rect x="{f(c[0] - 2 * r)}" y="{f(c[1] - hg / 2)}" width="{f(4 * r)}" height="{f(hg)}" fill="#000"/>'
+         f'<rect x="{f(c[0] - lw / 2)}" y="{f(c[1] - ll / 2)}" width="{f(lw)}" height="{f(ll)}" rx="{f(lw / 2)}" fill="#000"/></mask>')
+    halves = (f'<g transform="translate(0 {-g})"><path d="M{f(c[0] - r)} {f(c[1])} A {f(r)} {f(r)} 0 0 1 {f(c[0] + r)} {f(c[1])} Z" style="fill:var(--pearl)" mask="url(#{ns})"/></g>'
+              f'<g transform="translate(0 {g})"><path d="M{f(c[0] - r)} {f(c[1])} A {f(r)} {f(r)} 0 0 0 {f(c[0] + r)} {f(c[1])} Z" style="fill:var(--pearl)" mask="url(#{ns})"/></g>')
+    return f'<g transform="rotate({angle} {f(c[0])} {f(c[1])})">{m}{halves}</g>'
+
+def textured2(ns, split=False, angle=-32, rnd=.6, link=(.7, .44), seam=.09, gap=1.8, overlap=14, pose=0, w=3.0, light=(-1, -1)):
+    """Round nine's 02 (diagonal, shaded) with a rounder right side and the linker pearl."""
+    L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w)
+    a = math.radians(angle); R = np.array([[math.cos(a), -math.sin(a)], [math.sin(a), math.cos(a)]])
+    L, C = (L - pc) @ R.T + 50, (C - pc) @ R.T + 50
+    L, C = round_right(L, C, rnd, np.array([50.0, 50.0]), 11, gap, w)     # the right as you see it
+    allp = np.vstack([L, C]); lo, hi = allp.min(0) - w, allp.max(0) + w
+    sc = min(1.0, 92 / max(hi - lo)); mid = (lo + hi) / 2
+    fit = lambda P: (np.asarray(P) - mid) * sc + 50
+    L, C = fit(L), fit(C); c0 = fit(np.array([50.0, 50.0])); pr_ = 11 * sc
+    seam_n = R @ np.array([0, 1.0]); g = 5 if split else 0
+    lt = np.array(light, float); lt /= np.linalg.norm(lt)
+    body = ''
+    for P, s, nm in ((L, -1, 'a'), (C, 1, 'b')):
+        out = ''
+        for k, d in enumerate((3.8, 7.6, 11.4)):
+            Q = inset(P, d)
+            if Q is None: continue
+            n = _normals(Q); dot = (n * lt).sum(1)
+            for run in _runs(Q, dot < (-.15 + .25 * k)):
+                out += f'<polyline points="{PT(run)}" fill="none" stroke="currentColor" stroke-width="{w * (.5 - .09 * k):.2f}" stroke-linecap="round" stroke-linejoin="round"/>'
+        off = seam_n * g * s
+        body += (f'<g transform="translate({f(off[0])} {f(off[1])})"><path d="{_d(P)}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>'
+                 f'<clipPath id="{ns}{nm}"><path d="{_d(P)}"/></clipPath><g clip-path="url(#{ns}{nm})">{out}</g></g>')
+    return body + pearl_linker(c0, pr_, angle, split, link, seam, ns + 'p')
+
+def TV2(**kw):
+    fn = lambda ns, split=False: textured2(ns, split, **kw); fn.kw = kw; return fn

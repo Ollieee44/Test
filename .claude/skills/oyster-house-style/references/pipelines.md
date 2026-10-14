@@ -96,6 +96,7 @@ URL, so the client's link stays the same:
 | Brandmark brainstorm round seven, protein valves from 5T35 with the SELFTAC pearl (`brand/proteins.html`, built by `brand/brainstorm/build_brainstorm.py proteins`; `proteins.py` reads `editorial/5t35/5t35_poses.json`) | https://claude.ai/artifact/JxgwJ1tKUCo2XecZxJvSmv |
 | Brandmark brainstorm round eight, docked protein valves (`brand/docked.html`, built by `brand/brainstorm/build_brainstorm.py docked`; docking in `proteins.dock()`) | https://claude.ai/artifact/PW8G9QVY93bryREZNDghwp |
 | Brandmark brainstorm round nine, the docked shell on a diagonal with texture (`brand/textured.html`, built by `brand/brainstorm/build_brainstorm.py textured`; `proteins.textured()`, needs scipy, scikit-image, matplotlib) | https://claude.ai/artifact/D27YLdt2DpfofFJYqnMetM |
+| Brandmark brainstorm round ten, rounded shell with the linker pearl (`brand/rounded.html`, built by `brand/brainstorm/build_brainstorm.py rounded`; `proteins.textured2()`) | https://claude.ai/artifact/MM1h6xdHfR4F16BMn5XhuD |
 | **Mark catalogue, every mark numbered** (`brand/catalogue.html`, rebuild with `build_catalogue.py` after adding marks) | https://claude.ai/artifact/AJUpcjMJuGVzcQt5ZAfNrK |
 
 The deck is delivered as a file (send it to the user), not an artifact. Commit and push after each

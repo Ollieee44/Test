@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62;--pearl:#F2B84B'}
@@ -107,8 +107,17 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND9:
+OUT = 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND10:
+    import textured as R9
+    TITLE, EYEBROW, H1 = 'Oyster Rounded Shell', 'brandmark brainstorm, round ten', 'Rounded, with the linker pearl'
+    LEDE = ('<p class="lede"><b>Round nine&rsquo;s 02, with three changes.</b> The right side is rounded off (smoothed more the further right, then '
+            're-fitted so the gap between the proteins stays even). The pearl is turned so it splits along the same line as the shell, one half '
+            'by BRD4 and one by VHL. And the halves are held by a short, thick linker, cut out of the pearl as negative space. The variations '
+            'try how round, and the linker&rsquo;s proportions. Structures: PDB 5T35, Gadd et al., Nat. Chem. Biol. 2017; the degrader is drawn generically.</p>')
+    REF = ('<div class="ref"><span class="lab">From round nine</span><div class="refrow">'
+           f'<div class="tile" style="{PAL["nacre"]}">{mark(R9.CONCEPTS[1][3], "r9s")}</div><span>02 Diagonal, shaded</span></div></div>')
+elif ROUND9:
     import docked as R8
     TITLE, EYEBROW, H1 = 'Oyster Textured Shell', 'brandmark brainstorm, round nine', 'Diagonal, with depth'
     LEDE = ('<p class="lede"><b>Round eight&rsquo;s 04, turned and given depth.</b> The docked pair, BRD4 and VHL fitted to each other with a hairline '
