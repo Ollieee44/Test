@@ -552,6 +552,13 @@ def molecular(P, r=3.2, seed=0, vary=.28, res=.2, soften=0.0, spacing=1.15, sink
 
 def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.8, pose=0, reach=16.0,
                  link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None, soften=0.0, lumps=0, tint=False, spacing=1.15, sink=.9, waves=None, island=None):
+    gk = repr((angle, bump, overlap, gap, w, pose, reach, pr, lid, cup, balance, blob, soften, spacing, sink, waves))
+    if gk in _GEOM_CACHE: L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit = _GEOM_CACHE[gk]
+    else: L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit = _GEOM_CACHE.setdefault(gk, _two_geom(angle, bump, overlap, gap, w, pose, reach, pr, lid, cup, balance, blob, soften, spacing, sink, waves))
+    return _two_draw(ns, split, L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit, w, pose, link, seam, contour, angle, fill, lumps, tint, island)
+
+_GEOM_CACHE = {}
+def _two_geom(angle, bump, overlap, gap, w, pose, reach, pr, lid, cup, balance, blob, soften, spacing, sink, waves):
     L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w, lid=lid, cup=cup, balance=balance, blob=blob)
     if reach > 0: L, C = close_mouth(L, C, reach, gap=gap, w=w, pc=pc, pr=pr)
     if bump > 0:
@@ -572,8 +579,16 @@ def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.
     sc = min(1.0, 92 / max(hi - lo)); mid = (lo + hi) / 2
     fit = lambda P: (np.asarray(P) - mid) * sc + 50
     L, C = fit(L), fit(C); c0 = fit(np.zeros(2)); pr_ = pr * sc
-    seam_n = Rm @ np.array([0, 1.0]); g = 5 if split else 0
+    seam_n = Rm @ np.array([0, 1.0])
+    return L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit
+
+def _two_draw(ns, split, L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit, w, pose, link, seam, contour, angle, fill, lumps, tint, island):
+    g = 5 if split else 0
     body = ''
+    if fill and fill.startswith('mono:'):   # one colour (currentColor), the pearl too: for overlays
+        for P, key in ((L, 'target'), (C, 'e3')):
+            body += _mono(P, key, fill[5:], ns + key[0], w, island)
+        return f'<g style="--pearl:currentColor">{body}{pearl_linker(c0, pr_, angle, split, link, seam, ns + "p")}</g>'
     for P, key, tf, s, nm in ((L, 'target', tl, -1, 'a'), (C, 'e3', tc, 1, 'b')):
         inner = ''
         if contour:   # one real surface contour from the trace, as a quiet interior line
@@ -798,3 +813,30 @@ def _island(P, spec, w):
         if best is not None:
             out += f'<path d="{_d(_relax(_resample(best, .5), .4, 2))}" fill="none" style="stroke:var(--ring)" stroke-width="{w * .36:.2f}" stroke-linejoin="round" opacity=".55"/>'
     return out
+
+
+# ---- Round twenty: one-colour versions for laying over photographs. Everything in currentColor on a clear ground.
+
+def _mono(P, key, style, ns, w, island=None):
+    """A protein in one colour. 'line': the outline alone. 'contour': the outline with the contour rings (and the
+    island) as hairlines. 'solid': a silhouette, the island cut out of it. 'cut': a silhouette with the contour rings
+    and island cut out of it. 'duo': BRD4 as 'solid', VHL as 'line', so the two proteins differ."""
+    import re as _re
+    if style == 'duo': style = 'solid' if key == 'target' else 'line'
+    d = _d(P); rings = []
+    for dd in (3.6, 7.2, 10.8, 14.4):
+        Q = inset(P, dd)
+        if Q is None: break
+        rings.append(_d(Q))
+    isl = _re.findall(r' d="([^"]+)"', _island(P, island, w)) if island and key == 'target' else []
+    line = f'<path d="{d}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>'
+    if style == 'line':
+        return line
+    if style == 'contour':
+        hl = ''.join(f'<path d="{q}" fill="none" stroke="currentColor" stroke-width="{w * .3:.2f}" stroke-linejoin="round"/>' for q in rings + isl)
+        return f'<clipPath id="{ns}k"><path d="{d}"/></clipPath><g clip-path="url(#{ns}k)">{hl}</g>' + line
+    cuts = isl if style == 'solid' else rings + isl
+    cw = w * .5 if style == 'solid' else w * .42
+    m = (f'<mask id="{ns}m" maskUnits="userSpaceOnUse" x="-20" y="-20" width="140" height="140"><rect x="-20" y="-20" width="140" height="140" fill="#fff"/>'
+         + ''.join(f'<path d="{q}" fill="none" stroke="#000" stroke-width="{cw:.2f}" stroke-linejoin="round"/>' for q in cuts) + '</mask>')
+    return m + f'<path d="{d}" fill="currentColor" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round" mask="url(#{ns}m)"/>'

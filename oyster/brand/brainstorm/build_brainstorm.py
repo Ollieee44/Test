@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"; ROUND13 = C.__name__ == "blobby"; ROUND14 = C.__name__ == "filled"; ROUND15 = C.__name__ == "wavy"; ROUND16 = C.__name__ == "undulate"; ROUND17 = C.__name__ == "nacre"; ROUND18 = C.__name__ == "disc"; ROUND19 = C.__name__ == "island"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"; ROUND13 = C.__name__ == "blobby"; ROUND14 = C.__name__ == "filled"; ROUND15 = C.__name__ == "wavy"; ROUND16 = C.__name__ == "undulate"; ROUND17 = C.__name__ == "nacre"; ROUND18 = C.__name__ == "disc"; ROUND19 = C.__name__ == "island"; ROUND20 = C.__name__ == "mono"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0;--brd4:#E7C9D6;--vhl:#D6CBE6;--ring:#8C5572;--outline:#2B2230',
@@ -113,14 +113,27 @@ for key, num, name, fn, *rest in C.CONCEPTS:
         tiles = ''.join(f'<div class="tile sq" style="{st}" title="{p.title()}, {lab.lower()}">{mark(fn, f"{key}{p[0]}{int(split)}", split)}</div>' for p, st in PAL.items())
         states += f'<div class="state"><span class="lab">{lab}</span><div class="row">{tiles}</div></div>'
     small = ''.join(f'<div class="tile sm" style="{st}">' + ''.join(mark(fn, f'{key}{p[0]}s{px}', size=px, cls='px') for px in (16, 24, 32, 48)) + '</div>' for p, st in PAL.items())
+    ov = ''
+    if getattr(fn, 'overlay', False):   # the mark laid over stand-in images, in white or black, centred or as a corner bug
+        ov = ('<span class="lab">Over images: white on dark, black on light</span><div class="ovs">' + ''.join(
+            f'<div class="ov {bg}" title="{t}"><div class="om {pos}" style="color:{c}">{mark(fn, f"{key}o{i}")}</div><span>{t}</span></div>'
+            for i, (bg, pos, c, t) in enumerate((('sea', 'mid', '#fff', 'Deep water, centred'), ('cells', 'bug', '#fff', 'Microscopy, corner'),
+                                                  ('sand', 'mid', '#111', 'Light, centred'), ('dusk', 'bug', '#fff', 'Warm, corner')))) + '</div>')
     lk = lockup_xheight if hasattr(fn, 'kw') else lockup
     lock = ''.join(f'<div class="tile wide" style="{st}">{lk(fn, f"{key}{p[0]}L")}</div>' for p, st in PAL.items())
     cards += (f'<article class="card" id="c{num}"><header><b>{num}</b><h2>{name}</h2></header><p>{idea}</p>{f'<p class="why">{why}</p>' if why else ''}'
-              f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
+              f'<div class="states">{states}</div>{ov}<span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'island.html' if ROUND19 else 'disc.html' if ROUND18 else 'nacre.html' if ROUND17 else 'undulate.html' if ROUND16 else 'wavy.html' if ROUND15 else 'filled.html' if ROUND14 else 'blobby.html' if ROUND13 else 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND19:
+OUT = 'mono.html' if ROUND20 else 'island.html' if ROUND19 else 'disc.html' if ROUND18 else 'nacre.html' if ROUND17 else 'undulate.html' if ROUND16 else 'wavy.html' if ROUND15 else 'filled.html' if ROUND14 else 'blobby.html' if ROUND13 else 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND20:
+    TITLE, EYEBROW, H1, REF = 'Oyster Mono Marks', 'brandmark brainstorm, round twenty', 'One colour, for overlays', ''
+    LEDE = ('<p class="lede"><b>Round nineteen&rsquo;s 05, Model with the traced ring, pared back to one colour.</b> No fills, shading or '
+            'tints: each version is drawn in a single colour on a clear ground, so it can sit in white over a dark image or in black over a '
+            'light one, as a corner bug, a watermark or a centred stamp. Each is shown in both palettes, at small sizes, with the logotype, '
+            'and over four stand-in images. Clasped only. Structures: PDB 5T35, Gadd et al., Nat. Chem. Biol. 2017; the degrader is drawn '
+            'generically.</p>')
+elif ROUND19:
     TITLE, EYEBROW, H1, REF = 'Oyster Model Ring', 'brandmark brainstorm, round nineteen', 'Model, with a ring', ''
     LEDE = ('<p class="lede"><b>Round seventeen&rsquo;s 05, Model, with a small ring in the upper protein.</b> Toon shading and contour rings in '
             'the 3D story&rsquo;s colours, as before, plus a small closed ring at the deepest point of BRD4&rsquo;s left-hand lobe, like the '
@@ -313,6 +326,23 @@ h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.04; margin-top: 12px; }
 .grp h2 { font-size: clamp(26px, 2.8vw, 34px); }
 .grp p { color: var(--muted); max-width: 72ch; margin: 6px 0 0; }
 footer { margin-top: 40px; color: var(--muted); font-size: 13px; max-width: 80ch; }
+.ovs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ov { position: relative; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden; }
+.ov > span { position: absolute; left: 10px; bottom: 8px; font: 500 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+.ov.sand > span { color: rgba(0,0,0,.55); }
+.om { position: absolute; }
+.om.mid { width: 44%; aspect-ratio: 1; left: 28%; top: 16%; }
+.om.bug { width: 20%; aspect-ratio: 1; right: 5%; top: 6%; }
+.ov.sea { background: radial-gradient(120% 70% at 30% 0%, rgba(140,210,220,.55), transparent 60%), radial-gradient(60% 40% at 80% 90%, rgba(20,60,90,.9), transparent 70%),
+  repeating-linear-gradient(100deg, rgba(255,255,255,.05) 0 6px, transparent 6px 22px), linear-gradient(180deg, #2C7D8C, #0E3446 70%, #071C28); }
+.ov.cells { background: radial-gradient(14% 18% at 22% 30%, rgba(255,120,190,.75), transparent 70%), radial-gradient(10% 13% at 62% 58%, rgba(120,255,200,.6), transparent 70%),
+  radial-gradient(18% 22% at 80% 25%, rgba(190,120,255,.55), transparent 70%), radial-gradient(12% 15% at 40% 80%, rgba(255,160,220,.5), transparent 70%),
+  radial-gradient(9% 11% at 88% 78%, rgba(120,200,255,.5), transparent 70%), #120A1C; }
+.ov.sand { background: radial-gradient(90% 60% at 70% 20%, rgba(255,255,255,.8), transparent 60%), radial-gradient(70% 50% at 10% 100%, rgba(196,170,140,.6), transparent 70%),
+  repeating-radial-gradient(circle at 120% 120%, rgba(150,120,90,.08) 0 3px, transparent 3px 14px), linear-gradient(160deg, #F1E7DA, #D9C8B3); }
+.ov.dusk { background: radial-gradient(8% 10% at 20% 30%, rgba(255,230,170,.7), transparent 70%), radial-gradient(12% 15% at 70% 40%, rgba(255,180,120,.45), transparent 70%),
+  radial-gradient(6% 8% at 45% 70%, rgba(255,240,200,.6), transparent 70%), radial-gradient(10% 13% at 85% 75%, rgba(255,150,100,.4), transparent 70%),
+  linear-gradient(200deg, #7A3B2E, #3A1B24 60%, #1C0E14); }
 code { font-family: var(--mono); font-size: .92em; }
 '''
 html = f'''<!doctype html>
