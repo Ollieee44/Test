@@ -536,7 +536,7 @@ def molecular(P, r=3.2, seed=0, vary=.28, res=.2):
     return _resample(Q, .6)
 
 def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.8, pose=0, reach=16.0,
-                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None):
+                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None):
     L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w, lid=lid, cup=cup, balance=balance, blob=blob)
     if reach > 0: L, C = close_mouth(L, C, reach, gap=gap, w=w, pc=pc, pr=pr)
     if bump > 0:
@@ -561,8 +561,46 @@ def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.
             inner = (f'<clipPath id="{ns}{nm}"><path d="{_d(inset(P, 3) if inset(P, 3) is not None else P)}"/></clipPath>'
                      f'<g clip-path="url(#{ns}{nm})"><path d="{_d(q)}" fill="none" stroke="currentColor" stroke-width="{w * .45:.2f}" stroke-linejoin="round"/></g>')
         off = seam_n * g * s
+        if fill:
+            body += f'<g transform="translate({f(off[0])} {f(off[1])})">' + _filled(P, key, fill, ns + nm, w) + '</g>'
+            continue
         body += (f'<g transform="translate({f(off[0])} {f(off[1])})"><path d="{_d(P)}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>{inner}</g>')
     return body + pearl_linker(c0, pr_, angle, split, link, seam, ns + 'p')
+
+def _filled(P, key, style, ns, w, light=(-1, -1)):
+    """A protein filled in the 3D story's colours (var(--brd4) / var(--vhl)) with an ink outline (var(--outline)),
+    and depth by style: 'flat'; 'rings' (contour rings at even depths, in var(--ring), as on the 3D models);
+    'toon' (a lit band and a shade band, cut by the shape shifted toward and away from the light); 'soft' (a
+    radial gradient lit from the top left); 'model' (toon plus rings: closest to the 3D story)."""
+    col = 'var(--brd4)' if key == 'target' else 'var(--vhl)'
+    shade = f'color-mix(in srgb, {col} 72%, var(--outline))'; lit = f'color-mix(in srgb, {col} 55%, #fff)'
+    lt = np.array(light, float); lt /= np.linalg.norm(lt)
+    d = _d(P); clip = f'<clipPath id="{ns}k"><path d="{d}"/></clipPath>'
+    out = clip
+    if style in ('toon', 'model'):
+        a, b = -lt * 5.5, lt * 2.6            # shade on the far side, a thin lit band on the near side
+        out += (f'<g clip-path="url(#{ns}k)"><path d="{d}" style="fill:{shade}"/>'
+                f'<path d="{d}" transform="translate({f(a[0])} {f(a[1])})" style="fill:{col}"/>'
+                f'<path d="{d}" transform="translate({f(b[0])} {f(b[1])})" style="fill:{col}" opacity="0"/></g>')
+        # the lit band: the shape minus itself shifted away from the light
+        out += (f'<mask id="{ns}m" maskUnits="userSpaceOnUse" x="-20" y="-20" width="140" height="140"><rect x="-20" y="-20" width="140" height="140" fill="#fff"/>'
+                f'<path d="{d}" transform="translate({f(-lt[0] * 2.4)} {f(-lt[1] * 2.4)})" fill="#000"/></mask>'
+                f'<g clip-path="url(#{ns}k)"><path d="{d}" style="fill:{lit}" mask="url(#{ns}m)" opacity=".85"/></g>')
+    elif style in ('soft', 'softrings'):
+        c = P.mean(0); r = np.ptp(P, 0).max() * .75; fx, fy = c + lt * r * .45
+        out += (f'<radialGradient id="{ns}g" gradientUnits="userSpaceOnUse" cx="{f(fx)}" cy="{f(fy)}" r="{f(r)}">'
+                f'<stop offset="0" style="stop-color:{lit}"/><stop offset=".55" style="stop-color:{col}"/><stop offset="1" style="stop-color:{shade}"/></radialGradient>'
+                f'<path d="{d}" fill="url(#{ns}g)"/>')
+    else:
+        out += f'<path d="{d}" style="fill:{col}"/>'
+    if style in ('rings', 'model', 'softrings'):
+        rings = ''
+        for k, dd in enumerate((3.6, 7.2, 10.8, 14.4)):
+            Q = inset(P, dd)
+            if Q is None: break
+            rings += f'<path d="{_d(Q)}" fill="none" style="stroke:var(--ring)" stroke-width="{w * (.42 - .05 * k):.2f}" stroke-linejoin="round" opacity=".55"/>'
+        out += f'<g clip-path="url(#{ns}k)">{rings}</g>'
+    return out + f'<path d="{d}" fill="none" style="stroke:var(--outline)" stroke-width="{w}" stroke-linejoin="round"/>'
 
 _TP_CACHE = {}
 def TP(**kw):
