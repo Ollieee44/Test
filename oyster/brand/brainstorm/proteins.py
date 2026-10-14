@@ -516,7 +516,7 @@ def close_mouth(L, C, reach=16.0, iters=60, gap=1.8, w=3.0, pc=None, pr=11.0, re
         if relax and i % 6 == 5: L, C = _relax(_resample(L, .8), .25, 1), _relax(_resample(C, .8), .25, 1)
     return _resample(L, .8) if relax else L, _resample(C, .8) if relax else C
 
-def molecular(P, r=3.2, seed=0, vary=.28, res=.2):
+def molecular(P, r=3.2, seed=0, vary=.28, res=.2, soften=0.0, spacing=1.15, sink=.9):
     """The outline redrawn as a molecular surface: the shape filled in, with round bumps of radius ~r set along
     its edge, and the silhouette of the lot traced back out (scalloped, as space-filling surfaces are)."""
     from matplotlib.path import Path as _MP
@@ -525,22 +525,26 @@ def molecular(P, r=3.2, seed=0, vary=.28, res=.2):
     lo = P.min(0) - 2 * r; hi = P.max(0) + 2 * r
     xs = np.arange(lo[0], hi[0], res); ys = np.arange(lo[1], hi[1], res); X, Y = np.meshgrid(xs, ys)
     pts = np.stack([X.ravel(), Y.ravel()], 1)
-    core = inset(P, r * .9)
+    core = inset(P, r * sink)
     field = _MP(core if core is not None else P).contains_points(pts).reshape(X.shape).astype(float)
-    ring = _resample(P if core is None else core, r * 1.15)
+    ring = _resample(P if core is None else core, r * spacing)
     for c in ring:
         rr = r * (1 + vary * (rng.random() - .5) * 2)
         field = np.maximum(field, ((X - c[0]) ** 2 + (Y - c[1]) ** 2 <= rr * rr).astype(float))
+    if soften > 0:   # blur the union before tracing: the lobes stay, the notches between them round into waves
+        from scipy.ndimage import gaussian_filter
+        field = gaussian_filter(field, soften / res)
     cs = measure.find_contours(field, .5); cc = max(cs, key=len)
     Q = np.stack([lo[0] + cc[:, 1] * res, lo[1] + cc[:, 0] * res], 1)
     return _resample(Q, .6)
 
 def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.8, pose=0, reach=16.0,
-                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None):
+                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None, soften=0.0, lumps=0, tint=False, spacing=1.15, sink=.9):
     L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w, lid=lid, cup=cup, balance=balance, blob=blob)
     if reach > 0: L, C = close_mouth(L, C, reach, gap=gap, w=w, pc=pc, pr=pr)
     if bump > 0:
-        L, C = molecular(L, bump, 1), molecular(C, bump, 2)
+        L, C = (molecular(L, bump, 1, soften=soften, spacing=spacing, sink=sink),
+                molecular(C, bump, 2, soften=soften, spacing=spacing, sink=sink))
         if reach > 0: L, C = close_mouth(L, C, max(8.0, bump * 3), 30, gap=gap, w=w, pc=pc, pr=pr, relax=False)   # re-dock after the bumps
     g2, pg = gap + w, gap + w / 2
     for _ in range(14):                                         # keep the gap and the pocket exact after the bumps
@@ -562,12 +566,12 @@ def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.
                      f'<g clip-path="url(#{ns}{nm})"><path d="{_d(q)}" fill="none" stroke="currentColor" stroke-width="{w * .45:.2f}" stroke-linejoin="round"/></g>')
         off = seam_n * g * s
         if fill:
-            body += f'<g transform="translate({f(off[0])} {f(off[1])})">' + _filled(P, key, fill, ns + nm, w) + '</g>'
+            body += f'<g transform="translate({f(off[0])} {f(off[1])})">' + _filled(P, key, fill, ns + nm, w, lumps=lumps, tint=tint, seed=3 if key == "target" else 7) + '</g>'
             continue
         body += (f'<g transform="translate({f(off[0])} {f(off[1])})"><path d="{_d(P)}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>{inner}</g>')
     return body + pearl_linker(c0, pr_, angle, split, link, seam, ns + 'p')
 
-def _filled(P, key, style, ns, w, light=(-1, -1)):
+def _filled(P, key, style, ns, w, light=(-1, -1), lumps=0, tint=False, seed=0):
     """A protein filled in the 3D story's colours (var(--brd4) / var(--vhl)) with an ink outline (var(--outline)),
     and depth by style: 'flat'; 'rings' (contour rings at even depths, in var(--ring), as on the 3D models);
     'toon' (a lit band and a shade band, cut by the shape shifted toward and away from the light); 'soft' (a
@@ -600,7 +604,37 @@ def _filled(P, key, style, ns, w, light=(-1, -1)):
             if Q is None: break
             rings += f'<path d="{_d(Q)}" fill="none" style="stroke:var(--ring)" stroke-width="{w * (.42 - .05 * k):.2f}" stroke-linejoin="round" opacity=".55"/>'
         out += f'<g clip-path="url(#{ns}k)">{rings}</g>'
-    return out + f'<path d="{d}" fill="none" style="stroke:var(--outline)" stroke-width="{w}" stroke-linejoin="round"/>'
+    if lumps:   # soft lumps inside, as in illustrated proteins: a few merged blobs traced as light lines
+        out += f'<g clip-path="url(#{ns}k)">' + _lumps(P, lumps, seed, col, w) + '</g>'
+    stroke = f'color-mix(in srgb, {col} 45%, var(--outline))' if tint else 'var(--outline)'
+    return out + f'<path d="{d}" fill="none" style="stroke:{stroke}" stroke-width="{w}" stroke-linejoin="round"/>'
+
+def _lumps(P, n, seed, col, w, res=.25):
+    """n soft lumps inside the shape: a metaball field of random blobs, traced at one level, drawn as lighter lines."""
+    from matplotlib.path import Path as _MP
+    from scipy.ndimage import gaussian_filter
+    from skimage import measure
+    rng = np.random.default_rng(seed)
+    core = inset(P, 5.0)
+    if core is None: return ''
+    lo = P.min(0) - 2; hi = P.max(0) + 2
+    xs = np.arange(lo[0], hi[0], res); ys = np.arange(lo[1], hi[1], res); X, Y = np.meshgrid(xs, ys)
+    path = _MP(core); pts = []
+    while len(pts) < n * 6:
+        q = lo + rng.random(2) * (hi - lo)
+        if path.contains_point(q): pts.append(q)
+    field = np.zeros_like(X)
+    for q in pts:
+        rr = 3.2 + rng.random() * 3.2
+        field += np.exp(-((X - q[0]) ** 2 + (Y - q[1]) ** 2) / (2 * rr * rr))
+    out = ''
+    light = f'color-mix(in srgb, {col} 40%, #fff)'; dark = f'color-mix(in srgb, {col} 80%, var(--outline))'
+    for lev, c_, op in ((.55, dark, .35), (1.05, light, .55)):
+        for cc in measure.find_contours(field, lev):
+            if len(cc) < 20: continue
+            Q = np.stack([lo[0] + cc[:, 1] * res, lo[1] + cc[:, 0] * res], 1)
+            out += f'<path d="{_d(_resample(Q, .8))}" style="fill:{c_}" opacity="{op}"/>'
+    return out
 
 _TP_CACHE = {}
 def TP(**kw):
