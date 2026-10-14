@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"; ROUND13 = C.__name__ == "blobby"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62;--pearl:#F2B84B'}
@@ -107,8 +107,17 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND12:
+OUT = 'blobby.html' if ROUND13 else 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND13:
+    import twoproteins as R12
+    TITLE, EYEBROW, H1 = 'Oyster Blobby Proteins', 'brandmark brainstorm, round thirteen', 'Blobbier proteins'
+    LEDE = ('<p class="lede"><b>Round twelve&rsquo;s 02, with blobbier proteins.</b> Each protein&rsquo;s own traced lobes are amplified, measured '
+            'against its overall oval so only the local bulges grow, and clefts are pressed into its back; some get a wider domain at one end. '
+            'They are then docked as before: each holds half the pearl, the facing sides fit at a hairline gap, and the surfaces are molecular. '
+            'Structures: PDB 5T35, Gadd et al., Nat. Chem. Biol. 2017; the degrader is drawn generically.</p>')
+    REF = ('<div class="ref"><span class="lab">From round twelve</span><div class="refrow">'
+           f'<div class="tile" style="{PAL["nacre"]}">{mark(R12.CONCEPTS[1][3], "r12f")}</div><span>02 Flatter</span></div></div>')
+elif ROUND12:
     TITLE, EYEBROW, H1, REF = 'Oyster Two Proteins', 'brandmark brainstorm, round twelve', 'Two proteins, one pearl', ''
     LEDE = ('<p class="lede"><b>Proteins first, the oyster only in the silhouette.</b> Round eleven had drifted back to a shell: a circle, with lines '
             'that read as growth rings. Here the circle and the shell lines are gone. BRD4 and VHL keep close to their real traced proportions and '

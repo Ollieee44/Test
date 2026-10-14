@@ -222,8 +222,9 @@ def DV(**kw):
 # ---- Round nine: 04 (docked, hairline gap) turned so the seam runs on a diagonal, with texture lines for depth.
 
 def docked_geom(pose=0, overlap=14, gap=1.8, pr=11, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), w=3.0,
-                flip_lid=True, flip_cup=False, hinge=4, balance=None):
-    """balance (a number): place each protein so it reaches that far past the pearl's centre line before docking
+                flip_lid=True, flip_cup=False, hinge=4, balance=None, blob=None):
+    """blob: {'lid': exaggerate() settings, 'cup': ...} applied before docking.
+    balance (a number): place each protein so it reaches that far past the pearl's centre line before docking
     (lid downward, cup upward), so the seam runs through the pearl and each protein takes half of it."""
     pc = np.array([54.0, 52.0]); lk, lw, lh, lt = lid; ck, cw, ch, ct = cup
     def place(key, box, rot, flip):
@@ -231,6 +232,8 @@ def docked_geom(pose=0, overlap=14, gap=1.8, pr=11, lid=('target', 66, 28, -9), 
         return tf(smooth(v['outer'])), tf
     L0, tl = place(lk, (pc[0] - hinge, pc[1] - lh * .5 - pr * .35 + overlap / 2, lw, lh), lt, flip_lid)
     C0, tc = place(ck, (pc[0] - hinge, pc[1] + ch * .5 + pr * .2 - overlap / 2, cw, ch), ct, flip_cup)
+    if blob:
+        L0 = exaggerate(L0, **blob.get('lid', {})); C0 = exaggerate(C0, **blob.get('cup', {}))
     if balance is not None:
         near = lambda P: P[np.abs(P[:, 0] - pc[0]) < pr * 1.6]
         dl = (pc[1] + balance) - near(L0)[:, 1].max(); dc = (pc[1] - balance) - near(C0)[:, 1].min()
@@ -496,6 +499,8 @@ def CP(**kw):
 # the silhouette the pair makes together.
 
 def close_mouth(L, C, reach=16.0, iters=60, gap=1.8, w=3.0, pc=None, pr=11.0, relax=True):
+    L, C = _resample(L, .8), _resample(C, .8)
+    assert len(L) < 4000 and len(C) < 4000, 'outline exploded'
     """Pull each protein's facing surface toward the other wherever they are within `reach`, then clear back to
     the gap, so the open mouth closes and the two meet along their whole facing side."""
     g2, pg = gap + w, gap + w / 2
@@ -531,8 +536,8 @@ def molecular(P, r=3.2, seed=0, vary=.28, res=.2):
     return _resample(Q, .6)
 
 def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.8, pose=0, reach=16.0,
-                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None):
-    L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w, lid=lid, cup=cup, balance=balance)
+                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None):
+    L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w, lid=lid, cup=cup, balance=balance, blob=blob)
     if reach > 0: L, C = close_mouth(L, C, reach, gap=gap, w=w, pc=pc, pr=pr)
     if bump > 0:
         L, C = molecular(L, bump, 1), molecular(C, bump, 2)
@@ -580,3 +585,27 @@ def aspect(key, pose=0):
 def natural(lw=58, cw=62, pose=0, lt=-9, ct=6, squash=1.0):
     """lid / cup boxes at each protein's own proportions (squash < 1 flattens them toward a shell)."""
     return dict(lid=('target', lw, lw * aspect('target', pose) * squash, lt), cup=('e3', cw, cw * aspect('e3', pose) * squash, ct))
+
+
+# ---- Round thirteen: 02 of round twelve, blobbier. Each protein's own traced lobes amplified, with clefts pressed
+# into its back and an optional wider domain, before docking (which keeps the facing side fitted).
+
+def exaggerate(P, amp=1.2, keep=6, clefts=(), bulges=()):
+    """Amplify an outline's own broad lobes (radially, about its centroid) and press in clefts / push out bulges.
+    clefts / bulges: (angle in degrees, depth as a fraction of the radius, width in degrees)."""
+    P = _resample(np.asarray(P, float), .6); c = P.mean(0); d = P - c
+    th = np.arctan2(d[:, 1], d[:, 0]); r = np.linalg.norm(d, axis=1)
+    # the shape's own oval (from its covariance), so only local lobes are amplified, not its length
+    ev, V = np.linalg.eigh(np.cov(d.T)); q = d @ V
+    sa, sb = np.sqrt(ev) * 2.0
+    phi = np.arctan2(q[:, 1], q[:, 0])
+    r_e = 1 / np.sqrt((np.cos(phi) / sa) ** 2 + (np.sin(phi) / sb) ** 2)
+    rel = r / r_e; rel = rel / rel.mean() - 1
+    F = np.fft.rfft(rel); F[keep:] = 0; lob = np.fft.irfft(F, len(rel))
+    k = 1 + amp * lob
+    for ang, depth, width in clefts:
+        dt = np.angle(np.exp(1j * (th - math.radians(ang)))); k *= 1 - depth * np.exp(-(dt / math.radians(width)) ** 2)
+    for ang, depth, width in bulges:
+        dt = np.angle(np.exp(1j * (th - math.radians(ang)))); k *= 1 + depth * np.exp(-(dt / math.radians(width)) ** 2)
+    Q = c + d * k[:, None]
+    return _relax(_resample(Q, .8), .3, 3)
