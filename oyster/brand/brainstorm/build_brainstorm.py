@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62;--pearl:#F2B84B'}
@@ -31,6 +31,24 @@ def _letter_ink(d, x):
             n = max(1, int(np.linalg.norm(b - a) / 1.0)); out.append(a + (b - a) * np.arange(n)[:, None] / n)
     p = np.vstack(out); return np.stack([x + .5 * p[:, 0], -.5 * p[:, 1]], 1)
 
+def _ink_from_svg(svg):
+    """Every drawn point of a mark: path (M/L), polygon and polyline vertices and circle edges, densified,
+    ignoring masks, clip paths and defs (they shape the ink but are not ink)."""
+    svg = re.sub(r'<(mask|clipPath|defs)\b.*?</\1>', '', svg, flags=re.S); out = []
+    for d in re.findall(r'<path[^>]* d="([^"]+)"', svg):
+        for sub in re.findall(r'M[^MZ]*', d):
+            v = [float(x) for x in re.findall(r'-?\d+\.?\d*', sub)]
+            if len(v) >= 4: out.append(np.array(v[:len(v) // 2 * 2]).reshape(-1, 2))
+    for q in re.findall(r'points="([^"]+)"', svg):
+        out.append(np.array([[float(a) for a in p.split(',')] for p in q.split()]))
+    for cx, cy, r in re.findall(r'<circle cx="([-\d.]+)" cy="([-\d.]+)" r="([-\d.]+)"', svg):
+        t = np.linspace(0, 2 * np.pi, 48); out.append(np.stack([float(cx) + float(r) * np.cos(t), float(cy) + float(r) * np.sin(t)], 1))
+    dense = []
+    for q in out:
+        for a, b in zip(q[:-1], q[1:]):
+            n = max(1, int(np.linalg.norm(b - a) / .5)); dense.append(a + (b - a) * np.arange(n)[:, None] / n)
+    return np.vstack(dense)
+
 def _gap(A, B):
     return min(np.sqrt(((A[i:i + 1500, None] - B[None]) ** 2).sum(-1)).min() for i in range(0, len(A), 1500))
 
@@ -39,8 +57,12 @@ def lockup_xheight(fn, ns):
     baseline to the top of the e. Its spacing is set per mark: moved until the closest distance from any of
     its ink (shell, bonds, ligand rings) to the y equals the closest distance from the y to the s, so the
     mark sits as tight to the y as the s does. The viewBox grows to take the ligands."""
-    import lidcup
-    body, (sx0, sy0, sx1, sy1), (ax0, ay0, ax1, ay1), ink = lidcup.lid_cup(ns + 'k', False, raw=True, **fn.kw)
+    if C.__name__ == 'lidcup':
+        import lidcup
+        body, (sx0, sy0, sx1, sy1), (ax0, ay0, ax1, ay1), ink = lidcup.lid_cup(ns + 'k', False, raw=True, **fn.kw)
+    else:   # the whole mark is the shell: measure its drawn ink
+        body = fn(ns + 'k', False); ink = _ink_from_svg(body)
+        sx0, sy0 = ink.min(0); sx1, sy1 = ink.max(0); ax0, ay0, ax1, ay1 = sx0, sy0, sx1, sy1
     P = dict((x, d) for d, x in re.findall(r'<path d="([^"]*)" transform="translate\(([\d.]+) 0\.0\) scale\(0\.5000 -0\.5000\)"/>', LT))
     e = _bounds(P['1596.9'])
     top, bot = -.5 * e[3], -.5 * e[1]                    # the e's top and bottom (overshoots included), page units
@@ -85,8 +107,15 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND6:
+OUT = 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND7:
+    TITLE, EYEBROW, H1, REF = 'Oyster Protein Shell', 'brandmark brainstorm, round seven', 'The shell is the complex', ''
+    LEDE = ('<p class="lede"><b>Each half of the oyster is a protein from PDB 5T35, and the pearl is the SELFTAC.</b> BRD4, the target, is the lid; '
+            'VHL, the ligase, is the cup. Their outlines are traced from the structure and smoothed into blobs, and where they meet the pearl '
+            'they curve round it, so the two proteins cup the degrader between them, as they do in the real ternary complex. The surface '
+            'contours inside each protein double as an oyster&rsquo;s growth lines. One line weight throughout; the pearl in the logo&rsquo;s '
+            'pearl colour, the clasp in gold. Structures: PDB 5T35, Gadd et al., Nat. Chem. Biol. 2017; the degrader is drawn generically.</p>')
+elif ROUND6:
     TITLE, EYEBROW, H1, REF = 'Oyster Lid and Cup', 'brandmark brainstorm, round six', 'Variations on Lid and cup', ''
     LEDE = ('<p class="lede"><b>Round five&rsquo;s 02, pushed in nine directions.</b> The idea stays the same: a heterobifunctional degrader whose '
             'linker runs through an oyster, a flat lid over a deep cup, with the pearl between them as the reversible clasp. Each variation '
