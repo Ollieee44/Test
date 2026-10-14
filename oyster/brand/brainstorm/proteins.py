@@ -416,3 +416,70 @@ def textured2(ns, split=False, angle=-32, rnd=.6, link=(.7, .44), seam=.09, gap=
 
 def TV2(**kw):
     fn = lambda ns, split=False: textured2(ns, split, **kw); fn.kw = kw; return fn
+
+# ---- Round eleven: the pair as one round form. A circle split by a gentle S-shaped seam through the pearl; each
+# half's outer edge carries the lumps of its own traced protein (BRD4 above, VHL below), so the halves differ and
+# read as proteins while the whole reads as round. Hairline gap, shading, diagonal and linker pearl as before.
+
+def _profile(key, pose, n=360, keep=8):
+    """A protein's outline as a radial profile about its centroid: r(phi)/mean - 1, low-passed to its broad lobes."""
+    o = smooth(POSES[pose][key]['outer'], 16); c = o.mean(0); d = o - c
+    ang = np.mod(np.arctan2(d[:, 1], d[:, 0]), 2 * np.pi); r = np.linalg.norm(d, axis=1)
+    k = np.argsort(ang); ang, r = ang[k], r[k]
+    phi = np.linspace(0, 2 * np.pi, n, endpoint=False)
+    rr = np.interp(phi, ang, r, period=2 * np.pi); rr = rr / rr.mean() - 1
+    F = np.fft.rfft(rr); F[keep:] = 0
+    return np.fft.irfft(F, n)
+
+def circle_pair(ns, split=False, R=38.0, amp=.12, wave=4.0, angle=-32, pose=0, gap=1.8, w=3.0, pr=11.0,
+                link=(.7, .44), seam=.09, lobes=8, phase=(.0, .0), light=(-1, -1), shade=True):
+    """amp: how far the protein lumps push the outline in and out (fraction of R); wave: the seam's S (units);
+    lobes: how many of each protein's broad lobes are kept; phase: turns each protein's profile (fraction of a turn)."""
+    pu = np.roll(_profile('target', pose, keep=lobes), int(phase[0] * 360))
+    pl = np.roll(_profile('e3', pose, keep=lobes), int(phase[1] * 360))
+    def arc(t0, t1, prof):
+        t = np.linspace(t0, t1, 200); u = (t - t0) / (t1 - t0)
+        bump = np.interp(u * 2 * np.pi, np.linspace(0, 2 * np.pi, len(prof), endpoint=False), prof, period=2 * np.pi)
+        taper = np.clip(np.sin(u * np.pi) * 2.2, 0, 1)            # back to the circle where the halves meet
+        r = R * (1 + amp * bump * taper)
+        return np.stack([r * np.cos(t), r * np.sin(t)], 1)
+    xs = np.linspace(-R, R, 160); seam_pts = np.stack([xs, wave * np.sin(np.pi * xs / R)], 1)
+    up = np.vstack([arc(np.pi, 2 * np.pi, pu), seam_pts[::-1]])       # y down: pi..2pi is the top
+    lo = np.vstack([arc(0, np.pi, pl), seam_pts])
+    up, lo = _resample(up, .8), _resample(lo, .8)
+    c = np.zeros(2); pg, g2 = gap + w / 2, gap + w
+    for i in range(40):
+        up, lo = push_out(up, c, pr + pg), push_out(lo, c, pr + pg)
+        up, _ = _clear(up, lo, g2, .5); lo, _ = _clear(lo, up, g2, .5)
+        if i % 5 == 4: up, lo = _relax(up, .25, 1), _relax(lo, .25, 1)
+    for _ in range(6):
+        up, _ = _clear(up, lo, g2, .5); lo, _ = _clear(lo, up, g2, .5)
+        up, lo = push_out(up, c, pr + pg), push_out(lo, c, pr + pg)
+    a = math.radians(angle); Rm = np.array([[math.cos(a), -math.sin(a)], [math.sin(a), math.cos(a)]])
+    up, lo = up @ Rm.T, lo @ Rm.T
+    allp = np.vstack([up, lo]); lo_, hi_ = allp.min(0) - w, allp.max(0) + w
+    sc = min(1.0, 92 / max(hi_ - lo_)); mid = (lo_ + hi_) / 2
+    fit = lambda P: (np.asarray(P) - mid) * sc + 50
+    up, lo = fit(_resample(up, 1.0)), fit(_resample(lo, 1.0)); c0 = fit(np.zeros(2)); pr_ = pr * sc
+    seam_n = Rm @ np.array([0, 1.0]); gsp = 5 if split else 0
+    lt = np.array(light, float); lt /= np.linalg.norm(lt)
+    body = ''
+    for P, s, nm in ((up, -1, 'a'), (lo, 1, 'b')):
+        out = ''
+        if shade:
+            for k, d in enumerate((3.8, 7.6, 11.4)):
+                Q = inset(P, d)
+                if Q is None: continue
+                n = _normals(Q); dot = (n * lt).sum(1)
+                rad = Q - c0; rad /= np.maximum(np.linalg.norm(rad, axis=1, keepdims=True), 1e-9)
+                outer = (n * rad).sum(1) > .35                     # only along the outer surface, not the seam
+                for run in _runs(Q, (dot < (-.1 + .25 * k)) & outer):
+                    out += f'<polyline points="{PT(run)}" fill="none" stroke="currentColor" stroke-width="{w * (.5 - .09 * k):.2f}" stroke-linecap="round" stroke-linejoin="round"/>'
+        off = seam_n * gsp * s
+        body += (f'<g transform="translate({f(off[0])} {f(off[1])})"><path d="{_d(P)}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>'
+                 f'<clipPath id="{ns}{nm}"><path d="{_d(P)}"/></clipPath><g clip-path="url(#{ns}{nm})">{out}</g></g>')
+    tilt = angle + math.degrees(math.atan(wave * math.pi / R))         # the seam's direction at the pearl
+    return body + pearl_linker(c0, pr_, tilt, split, link, seam, ns + 'p')
+
+def CP(**kw):
+    fn = lambda ns, split=False: circle_pair(ns, split, **kw); fn.kw = kw; return fn
