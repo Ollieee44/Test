@@ -218,3 +218,141 @@ def docked(ns, split=False, pose=0, overlap=8, gap=2.6, pr=11, lid=('target', 66
 
 def DV(**kw):
     fn = lambda ns, split=False: docked(ns, split, **kw); fn.kw = kw; return fn
+
+# ---- Round nine: 04 (docked, hairline gap) turned so the seam runs on a diagonal, with texture lines for depth.
+
+def docked_geom(pose=0, overlap=14, gap=1.8, pr=11, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), w=3.0,
+                flip_lid=True, flip_cup=False, hinge=4):
+    pc = np.array([54.0, 52.0]); lk, lw, lh, lt = lid; ck, cw, ch, ct = cup
+    def place(key, box, rot, flip):
+        v = POSES[pose][key]; tf = _frame(v['outer'], box[2], box[3], rot, np.array(box[:2]), flip)
+        return tf(smooth(v['outer'])), tf
+    L0, tl = place(lk, (pc[0] - hinge, pc[1] - lh * .5 - pr * .35 + overlap / 2, lw, lh), lt, flip_lid)
+    C0, tc = place(ck, (pc[0] - hinge, pc[1] + ch * .5 + pr * .2 - overlap / 2, cw, ch), ct, flip_cup)
+    L, C = dock(L0, C0, pc, pr, gap, w=w)
+    return L, C, pc, tl, tc
+
+def _normals(P):
+    d = np.roll(P, -1, 0) - np.roll(P, 1, 0); n = np.stack([d[:, 1], -d[:, 0]], 1)
+    n /= np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-9)
+    # outward: the side away from the centroid on average
+    if ((P - P.mean(0)) * n).sum() < 0: n = -n
+    return n
+
+_SDF = {}
+def _sdf(P, res=.25):
+    """Distance from the outline, inside the shape, on a fine grid (cached per outline)."""
+    key = (P.shape, float(P[0, 0]), float(P[0, 1]), float(P[:, 0].sum()))
+    if key not in _SDF:
+        from scipy.ndimage import distance_transform_edt
+        from matplotlib.path import Path as _MP
+        lo = P.min(0) - 2; hi = P.max(0) + 2
+        xs = np.arange(lo[0], hi[0], res); ys = np.arange(lo[1], hi[1], res)
+        X, Y = np.meshgrid(xs, ys); inside = _MP(P).contains_points(np.stack([X.ravel(), Y.ravel()], 1)).reshape(X.shape)
+        _SDF[key] = (distance_transform_edt(inside) * res, lo, res)
+    return _SDF[key]
+
+def inset(P, d):
+    """The line inside the shape at distance d from its outline: an iso-line of the distance field, so it never
+    loops back on itself in tight curves. Returns the longest closed contour (or None if the shape is thinner)."""
+    from skimage import measure
+    dist, lo, res = _sdf(P)
+    cs = measure.find_contours(dist, d)
+    if not cs: return None
+    c = max(cs, key=len)
+    Q = np.stack([lo[0] + c[:, 1] * res, lo[1] + c[:, 0] * res], 1)
+    Q = _resample(Q, .8)
+    return _relax(Q, .4, 2)
+
+def _runs(P, keep):
+    """Split a closed outline into the polylines where keep is true."""
+    out, cur = [], []
+    idx = list(range(len(P)))
+    start = int(np.argmin(keep)) if not keep.all() else 0
+    for i in idx[start:] + idx[:start]:
+        if keep[i]: cur.append(P[i])
+        elif len(cur) > 3: out.append(np.array(cur)); cur = []
+        else: cur = []
+    if len(cur) > 3: out.append(np.array(cur))
+    return out
+
+def textured(ns, split=False, angle=-32, texture='layers', gap=1.8, overlap=14, pose=0, pearl='halves', w=3.0, light=(-1, -1)):
+    """The docked pair turned by `angle` degrees about the pearl, so the seam runs on a diagonal, with texture:
+    'layers': two inset outlines in each protein, like contours on a surface;
+    'traced': the real surface contours from 5T35, clipped inside each protein;
+    'shade':  inset contours only on the side turned away from the light (top left), so the form turns;
+    'rim':    shading plus one highlight line on the lit side."""
+    L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w)
+    a = math.radians(angle); R = np.array([[math.cos(a), -math.sin(a)], [math.sin(a), math.cos(a)]])
+    rot = lambda P: (np.asarray(P) - pc) @ R.T + [50, 50]
+    L, C = rot(L), rot(C)
+    # fit into the box by moving the geometry itself (so the drawn coordinates are the final ones)
+    allp = np.vstack([L, C]); lo, hi = allp.min(0) - w, allp.max(0) + w
+    sc = min(1.0, 92 / max(hi - lo)); mid = (lo + hi) / 2
+    fit = lambda P: (np.asarray(P) - mid) * sc + 50
+    L, C = fit(L), fit(C); c0 = fit(np.array([50.0, 50.0])); pr_ = 11 * sc
+    rot0 = rot
+    rot = lambda P: fit(rot0(P))
+    seam_n = R @ np.array([0, 1.0])                      # from lid to cup, after turning
+    g = 5 if split else 0
+    lt = np.array(light, float); lt /= np.linalg.norm(lt)
+    def tex(P, key, tf, ns2):
+        out = ''
+        if texture == 'layers':
+            for k, d in enumerate((4.2, 8.6)):
+                Q = inset(P, d)
+                if Q is None: continue
+                out += f'<path d="{_d(Q)}" fill="none" stroke="currentColor" stroke-width="{w * (.5 - .1 * k):.2f}" stroke-linejoin="round"/>'
+        elif texture == 'traced':
+            for ring in POSES[pose][key]['inner'][:3]:
+                q = rot(tf(smooth(ring)))
+                out += f'<path d="{_d(q)}" fill="none" stroke="currentColor" stroke-width="{w * .42:.2f}" stroke-linejoin="round"/>'
+        else:
+            for k, d in enumerate((3.8, 7.6, 11.4)):
+                Q = inset(P, d)
+                if Q is None: continue
+                n = _normals(Q); dot = (n * lt).sum(1)
+                for run in _runs(Q, dot < (-.15 + .25 * k)):
+                    out += f'<polyline points="{PT(run)}" fill="none" stroke="currentColor" stroke-width="{w * (.5 - .09 * k):.2f}" stroke-linecap="round" stroke-linejoin="round"/>'
+            if texture == 'rim':
+                Q = inset(P, 3.6)
+                if Q is None: Q = P
+                n = _normals(Q); dot = (n * lt).sum(1)
+                for run in _runs(Q, dot > .55):
+                    out += f'<polyline points="{PT(run)}" fill="none" stroke="currentColor" stroke-width="{w * .38:.2f}" stroke-linecap="round" stroke-dasharray="0.1 2.4"/>'
+        return f'<clipPath id="{ns2}"><path d="{_d(P)}"/></clipPath><g clip-path="url(#{ns2})">{out}</g>'
+    body = ''
+    for P, key, tf, s, nm in ((L, 'target', tl, -1, 'a'), (C, 'e3', tc, 1, 'b')):
+        off = seam_n * g * s
+        body += (f'<g transform="translate({f(off[0])} {f(off[1])})"><path d="{_d(P)}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>'
+                 + tex(P, key, tf, ns + nm) + '</g>')
+    pm = pearl_molecule(c0, pr_, split, pearl)
+    pm = f'<g transform="rotate({angle} {f(c0[0])} {f(c0[1])})">{pm}</g>'
+    return body + pm
+
+def _d(P):
+    return 'M' + ' L'.join(f'{f(x)} {f(y)}' for x, y in P) + ' Z'
+
+def TV(**kw):
+    fn = lambda ns, split=False: textured(ns, split, **kw); fn.kw = kw; return fn
+
+CONCEPTS9 = [
+    ('layers', '01', 'Diagonal, layered', TV(texture='layers'),
+     '04 turned so the seam between the proteins runs on a diagonal, with two lines inside each protein at an even depth from its edge, like contours on a surface.',
+     'The cleanest way to add depth: the lines follow each protein&rsquo;s own shape, so it stays a protein outline.'),
+    ('shade', '02', 'Diagonal, shaded', TV(texture='shade'),
+     'The same lines kept only on the side of each protein turned away from the light (top left), so the form turns away into shadow.',
+     'The most 3D: light from one side, shade on the other, from line alone.'),
+    ('rim', '03', 'Shaded, with highlight', TV(texture='rim'),
+     'Shading as 02, plus a dotted highlight just inside the lit edge.',
+     'Most like a rendered surface; the dots are a detail for large sizes.'),
+    ('traced', '04', 'Traced contours', TV(texture='traced'),
+     'The real surface contours from the 5T35 trace inside each protein, as in round seven.',
+     'The most scientific; the contours are the proteins&rsquo; own.'),
+    ('other', '05', 'Other diagonal', TV(texture='shade', angle=32),
+     'Shaded, turned the other way, so the seam falls from top left to bottom right.',
+     'Compare the two diagonals: this one reads more as a shell lying open.'),
+    ('steep', '06', 'Steeper, layered', TV(texture='layers', angle=-48),
+     'Layered, turned further, close to 45 degrees.',
+     'The most dynamic angle; the pair reads as a single rounded form.'),
+]

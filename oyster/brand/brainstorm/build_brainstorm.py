@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0', 'tidepool': 'color:#EAF3EF;background:#0F4C4A;--clasp:#F27D62;--pearl:#F2B84B'}
@@ -107,8 +107,18 @@ for key, num, name, fn, idea, why in C.CONCEPTS:
               f'<div class="states">{states}</div><span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND8:
+OUT = 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND9:
+    import docked as R8
+    TITLE, EYEBROW, H1 = 'Oyster Textured Shell', 'brandmark brainstorm, round nine', 'Diagonal, with depth'
+    LEDE = ('<p class="lede"><b>Round eight&rsquo;s 04, turned and given depth.</b> The docked pair, BRD4 and VHL fitted to each other with a hairline '
+            'gap and the SELFTAC pearl between them, is turned so the seam runs on a diagonal. Texture lines are back to make it more 3D: lines '
+            'at an even depth inside each protein&rsquo;s edge (traced as true contours, so they never tangle), shading kept to the side away '
+            'from the light, a highlight, or the real surface contours from the 5T35 trace. Structures: PDB 5T35, Gadd et al., Nat. Chem. Biol. '
+            '2017; the degrader is drawn generically.</p>')
+    REF = ('<div class="ref"><span class="lab">From round eight</span><div class="refrow">'
+           f'<div class="tile" style="{PAL["nacre"]}">{mark(R8.CONCEPTS[3][3], "r8h")}</div><span>04 Hairline gap</span></div></div>')
+elif ROUND8:
     import proteins as R7
     TITLE, EYEBROW, H1 = 'Oyster Docked Shell', 'brandmark brainstorm, round eight', 'Docked'
     LEDE = ('<p class="lede"><b>Round seven&rsquo;s 02, with the proteins brought together.</b> BRD4 (the lid) and VHL (the cup) now fit each other: '
