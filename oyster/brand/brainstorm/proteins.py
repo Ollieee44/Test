@@ -551,7 +551,7 @@ def molecular(P, r=3.2, seed=0, vary=.28, res=.2, soften=0.0, spacing=1.15, sink
     return _resample(Q, .6)
 
 def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.8, pose=0, reach=16.0,
-                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None, soften=0.0, lumps=0, tint=False, spacing=1.15, sink=.9, waves=None):
+                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None, soften=0.0, lumps=0, tint=False, spacing=1.15, sink=.9, waves=None, island=None):
     L, C, pc, tl, tc = docked_geom(pose, overlap, gap, w=w, lid=lid, cup=cup, balance=balance, blob=blob)
     if reach > 0: L, C = close_mouth(L, C, reach, gap=gap, w=w, pc=pc, pr=pr)
     if bump > 0:
@@ -585,13 +585,13 @@ def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.
             body += f'<g transform="translate({f(off[0])} {f(off[1])})">' + _nacre_fill(P, key, fill[6:], ns + nm, w) + '</g>'
             continue
         if fill:
-            body += f'<g transform="translate({f(off[0])} {f(off[1])})">' + _filled(P, key, fill, ns + nm, w, lumps=lumps, tint=tint, seed=3 if key == "target" else 7) + '</g>'
+            body += f'<g transform="translate({f(off[0])} {f(off[1])})">' + _filled(P, key, fill, ns + nm, w, lumps=lumps, tint=tint, seed=3 if key == "target" else 7, island=island) + '</g>'
             continue
         body += (f'<g transform="translate({f(off[0])} {f(off[1])})"><path d="{_d(P)}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>{inner}</g>')
     nac = fill[6:] if fill and fill.startswith('nacre:') else None
     return body + pearl_linker(c0, pr_, angle, split, link, seam, ns + 'p', nacre=nac)
 
-def _filled(P, key, style, ns, w, light=(-1, -1), lumps=0, tint=False, seed=0):
+def _filled(P, key, style, ns, w, light=(-1, -1), lumps=0, tint=False, seed=0, island=None):
     """A protein filled in the 3D story's colours (var(--brd4) / var(--vhl)) with an ink outline (var(--outline)),
     and depth by style: 'flat'; 'rings' (contour rings at even depths, in var(--ring), as on the 3D models);
     'toon' (a lit band and a shade band, cut by the shape shifted toward and away from the light); 'soft' (a
@@ -623,6 +623,8 @@ def _filled(P, key, style, ns, w, light=(-1, -1), lumps=0, tint=False, seed=0):
             Q = inset(P, dd)
             if Q is None: break
             rings += f'<path d="{_d(Q)}" fill="none" style="stroke:var(--ring)" stroke-width="{w * (.42 - .05 * k):.2f}" stroke-linejoin="round" opacity=".55"/>'
+        if island and key == 'target':
+            rings += _island(P, island, w)
         out += f'<g clip-path="url(#{ns}k)">{rings}</g>'
     if lumps:   # soft lumps inside, as in illustrated proteins: a few merged blobs traced as light lines
         out += f'<g clip-path="url(#{ns}k)">' + _lumps(P, lumps, seed, col, w) + '</g>'
@@ -760,3 +762,39 @@ def _nacre_fill(P, key, name, ns, w, light=(-1, -1)):
     return (f'<defs>{defs}</defs><path d="{d}" fill="url(#{ns}b)"/>{sheen}'
             f'<path d="{d}" fill="url(#{ns}s)"/><path d="{d}" fill="url(#{ns}h)"/>'
             f'<path d="{d}" fill="none" stroke="{N_["edge"]}" stroke-width="{w * .7:.2f}" stroke-linejoin="round" opacity=".9"/>')
+
+
+def _island(P, spec, w):
+    """Small closed contour rings round the deepest point of the protein's left-hand part, like a peak on a
+    topographic map. spec = (size, count): the outer ring sits `size` below the peak, with `count` rings in all."""
+    from skimage import measure
+    if isinstance(spec, dict):   # a small round ring (or a few concentric ones) at the left-hand peak, gently wobbled
+        dist, lo, res = _sdf(P); xs = lo[0] + np.arange(dist.shape[1]) * res
+        left = dist.copy(); left[:, xs > P[:, 0].mean()] = 0
+        j, i = np.unravel_index(np.argmax(left), left.shape); pt = np.array([lo[0] + i * res, lo[1] + j * res])
+        pt = pt + np.array(spec.get('nudge', (0, 0)))
+        out = ''
+        for k in range(spec.get('count', 1)):
+            r = spec['r'] * (k + 1)
+            t = np.linspace(0, 2 * np.pi, 60, endpoint=False)
+            rr = r * (1 + .08 * np.sin(3 * t + 1.1) + .05 * np.sin(5 * t))
+            Q = np.stack([pt[0] + rr * np.cos(t), pt[1] + rr * .85 * np.sin(t)], 1)
+            out += f'<path d="{_d(Q)}" fill="none" style="stroke:var(--ring)" stroke-width="{w * .36:.2f}" stroke-linejoin="round" opacity=".55"/>'
+        return out
+    size, count = spec if isinstance(spec, tuple) else (spec, 1)
+    dist, lo, res = _sdf(P)
+    xs = lo[0] + np.arange(dist.shape[1]) * res
+    left = dist.copy(); left[:, xs > P[:, 0].mean()] = 0
+    j, i = np.unravel_index(np.argmax(left), left.shape); peak = left[j, i]; pt = np.array([lo[0] + i * res, lo[1] + j * res])
+    out = ''
+    for k in range(count):
+        lev = peak - size * (k + 1) / count
+        if lev <= 0: continue
+        best = None
+        for cc in measure.find_contours(dist, lev):
+            Q = np.stack([lo[0] + cc[:, 1] * res, lo[1] + cc[:, 0] * res], 1)
+            from matplotlib.path import Path as _MP
+            if _MP(Q).contains_point(pt) and (best is None or len(Q) < len(best)): best = Q
+        if best is not None:
+            out += f'<path d="{_d(_relax(_resample(best, .5), .4, 2))}" fill="none" style="stroke:var(--ring)" stroke-width="{w * .36:.2f}" stroke-linejoin="round" opacity=".55"/>'
+    return out
