@@ -106,8 +106,8 @@ def lockup(fn, ns):
 cards = ''
 for key, num, name, fn, *rest in C.CONCEPTS:
     idea, why = (rest + ['', ''])[:2]
-    if fn is None:   # a group heading spanning the grid
-        cards += f'<div class="grp"><h2>{name}</h2><p>{idea}</p></div>'; continue
+    if fn is None:   # a group heading spanning the grid: (key, heading, text, None)
+        cards += f'<div class="grp"><h2>{num}</h2><p>{name}</p></div>'; continue
     states = ''
     for split, lab in ((False, 'Clasped'), (True, 'Split')):
         tiles = ''.join(f'<div class="tile sq" style="{st}" title="{p.title()}, {lab.lower()}">{mark(fn, f"{key}{p[0]}{int(split)}", split)}</div>' for p, st in PAL.items())
