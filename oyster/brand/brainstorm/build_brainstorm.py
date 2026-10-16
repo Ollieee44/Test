@@ -5,7 +5,7 @@ import os, re
 import numpy as np
 import sys, importlib
 C = importlib.import_module(sys.argv[1] if len(sys.argv) > 1 else "concepts")
-ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"; ROUND13 = C.__name__ == "blobby"; ROUND14 = C.__name__ == "filled"; ROUND15 = C.__name__ == "wavy"; ROUND16 = C.__name__ == "undulate"; ROUND17 = C.__name__ == "nacre"; ROUND18 = C.__name__ == "disc"; ROUND19 = C.__name__ == "island"; ROUND20 = C.__name__ == "mono"
+ROUND3 = C.__name__ == "geo"; ROUND4 = C.__name__ == "selftac_o"; ROUND5 = C.__name__ == "bifunctional"; ROUND6 = C.__name__ == "lidcup"; ROUND7 = C.__name__ == "proteins"; ROUND8 = C.__name__ == "docked"; ROUND9 = C.__name__ == "textured"; ROUND10 = C.__name__ == "rounded"; ROUND11 = C.__name__ == "roundpair"; ROUND12 = C.__name__ == "twoproteins"; ROUND13 = C.__name__ == "blobby"; ROUND14 = C.__name__ == "filled"; ROUND15 = C.__name__ == "wavy"; ROUND16 = C.__name__ == "undulate"; ROUND17 = C.__name__ == "nacre"; ROUND18 = C.__name__ == "disc"; ROUND19 = C.__name__ == "island"; ROUND20 = C.__name__ == "mono"; ROUND21 = C.__name__ == "clasp"
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../intro/fan-site.html'
 PAL = {'nacre': 'color:#2B2230;background:#EFE6E1;--clasp:#D9A443;--pearl:#C99BB0;--brd4:#E7C9D6;--vhl:#D6CBE6;--ring:#8C5572;--outline:#2B2230',
@@ -125,8 +125,15 @@ for key, num, name, fn, *rest in C.CONCEPTS:
               f'<div class="states">{states}</div>{ov}<span class="lab">16, 24, 32 and 48px</span><div class="row">{small}</div>'
               f'<span class="lab">{'With the logotype, the shell at the letters&rsquo; x-height' if hasattr(fn, 'kw') else 'With the logotype'}</span><div class="row">{lock}</div></article>')
 
-OUT = 'mono.html' if ROUND20 else 'island.html' if ROUND19 else 'disc.html' if ROUND18 else 'nacre.html' if ROUND17 else 'undulate.html' if ROUND16 else 'wavy.html' if ROUND15 else 'filled.html' if ROUND14 else 'blobby.html' if ROUND13 else 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
-if ROUND20:
+OUT = 'clasp.html' if ROUND21 else 'mono.html' if ROUND20 else 'island.html' if ROUND19 else 'disc.html' if ROUND18 else 'nacre.html' if ROUND17 else 'undulate.html' if ROUND16 else 'wavy.html' if ROUND15 else 'filled.html' if ROUND14 else 'blobby.html' if ROUND13 else 'twoproteins.html' if ROUND12 else 'roundpair.html' if ROUND11 else 'rounded.html' if ROUND10 else 'textured.html' if ROUND9 else 'docked.html' if ROUND8 else 'proteins.html' if ROUND7 else 'lidcup.html' if ROUND6 else 'bifunctional.html' if ROUND5 else 'selftac-o.html' if ROUND4 else 'construct.html' if ROUND3 else 'brainstorm.html'
+if ROUND21:
+    TITLE, EYEBROW, H1, REF = 'Oyster Pearl Clasp', 'brandmark brainstorm, round twenty-one', 'The pearl as the clasp', ''
+    LEDE = ('<p class="lede"><b>Round nineteen&rsquo;s 05, Model with the traced ring, with other ways for the pearl to say SELFTAC.</b> '
+            'A SELFTAC is two halves that clasp back together inside the neuron, and on the site the clasp is always gold. So each version '
+            'makes the pearl two halves, one against each protein, and puts the clasp where they meet: a gold bond across the gap, '
+            'two tones, the site&rsquo;s clasp glyph and pearl strand, halves that click together, or two pearls that overlap. '
+            'Clasped only. Structures: PDB 5T35, Gadd et al., Nat. Chem. Biol. 2017; the degrader is drawn generically.</p>')
+elif ROUND20:
     TITLE, EYEBROW, H1, REF = 'Oyster Mono Marks', 'brandmark brainstorm, round twenty', 'One colour, for overlays', ''
     LEDE = ('<p class="lede"><b>Round nineteen&rsquo;s 05, Model with the traced ring, pared back to one colour.</b> No fills, shading or '
             'tints: each version is drawn in a single colour on a clear ground, so it can sit in white over a dark image or in black over a '

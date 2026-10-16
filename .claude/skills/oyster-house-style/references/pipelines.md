@@ -107,6 +107,7 @@ URL, so the client's link stays the same:
 | Brandmark brainstorm round eighteen, mother-of-pearl on a dark disc (`brand/disc.html`, built by `brand/brainstorm/build_brainstorm.py disc`; `disc.on_disc()`) | https://claude.ai/artifact/XAxCtpQjxznm2hfWMq6TeL |
 | Brandmark brainstorm round nineteen, Model with a small ring (`brand/island.html`, built by `brand/brainstorm/build_brainstorm.py island`; `proteins._island()`) | https://claude.ai/artifact/18x6XzPtnC8ms3qMkcPCRs |
 | Brandmark brainstorm round twenty, one-colour marks for overlays (`brand/mono.html`, built by `brand/brainstorm/build_brainstorm.py mono`; `proteins._mono()`) | https://claude.ai/artifact/UcePnREDViEvz3mLj6NEHr |
+| Brandmark brainstorm round twenty-one, the pearl as the clasp (`brand/clasp.html`, built by `brand/brainstorm/build_brainstorm.py clasp`; `proteins.pearl_alt()`) | https://claude.ai/artifact/XBENEzKfnFuDcjfNVbntTD |
 | **Mark catalogue, every mark numbered** (`brand/catalogue.html`, rebuild with `build_catalogue.py` after adding marks) | https://claude.ai/artifact/AJUpcjMJuGVzcQt5ZAfNrK |
 
 The deck is delivered as a file (send it to the user), not an artifact. Commit and push after each

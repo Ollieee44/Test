@@ -551,11 +551,11 @@ def molecular(P, r=3.2, seed=0, vary=.28, res=.2, soften=0.0, spacing=1.15, sink
     return _resample(Q, .6)
 
 def two_proteins(ns, split=False, angle=-32, bump=3.2, overlap=14, gap=1.8, w=2.8, pose=0, reach=16.0,
-                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None, soften=0.0, lumps=0, tint=False, spacing=1.15, sink=.9, waves=None, island=None):
+                 link=(.7, .44), seam=.09, contour=False, pr=11.0, lid=('target', 66, 28, -9), cup=('e3', 72, 36, 6), balance=None, blob=None, fill=None, soften=0.0, lumps=0, tint=False, spacing=1.15, sink=.9, waves=None, island=None, pearl=None):
     gk = repr((angle, bump, overlap, gap, w, pose, reach, pr, lid, cup, balance, blob, soften, spacing, sink, waves))
     if gk in _GEOM_CACHE: L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit = _GEOM_CACHE[gk]
     else: L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit = _GEOM_CACHE.setdefault(gk, _two_geom(angle, bump, overlap, gap, w, pose, reach, pr, lid, cup, balance, blob, soften, spacing, sink, waves))
-    return _two_draw(ns, split, L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit, w, pose, link, seam, contour, angle, fill, lumps, tint, island)
+    return _two_draw(ns, split, L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit, w, pose, link, seam, contour, angle, fill, lumps, tint, island, pearl)
 
 _GEOM_CACHE = {}
 def _two_geom(angle, bump, overlap, gap, w, pose, reach, pr, lid, cup, balance, blob, soften, spacing, sink, waves):
@@ -582,7 +582,7 @@ def _two_geom(angle, bump, overlap, gap, w, pose, reach, pr, lid, cup, balance, 
     seam_n = Rm @ np.array([0, 1.0])
     return L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit
 
-def _two_draw(ns, split, L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit, w, pose, link, seam, contour, angle, fill, lumps, tint, island):
+def _two_draw(ns, split, L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit, w, pose, link, seam, contour, angle, fill, lumps, tint, island, pearl=None):
     g = 5 if split else 0
     body = ''
     if fill and fill.startswith('mono:'):   # one colour (currentColor), the pearl too: for overlays
@@ -604,6 +604,7 @@ def _two_draw(ns, split, L, C, c0, pr_, seam_n, tl, tc, pc, Rm, fit, w, pose, li
             continue
         body += (f'<g transform="translate({f(off[0])} {f(off[1])})"><path d="{_d(P)}" fill="none" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round"/>{inner}</g>')
     nac = fill[6:] if fill and fill.startswith('nacre:') else None
+    if pearl: return body + pearl_alt(c0, pr_, angle, pearl, ns + 'p')
     return body + pearl_linker(c0, pr_, angle, split, link, seam, ns + 'p', nacre=nac)
 
 def _filled(P, key, style, ns, w, light=(-1, -1), lumps=0, tint=False, seed=0, island=None):
@@ -840,3 +841,72 @@ def _mono(P, key, style, ns, w, island=None):
     m = (f'<mask id="{ns}m" maskUnits="userSpaceOnUse" x="-20" y="-20" width="140" height="140"><rect x="-20" y="-20" width="140" height="140" fill="#fff"/>'
          + ''.join(f'<path d="{q}" fill="none" stroke="#000" stroke-width="{cw:.2f}" stroke-linejoin="round"/>' for q in cuts) + '</mask>')
     return m + f'<path d="{d}" fill="currentColor" stroke="currentColor" stroke-width="{w}" stroke-linejoin="round" mask="url(#{ns}m)"/>'
+
+
+# ---- Round twenty-one: other ways for the pearl to tell the SELFTAC story (two halves that clasp back together).
+
+def pearl_alt(c, r, angle, style, ns):
+    """The pearl in the pocket, drawn with the seam level and the BRD4 half on top, then turned to the shell's angle.
+    'bridge': the two halves a little apart, held by a solid gold bond (the clasp) across the gap. 'glow': the same,
+    the bond glowing as the site's clasp does when closed. 'twotone': as bridge, the halves in two tones, one per
+    protein. 'clasp': the site's clasp glyph, two gold pearls joined by a thick bond. 'yinyang': two interlocking
+    teardrop halves. 'jigsaw': halves joined by a knob and socket, which click together. 'venn': two overlapping
+    pearls, the overlap gold. 'strand': the site's pearl strand running from one protein to the other through the
+    pocket, the two gold clasp pearls at its middle."""
+    c = np.asarray(c, float); P, G = 'var(--pearl)', 'var(--clasp)'; pale = 'color-mix(in srgb, var(--pearl) 45%, #fff)'
+    gap = .1 * r
+    M = lambda inner: (f'<mask id="{ns}" maskUnits="userSpaceOnUse" x="{f(c[0] - 3 * r)}" y="{f(c[1] - 3 * r)}" width="{f(6 * r)}" height="{f(6 * r)}">'
+                       f'<rect x="{f(c[0] - 3 * r)}" y="{f(c[1] - 3 * r)}" width="{f(6 * r)}" height="{f(6 * r)}" fill="#fff"/>{inner}</mask>')
+    at = lambda x, y: c + np.array([x, y]) * r
+
+    def halves(seam_pts, up, lo, extra=''):
+        sp = np.array([at(x, y) for x, y in seam_pts])
+        t = np.linspace(0, -np.pi, 90); top = np.stack([c[0] + r * np.cos(t), c[1] + r * np.sin(t)], 1)
+        t = np.linspace(0, np.pi, 90); bot = np.stack([c[0] + r * np.cos(t), c[1] + r * np.sin(t)], 1)
+        mk = M(f'<path d="{_d(sp)[:-2]}" fill="none" stroke="#000" stroke-width="{f(gap)}" stroke-linejoin="round"/>{extra}')
+        return (mk + f'<g mask="url(#{ns})"><path d="{_d(np.vstack([sp, top]))}" style="fill:{up}"/>'
+                f'<path d="{_d(np.vstack([sp, bot]))}" style="fill:{lo}"/></g>')
+
+    def bond(lw=.42, ll=.72, glow=False):
+        x, y = c[0] - lw * r / 2, c[1] - ll * r / 2
+        cut = f'<rect x="{f(x - gap)}" y="{f(y - gap)}" width="{f(lw * r + 2 * gap)}" height="{f(ll * r + 2 * gap)}" rx="{f(lw * r / 2 + gap)}" fill="#000"/>'
+        g = (f'<filter id="{ns}gl" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="{f(r * .22)}"/></filter>'
+             f'<ellipse cx="{f(c[0])}" cy="{f(c[1])}" rx="{f(r * .45)}" ry="{f(r * .6)}" style="fill:{G}" opacity=".7" filter="url(#{ns}gl)"/>') if glow else ''
+        return cut, g + f'<rect x="{f(x)}" y="{f(y)}" width="{f(lw * r)}" height="{f(ll * r)}" rx="{f(lw * r / 2)}" style="fill:{G}"/>'
+
+    line = [(-1.2, 0), (1.2, 0)]
+    if style in ('bridge', 'glow', 'twotone'):
+        cut, b = bond(glow=style == 'glow')
+        body = halves(line, P, pale if style == 'twotone' else P, cut) + b
+    elif style == 'clasp':
+        k = .5; rr = .4
+        body = (f'<rect x="{f(c[0] - .18 * r)}" y="{f(c[1] - k * r)}" width="{f(.36 * r)}" height="{f(2 * k * r)}" style="fill:{G}"/>'
+                + ''.join(f'<circle cx="{f(c[0])}" cy="{f(c[1] + s * k * r)}" r="{f(rr * r)}" style="fill:{G}"/>'
+                          f'<circle cx="{f(c[0] - .13 * r)}" cy="{f(c[1] + s * k * r - .13 * r)}" r="{f(.1 * r)}" fill="#fff" opacity=".55"/>' for s in (-1, 1)))
+    elif style == 'yinyang':
+        t1 = np.linspace(np.pi, 2 * np.pi, 40); t2 = np.linspace(np.pi, 0, 40)
+        s_ = [(-1.2, 0)] + [(-.5 + .5 * math.cos(t), .5 * math.sin(t)) for t in t1] + [(.5 + .5 * math.cos(t), .5 * math.sin(t)) for t in t2] + [(1.2, 0)]
+        body = halves(s_, P, pale)
+    elif style == 'jigsaw':
+        kc, kr, nk = .4, .28, .16                     # knob centre (below the seam), radius, half-width of its neck
+        a0 = math.atan2(-math.sqrt(kr ** 2 - nk ** 2), -nk); a1 = math.atan2(-math.sqrt(kr ** 2 - nk ** 2), nk) - 2 * np.pi
+        s_ = [(-1.2, 0), (-nk, 0)] + [(kr * math.cos(t), kc + kr * math.sin(t)) for t in np.linspace(a0, a1, 60)] + [(nk, 0), (1.2, 0)]
+        body = halves(s_, P, pale)
+    elif style == 'venn':
+        k, rr = .36, .62; cu, cl = at(0, -k), at(0, k)
+        lens = (f'<clipPath id="{ns}v"><circle cx="{f(cu[0])}" cy="{f(cu[1])}" r="{f(rr * r)}"/></clipPath>'
+                f'<circle cx="{f(cl[0])}" cy="{f(cl[1])}" r="{f(rr * r)}" style="fill:{G}" clip-path="url(#{ns}v)"/>')
+        rim = ''.join(f'<circle cx="{f(q[0])}" cy="{f(q[1])}" r="{f(rr * r)}" fill="none" stroke="#000" stroke-width="{f(gap)}"/>' for q in (cu, cl))
+        body = (M(rim) + f'<g mask="url(#{ns})"><circle cx="{f(cu[0])}" cy="{f(cu[1])}" r="{f(rr * r)}" style="fill:{P}"/>'
+                f'<circle cx="{f(cl[0])}" cy="{f(cl[1])}" r="{f(rr * r)}" style="fill:{pale}"/>{lens}</g>')
+    elif style == 'strand':
+        k, rr = .42, .34; white = 'color-mix(in srgb, var(--pearl) 20%, #fff)'
+        body = f'<line x1="{f(c[0])}" y1="{f(c[1] - 1.75 * r)}" x2="{f(c[0])}" y2="{f(c[1] + 1.75 * r)}" style="stroke:var(--outline)" stroke-width="{f(.1 * r)}" stroke-linecap="round"/>'
+        for s in (-1, 1):
+            for y in (1.04, 1.5):
+                body += f'<circle cx="{f(c[0])}" cy="{f(c[1] + s * y * r)}" r="{f(.17 * r)}" style="fill:{white};stroke:var(--outline)" stroke-width="{f(.06 * r)}"/>'
+        body += f'<rect x="{f(c[0] - .16 * r)}" y="{f(c[1] - k * r)}" width="{f(.32 * r)}" height="{f(2 * k * r)}" style="fill:{G}"/>'
+        body += ''.join(f'<circle cx="{f(c[0])}" cy="{f(c[1] + s * k * r)}" r="{f(rr * r)}" style="fill:{G}"/>' for s in (-1, 1))
+    else:
+        raise ValueError(style)
+    return f'<g transform="rotate({angle} {f(c[0])} {f(c[1])})">{body}</g>'
