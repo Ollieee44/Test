@@ -77,6 +77,7 @@ URL, so the client's link stays the same:
 | **Multi-page site** (`site/pages/index.html`; publish with `files` mapping each other page plus `oyster.css` and `oyster.js`) | https://claude.ai/artifact/QVr3B1xEHBfEsFQDmtSgU2 |
 | **Website v2** (`site/v2/pages/index.html`; publish with `files` mapping each other page plus `site.css` and `site.js`) | https://claude.ai/artifact/QDNhDiXarQizvhVyZTPQQT |
 | **Hero mockups**: four static heroes around a still of the SELFTAC ternary complex (`site/v2/heroes/index.html`; `build_heroes.py --harness`, then `render_heroes.js`, then `build_heroes.py`; publish with `files` mapping `img/*.png`) | https://claude.ai/artifact/5eRxZXLuywhZRSiFr7KgzF |
+| **SELFTAC pearl variations**: eight Tidepool heroes with the linker's join as a realistic pearl, a grid (`site/v2/pearl/index.html`; `../heroes/build_heroes.py --harness`, then `render_pearl.js`, then `build_pearl.py`; publish with `files` mapping `img/*.png`) | https://claude.ai/artifact/9XAcpE2ngAZ7xAihnTwcsC |
 | Palette explorer (`site/palettes.html`) | https://claude.ai/artifact/AfzgUFchFXjBXQWcboMYMy |
 | Current website (`site/index.html`) | https://claude.ai/artifact/9pFqdk4otTS46U21phpLCk |
 | 3D story (`landing/landing.html`) | https://claude.ai/artifact/9aJKZGFD5fzeHUrQu9EPTk |
