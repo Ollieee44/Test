@@ -22,7 +22,7 @@ if '--harness' in sys.argv:
     open(D + '.harness.html', 'w').write(s)
     print('.harness.html written'); sys.exit()
 
-A = {k: json.load(open(D + f'img/{k}.json')) for k in ('a-centre', 'b-split', 'c-annot', 'd-macro')}
+A = {k: json.load(open(D + f'img/{k}.json')) for k in ('a-centre', 'b-split', 'c-annot', 'd-macro', 'e-pearl')}
 home = re.search(r'<a class="home".*?</a>', open(PAGES + 'index.html').read(), re.S).group(0)
 WM = re.search(r'<svg class="wm".*?</svg>', home, re.S).group(0)
 CG = '<svg class="cg" viewBox="0 0 30 12" aria-hidden="true"><line x1="6" y1="6" x2="24" y2="6"/><circle cx="6" cy="6" r="4.6"/><circle cx="24" cy="6" r="4.6"/></svg>'
@@ -101,10 +101,26 @@ mockD = (f'<div class="mock" style="{tokens("shellcoral")}">'
          + tag('Reversible linker', cx, cy + 30, cx + 20, cy + 100, 'chip')
          + f'<p class="cr r">{CREDIT}</p></div>')
 
+# E: D made abstract (Shell Coral). The ends of the degrader are plain glossy pods and the reversible linker's join is
+# one large pearl, named as such: the pearl strand with the pearl at its heart
+CREDIT_E = ('BRD4, VHL and Elongin B and C from PDB 5T35 (Gadd et al., Nat. Chem. Biol. 2017). The degrader is drawn abstractly '
+            'and larger than true scale, with the proteins eased apart so its linker shows.')
+PEARL = '<svg class="cg" viewBox="0 0 30 12" aria-hidden="true" style="width:14px"><circle cx="6" cy="6" r="5.4"/></svg>'   # one pearl, for the pearl
+boxE = (0, 70, 1440, 810)
+cx, cy = pt('e-pearl', 'clasp', boxE)
+mockE = (f'<div class="mock" style="{tokens("shellcoral")}">'
+         f'<img src="img/e-pearl.png" alt="" style="left:{boxE[0]}px;top:{boxE[1]}px;width:{boxE[2]}px;height:{boxE[3]}px">{head()}'
+         f'<div class="dl"><p class="ey">{PEARL}<span>The pearl</span></p><h2 class="h1">Where two halves become one degrader.</h2>'
+         f'<p class="lede">{SELFTAC} molecules travel as two small halves. Inside the cell they close at the pearl, a reversible linker, and rebuild the full degrader.</p>'
+         f'{ctas("See how it works", "Our pipeline")}</div>'
+         + tag('The pearl &middot; reversible linker', cx, cy + 62, cx + 20, cy + 120, 'chip')
+         + f'<p class="cr r">{CREDIT_E}</p></div>')
+
 MOCKS = [('A', 'Centre stage', 'Nacre', 'The complex runs across the middle under the line, with three plain labels. The calmest of the four.', mockA, 'a-centre'),
          ('B', 'Split', 'Tidepool', 'Copy on the left as on the current site, the complex in three-quarter view bleeding off the right edge, one chip on the clasp.', mockB, 'b-split'),
          ('C', 'Annotated', 'Nacre', 'The complex as a labelled diagram: both ends of the degrader, the linker and clasp, the target and the ligase. Most explanatory.', mockC, 'c-annot'),
-         ('D', 'Macro', 'Shell Coral', 'Close in on the linker and clasp on a rising diagonal, the proteins cropped into opposite corners, the line top left. Most striking.', mockD, 'd-macro')]
+         ('D', 'Macro', 'Shell Coral', 'Close in on the linker and clasp on a rising diagonal, the proteins cropped into opposite corners, the line top left. Most striking.', mockD, 'd-macro'),
+         ('E', 'Macro, abstract', 'Shell Coral', 'D made abstract: each end of the degrader is a plain glossy pod, and the reversible linker meets at one large pearl, called the pearl. The linker is the only detailed thing in the picture.', mockE, 'e-pearl')]
 
 page = '''<title>Oyster Hero Mockups</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">

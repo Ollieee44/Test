@@ -14,6 +14,7 @@ const IMG = HERE + 'img/';
     { out: IMG + 'a-centre.png', pal: 'nacre', k: 2.4, pull: 10, dist: 340, look: [14, 2, 0], dir: [0, .18, 1], w: 1440, h: 600, dpr: 2 },
     { out: IMG + 'b-split.png', pal: 'tidepool', k: 2.6, pull: 12, dist: 380, look: [14, 2, 0], dir: [-.55, .35, 1], w: 860, h: 810, dpr: 2 },
     { out: IMG + 'c-annot.png', pal: 'nacre', k: 2.4, pull: 14, dist: 360, look: [14, 0, 0], dir: [0, .1, 1], w: 1440, h: 620, dpr: 2 },
+    { out: IMG + 'e-pearl.png', pal: 'shellcoral', k: 2.6, pull: 10, dist: 225, look: [14, 10, 0], dir: [-.2, .22, 1], roll: 18, w: 1440, h: 810, dpr: 2, abstract: true },
     { out: IMG + 'd-macro.png', pal: 'shellcoral', k: 2.6, pull: 10, dist: 225, look: [14, 10, 0], dir: [-.2, .22, 1], roll: 18, w: 1440, h: 810, dpr: 2 },
   ];
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -38,6 +39,27 @@ const IMG = HERE + 'img/';
       const mW = cW.clone().sub(brk).multiplyScalar(k - 1), mE = cE.clone().sub(brk).multiplyScalar(k - 1);
       d.P.brd4.position.add(mW); for (const key of ['vhl', 'elob', 'eloc']) d.P[key].position.add(mE);
       const pull = s.pull || 0; d.P.brd4.position.x -= pull; for (const key of ['vhl', 'elob', 'eloc']) d.P[key].position.x += pull;   // exploded a little so both ends of the degrader show
+      // abstract: each half becomes a smooth glossy pod in its own colour, and the clasp (two beads and the bond) one
+      // larger pearl at the join. Built in the molecule's own frame, so they scale with it; removed before the next shot
+      (d.mol.group.userData.extra || []).forEach(o => d.mol.group.remove(o)); d.mol.group.userData.extra = [];
+      const ch = d.mol.group.children, heads = [ch[0], ch[1]], claspSet = [ch[4], ch[5], ch[9]];
+      heads.concat(claspSet).forEach(o => { o.visible = true; });
+      if (s.abstract) {
+        const bondAt = ch[9].position.clone(), bondLen = ch[9].scale.y, lineMat = heads[0].children[0].material;
+        const add = (geo, mat, pos, quat) => { const m = new d.THREE.Mesh(geo, mat); m.position.copy(pos); if (quat) m.quaternion.copy(quat);
+          const o = new d.THREE.Mesh(geo, lineMat); o.renderOrder = -1; m.add(o); d.mol.group.add(m); d.mol.group.userData.extra.push(m); return m; };
+        // a pod on each end of the strand, threaded on it like the end bead of a string and seated in its protein
+        [ch[7], ch[8]].forEach((t, i) => { const h = heads[i]; h.visible = false;
+          const path = t.geometry.parameters.path, u = i === 0 ? 0 : 1, end = path.getPointAt(u), dir = path.getTangentAt(u).normalize();
+          h.geometry.computeBoundingSphere(); const r = h.geometry.boundingSphere.radius;
+          const pod = new d.THREE.CapsuleGeometry(r * .33, r * .55, 12, 28);
+          add(pod, h.material, end.clone().addScaledVector(dir, (i === 0 ? -1 : 1) * r * .2), new d.THREE.Quaternion().setFromUnitVectors(V(0, 1, 0), dir)); });
+        claspSet.forEach(o => { o.visible = false; });
+        // the pearl: one sphere at the join, wide enough to take both ends of the strand
+        const pr = Math.max(2.3, bondLen / 2 + .9);
+        add(new d.THREE.SphereGeometry(pr, 48, 32), ch[4].material, bondAt);
+        ch[6].scale.setScalar(13 * (s.glow || 1.4));
+      }
       const tgt = brk.clone().add(V(...(s.look || [0, 0, 0])));
       const dir = V(...(s.dir || [0, .15, 1])).normalize();
       d.camera.fov = s.fov || 26; d.camera.position.copy(tgt).addScaledVector(dir, s.dist || 260);
