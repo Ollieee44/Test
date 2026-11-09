@@ -182,3 +182,67 @@ meshes = re.search(r'<script type="application/json" id="meshes">.*?</script>', 
 page = (head + '<main id="main">\n' + story + '</main>\n' + meshes + '\n<script type="module">' + prefix + "\npal = 'tidepool';   // Tidepool only\n" + open(D + 'journey.js').read() + '</script>\n' + SMALL)
 open(D + 'index.html', 'w').write(page)
 print('index.html', os.path.getsize(D + 'index.html') // 1024, 'KB')
+
+# ---------- the oyster-tx.com theme (otx/index.html): the same journey restyled after the new site ----------
+# Emerald ground with a speckle of tiny dots, Geist and Monomaniac One, translucent rounded controls, proteins as
+# particle clouds (otx.js), the degrader in the site's icon colours (pink to the target, pale blue to the ligase,
+# a yellow join), and the site's headline and mark on the end card. Colours sampled from the site's screenshots.
+import random, urllib.parse
+rnd = random.Random(11)
+dots = []
+for _ in range(300):
+    r = rnd.random()
+    col = '#FFFFFF' if r < .55 else '#CFFFFF' if r < .8 else rnd.choice(['#F7D16B', '#96FF87', '#FFB36B'])
+    dots.append(f'<circle cx="{rnd.uniform(0, 520):.1f}" cy="{rnd.uniform(0, 520):.1f}" r="{rnd.uniform(.5, 1.35):.2f}" fill="{col}" fill-opacity="{rnd.uniform(.22, .85):.2f}"/>')
+STARS = 'data:image/svg+xml,' + urllib.parse.quote('<svg xmlns="http://www.w3.org/2000/svg" width="520" height="520">' + ''.join(dots) + '</svg>')
+OTX_CSS = '''<style>
+/* oyster-tx.com: emerald, white type with mint accents, Geist and Monomaniac One, translucent rounded controls */
+:root[data-palette="otx"] { --ink: #F5FFFC; --muted: #A8D8C6; --accent: #30FCBA; --paper: #158B63; --band: #12805B; --pearl: #F7D16B; --clasp: #F7D16B;
+  --line: rgba(245, 255, 252, .22); --card: rgba(255, 255, 255, .08); --sans: "Geist", "Helvetica Neue", Arial, sans-serif; --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+  --pixel: "Monomaniac One", "Geist Mono", ui-monospace, monospace; color-scheme: dark; }
+body { font-family: var(--sans); }
+.jstars { position: absolute; inset: 0; pointer-events: none; background-image: url("''' + STARS + '''"); background-size: 520px 520px; opacity: .9; }
+.beat .k { font: 400 15px/1 var(--pixel); letter-spacing: .03em; text-transform: uppercase; color: var(--ink); }
+.beat .k b { font-weight: 400; color: #8AC3B1; margin-right: 8px; }
+.beat h1, .beat h2 { font-weight: 400; color: #FFFFFF; }
+.beat p { color: rgba(245, 255, 252, .84); font-family: var(--sans); }
+.jl { font: 400 11px/1.25 var(--mono); letter-spacing: .14em; background: rgba(12, 92, 64, .55); border-radius: 6px; }
+.jl.hi { color: var(--accent); }
+.jl.plus { font: 400 34px/1 var(--serif); }
+.skip, .end a { border-radius: 12px; background: rgba(255, 255, 255, .17); border: 1px solid rgba(255, 255, 255, .12); color: #FFFFFF; font: 500 14px/1 var(--sans); }
+.skip:hover, .end a:hover { background: rgba(255, 255, 255, .28); color: #FFFFFF; border-color: rgba(255, 255, 255, .2); }
+.rail span { font: 400 12px/1 var(--pixel); letter-spacing: .04em; }
+.hint { font-family: var(--mono); }
+.end .otx-logo { width: min(40vw, 420px); height: auto; color: #FFFFFF; }
+.end .tag { margin: 0; font: 400 clamp(26px, 3.2vw, 50px)/1.06 var(--serif); letter-spacing: -.015em; color: #FFFFFF; text-wrap: balance; }
+.end .tag em { font-style: normal; color: var(--accent); }
+@media (max-width: 760px) { .end .otx-logo { width: 62vw; } .beat .k { font-size: 13px; } }
+</style>
+'''
+# the mark (two brackets and the join, as in the site's logo) and the name, redrawn from the site's screenshots
+OTX_LOGO = ('<svg class="otx-logo" viewBox="0 0 300 92" role="img" aria-label="Oyster Therapeutics" translate="no">'
+            '<g fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">'
+            '<path d="M 34 8 V 30 Q 34 40 24 40 H 8"/><path d="M 84 52 H 62 Q 52 52 52 62 V 84"/></g>'
+            '<circle cx="45" cy="46" r="4.6" fill="currentColor"/>'
+            '<text x="102" y="56" fill="currentColor" style="font: 500 54px Geist, Helvetica Neue, Arial, sans-serif; letter-spacing: -1px">oyster</text>'
+            '<text x="160" y="78" fill="currentColor" style="font: 400 15px Geist, Helvetica Neue, Arial, sans-serif">therapeutics</text></svg>')
+otx_story = story.replace('<div class="stage" id="stage">', '<div class="stage" id="stage"><div class="jstars" id="jstars" aria-hidden="true"></div>', 1)
+otx_story = re.sub(r'<span class="k">(\d\d) &middot; ([^<]+)</span>', r'<span class="k"><b>\1</b>\2</span>', otx_story)
+otx_story = re.sub(r'<svg class="lt".*?</svg>', OTX_LOGO, otx_story, count=1, flags=re.S)
+otx_story = once(otx_story, '<p>Oral, brain-penetrant protein degraders.</p>', '<p class="tag">Targeted protein degradation <em>beyond conventional limits.</em></p>')
+otx_head = head.replace('data-palette="tidepool"', 'data-palette="otx"', 1)
+otx_head = otx_head.replace('<title>SELFTAC Journey</title>', '<title>SELFTAC Journey, New Site</title>', 1)
+otx_head = re.sub(r'<meta name="theme-color" content="[^"]*">', '<meta name="theme-color" content="#158B63">', otx_head)
+otx_head = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com/css2\?[^"]*">',
+                  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Monomaniac+One&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">', otx_head)
+otx_head += OTX_CSS
+OTX_PAL = ("PAL.otx = { ...PAL.tidepool, ring: '#0F5A41', ink: '#0B3B2B', brd4: '#F0A6CA', vhl: '#CEE5F3', elob: '#6CFEED', eloc: '#30FCBA', "
+           "warhead: '#F0A6CA', e3lig: '#CEE5F3', linker: '#F5FFFC', brk: '#F7D16B', ub: '#F0A6CA', pearl3d: '#FFFFFF', clasp: '#F7D16B', "
+           "e2: '#CEE5F3', prot: '#6CFEED', wall: '#2E9E78', cell: '#2E9E78', flash: '#F7D16B', "
+           "sky: [['#1A9A6E', '#158B63'], ['#1A9A6E', '#158B63'], ['#17845F', '#0F6A4E']] };\npal = 'otx';   // the oyster-tx.com palette only\n")
+otx_prefix = once(prefix, "import * as THREE from 'three';", "import * as THREE from 'three';\nimport { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';")
+os.makedirs(D + 'otx', exist_ok=True)
+otx_page = (otx_head + '<main id="main">\n' + otx_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + OTX_PAL
+            + open(D + 'journey.js').read() + '\n' + open(D + 'otx.js').read() + '</script>\n' + SMALL)
+open(D + 'otx/index.html', 'w').write(otx_page)
+print('otx/index.html', os.path.getsize(D + 'otx/index.html') // 1024, 'KB')
