@@ -61,6 +61,12 @@ three.js from an npm install of `three@0.160.0`, and font files. Launch Chromium
 Check desktop (1440×900) and phone (390×844), and both palettes (click `.pal button[data-pal=tidepool]`).
 Look at the screenshots before reporting.
 
+## PowerPoint version of the journey (new-site style)
+
+`site/v2/journey/deck/`: `export_deck.js` (stills of each element and 25 keyframes measured from the live
+animation) → `prep_deck.py` → `build_deck.js` (pptxgenjs; every element named `!!…` on every slide) → `post_deck.py`
+(Morph on every slide, auto-advance, de-duplicated pictures) → `selftac-journey.pptx`. Fonts: Georgia, Aptos, Consolas.
+
 ## Publish
 
 Copy the built HTML into the session scratchpad and publish it with the Artifact tool to the existing
