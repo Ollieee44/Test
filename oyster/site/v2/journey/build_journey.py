@@ -219,13 +219,9 @@ body { font-family: var(--sans); }
 @media (max-width: 760px) { .end .otx-logo { width: 62vw; } .beat .k { font-size: 13px; } }
 </style>
 '''
-# the mark (two brackets and the join, as in the site's logo) and the name, redrawn from the site's screenshots
-OTX_LOGO = ('<svg class="otx-logo" viewBox="0 0 300 92" role="img" aria-label="Oyster Therapeutics" translate="no">'
-            '<g fill="none" stroke="currentColor" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">'
-            '<path d="M 34 8 V 30 Q 34 40 24 40 H 8"/><path d="M 84 52 H 62 Q 52 52 52 62 V 84"/></g>'
-            '<circle cx="45" cy="46" r="4.6" fill="currentColor"/>'
-            '<text x="102" y="56" fill="currentColor" style="font: 500 54px Geist, Helvetica Neue, Arial, sans-serif; letter-spacing: -1px">oyster</text>'
-            '<text x="160" y="78" fill="currentColor" style="font: 400 15px Geist, Helvetica Neue, Arial, sans-serif">therapeutics</text></svg>')
+# the site's logo, traced from a screenshot of oyster-tx.com (trace_otx_logo.py writes otx_logo.svg); swap in the
+# real file when there is one
+OTX_LOGO = open(D + 'otx_logo.svg').read().replace('<svg ', '<svg class="otx-logo" role="img" aria-label="Oyster Therapeutics" translate="no" ', 1)
 otx_story = story.replace('<div class="stage" id="stage">', '<div class="stage" id="stage"><div class="jstars" id="jstars" aria-hidden="true"></div>', 1)
 otx_story = re.sub(r'<span class="k">(\d\d) &middot; ([^<]+)</span>', r'<span class="k"><b>\1</b>\2</span>', otx_story)
 otx_story = re.sub(r'<svg class="lt".*?</svg>', OTX_LOGO, otx_story, count=1, flags=re.S)
