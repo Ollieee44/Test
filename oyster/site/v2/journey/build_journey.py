@@ -76,17 +76,39 @@ for r, inward in ((R, 1), (R + BAND, -1)):
 membrane = (f'<g id="jmem"><path d="{band}" style="fill:var(--ink);fill-opacity:.07"/>'
             f'<g style="stroke:var(--ink);stroke-opacity:.28;stroke-width:1">{"".join(tails)}</g>'
             f'<g style="fill:var(--muted);fill-opacity:.75">{"".join(heads)}</g></g>')
-# the person, facing right, drawn y-down and flipped into the world (head about y 42, the gut at y -25)
-PERSON_D = ('M -10,-74 C -2,-80 10,-78 14,-70 C 16,-66 16,-62 17,-59 L 21,-53 L 17,-51 C 17,-49 17,-48 18,-46 C 17,-45 16,-44 17,-43 '
-            'C 16,-40 14,-37 11,-36 C 9,-35 8,-33 8,-29 L 9,-22 C 20,-19 34,-15 38,-2 L 42,80 L -42,80 L -38,-2 C -34,-15 -20,-19 -10,-22 '
-            'L -10,-30 C -18,-36 -20,-48 -19,-58 C -18,-68 -14,-72 -10,-74 Z')
-GUT = ('<circle cx="0" cy="25" r="21" style="fill:var(--paper);fill-opacity:.9;stroke:var(--ink);stroke-width:1.6"/>'
-       '<g style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round">'
-       '<path d="M -12 36 L -12 15 Q -12 10 -7 10 L 7 10 Q 12 10 12 15 L 12 33 Q 12 37 8 37 L 3 37"/>'
-       '<path d="M -7 16 C -2 13 4 13 7 16 C 4 19 -3 19 -7 22 C -3 25 4 25 7 22 C 4 26 -2 28 -6 30"/>'
-       '<path d="M 1 37 L 1 43"/></g>')
-person = (f'<g id="jperson"><g transform="scale(1 -1)"><path d="{PERSON_D}" style="fill:url(#jpersonG)"/>'
-          f'<path d="M 16,-40 L 26,-44" style="stroke:var(--ink);stroke-opacity:.25;stroke-width:1"/>{GUT}</g></g>')
+# the person in side profile, facing right, drawn y-down and flipped into the world (the lips about y -42, the gut at
+# y -25): skull, brow, nose, lips and chin, the jaw into the throat, chest and back, with a faint edge and an ear
+HEAD_NECK = ('M -4,-82 C 6,-83 13,-76 15,-67 C 16,-63 16.5,-60 16.8,-57.5 C 17.2,-55.5 17.8,-54 19,-52 C 21,-49 23,-47.6 22.5,-46.6 '
+             'C 22,-45.6 19.5,-45.4 18.3,-45 C 18.8,-44 19.2,-43.2 18.9,-42.4 C 18.4,-41.8 17.6,-41.6 17.6,-41.2 C 18.6,-40.6 18.8,-39.4 18.1,-38.6 '
+             'C 17.2,-37.8 16.4,-37.6 16.6,-36.6 C 17.4,-35 17.6,-32 16,-30.2 C 13.5,-28 9,-27.5 6.5,-27 C 6,-22 6.5,-16 8,-12 ')
+FRONT = 'C 11,-8 16,-5 19,1 C 23,9 24,16 23,26 C 22.5,34 23.5,42 24,52 C 24.5,62 23.5,72 23,88'
+BACK = ('M -21,88 C -21.5,70 -22,56 -21,44 C -20,34 -19.5,24 -20.5,14 C -21.5,4 -21,-4 -17,-10 C -15,-14 -13,-19 -12,-24 '
+        'C -12,-30 -14,-34 -16,-38 C -21,-46 -23,-58 -20,-68 C -17,-77 -11,-82 -4,-82')
+PERSON_D = HEAD_NECK + FRONT + ' L -21,88 ' + BACK[len('M -21,88 '):] + ' Z'          # the filled silhouette
+EDGE_D = HEAD_NECK + FRONT + ' M ' + BACK[2:]                                       # its outline, open at the bottom
+ARM = 'M -9,-8 C -7,-15 4,-17 9,-10 C 12,-5 11,8 10,24 C 9.5,34 9,42 8,50 C 6,53 -6,53 -8,50 C -9.5,40 -10.5,20 -9,-8 Z'
+EAR = 'M -2.5,-55 C 1,-56 2.5,-52 1.8,-49 C 1.2,-46.5 -1,-45.5 -2.6,-46.4'
+# the gut, front view in an inset: the oesophagus in at the top, a J-shaped stomach, the small intestine coiled in
+# the middle, and the large intestine framing it down to the rectum; each tube an ink outline round a light core
+def tube(d, w, core):
+    return (f'<path d="{d}" style="fill:none;stroke:var(--ink);stroke-width:{w};stroke-linecap:round;stroke-linejoin:round"/>'
+            f'<path d="{d}" style="fill:none;stroke:var(--paper);stroke-width:{core};stroke-linecap:round;stroke-linejoin:round"/>')
+COLON = 'M 0 40 C -6 41 -13 40 -13.5 35 L -13.5 21 C -13.5 17.5 -11 16 -7 16 L 7 16.5 C 11 16.5 13.5 18 13.5 22 L 13.5 33 C 13.5 37.5 9.5 39 5.5 39.5 L 2.5 40.5 L 2.5 45.5'
+SMALL = 'M 6 20.5 C 2 19.3 -6 19.3 -8.5 21.3 C -10 23.3 -6 24.8 0 24.4 C 6 24 9.5 25 9 27.4 C 8.5 29.9 3 30 -2 29.6 C -7 29.2 -10 30.6 -8.5 33 C -7 35 0 35.4 4 34.6'
+# the stomach as a filled J: the oesophagus comes in at its top left, the sac swells to the right and narrows
+# back toward the middle, where the duodenum leaves for the small intestine
+STOMACH = 'M -1.6 3.2 L -1.6 6.2 C -1.6 9.6 1.4 12.2 5.2 12.6 C 9.2 13 12.8 11.4 12.9 8.2 C 13 5.2 10.4 3.4 7.6 4.6 C 5.8 5.4 4.6 6.6 3 6.6 C 1.6 6.6 1.2 5.4 1.2 3.2 Z'
+GUT = (f'<circle cx="0" cy="25" r="22" style="fill:var(--paper);fill-opacity:.92;stroke:var(--ink);stroke-width:1.6"/>'
+       f'<circle id="jgutring" cx="0" cy="25" r="25.5" style="fill:none;stroke:var(--accent);stroke-width:2;opacity:0"/>'
+       f'<g>{tube(COLON, 4.4, 2)}{tube(SMALL, 3.2, 1.3)}<path d="{STOMACH}" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round"/><path d="M 4.5 12.4 C 4.5 15 3 17 1 18.6" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round"/></g>')
+ROUTE = 'M 17.5,-41.6 C 13,-39 9.5,-33 8,-25 C 6.5,-16 4,-6 0.5,2.5'
+person = (f'<g id="jperson"><g transform="scale(1 -1)">'
+          f'<path d="{PERSON_D}" style="fill:url(#jpersonG)"/>'
+          f'<path d="{ARM}" style="fill:var(--ink);fill-opacity:.05;stroke:url(#jedgeG);stroke-width:1"/>'
+          f'<path d="{EDGE_D}" style="fill:none;stroke:url(#jedgeG);stroke-width:1.1;stroke-linejoin:round;stroke-linecap:round"/>'
+          f'<path d="{EAR}" style="fill:none;stroke:var(--ink);stroke-opacity:.35;stroke-width:1;stroke-linecap:round"/>'
+          f'<path id="jroute" d="{ROUTE}" style="fill:none;stroke:var(--accent);stroke-opacity:.7;stroke-width:1.4;stroke-dasharray:2 3;stroke-linecap:round;opacity:0"/>'
+          f'{GUT}</g></g>')
 pill = ('<g id="jpill"><rect x="-8" y="-3.2" width="16" height="6.4" rx="3.2" style="fill:var(--mol-b, #8A73B2)"/>'
         '<path d="M 0 -3.2 L -4.8 -3.2 A 3.2 3.2 0 0 0 -4.8 3.2 L 0 3.2 Z" style="fill:var(--mol-a, #B4678B)"/>'
         '<rect x="-.9" y="-3.2" width="1.8" height="6.4" style="fill:var(--mol-c, #D9A443)"/>'
@@ -97,6 +119,8 @@ svg = (f'<svg id="jsvg" class="jsvg" aria-hidden="true"><defs>'
        '<stop offset="0" style="stop-color:var(--accent);stop-opacity:.24"/><stop offset=".55" style="stop-color:var(--accent);stop-opacity:.09"/><stop offset="1" style="stop-color:var(--accent);stop-opacity:.02"/></linearGradient>'
        '<linearGradient id="jpersonG" gradientUnits="userSpaceOnUse" x1="0" y1="-80" x2="0" y2="80">'
        '<stop offset="0" style="stop-color:var(--ink);stop-opacity:.16"/><stop offset=".75" style="stop-color:var(--ink);stop-opacity:.12"/><stop offset="1" style="stop-color:var(--ink);stop-opacity:0"/></linearGradient>'
+       '<linearGradient id="jedgeG" gradientUnits="userSpaceOnUse" x1="0" y1="-84" x2="0" y2="88">'
+       '<stop offset="0" style="stop-color:var(--ink);stop-opacity:.38"/><stop offset=".72" style="stop-color:var(--ink);stop-opacity:.3"/><stop offset="1" style="stop-color:var(--ink);stop-opacity:0"/></linearGradient>'
        f'</defs><g id="jworld">{beam}{membrane}{person}{pill}</g></svg>')
 
 EQ = ('<svg viewBox="0 0 52 24" aria-hidden="true"><path d="M4 8 H46 L39 3" fill="none" stroke="var(--clasp)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'

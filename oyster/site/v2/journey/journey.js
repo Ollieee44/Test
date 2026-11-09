@@ -49,6 +49,7 @@ const HERO_X = curve([[0, X.mono], [.42, X.mono], [.6, X.inside], [.68, X.comple
 
 // ---------- the flat layer (SVG, world units in the z = 0 plane) and the labels ----------
 const svgNS = 'http://www.w3.org/2000/svg', world = document.getElementById('jworld');
+const route = document.getElementById('jroute'), routeLen = route.getTotalLength(), gutRing = document.getElementById('jgutring');
 const pill = document.getElementById('jpill'), beam = document.getElementById('jbeam'), membrane = document.getElementById('jmem'), person = document.getElementById('jperson');
 const plus = document.getElementById('jplus');
 const LABELS = [...document.querySelectorAll('.jl[data-x]')].map(el => ({ el, x: +el.dataset.x, y: +el.dataset.y, a: +el.dataset.a, b: +el.dataset.b }));
@@ -68,11 +69,18 @@ function frame(p0) {
   const k = stage.clientHeight / vh, tx = stage.clientWidth / 2 - ax * k, ty = stage.clientHeight / 2 + ay * k;
   world.setAttribute('transform', `matrix(${k.toFixed(5)} 0 0 ${(-k).toFixed(5)} ${tx.toFixed(2)} ${ty.toFixed(2)})`);
 
-  // ---- 01 oral dosing: the capsule goes in by mouth
-  const pp = ease(clamp((p - .025) / .1, 0, 1));
-  const px = 74 + (19 - 74) * pp, py = 64 + (43 - 64) * pp - 10 * Math.sin(Math.PI * pp);
-  pill.setAttribute('transform', `translate(${px.toFixed(2)} ${py.toFixed(2)}) rotate(${(-18 + 18 * pp).toFixed(1)}) scale(${(1 - .7 * pp).toFixed(3)})`);
-  pill.style.opacity = (1 - clamp((pp - .86) / .14, 0, 1)).toFixed(3);
+  // ---- 01 oral dosing: the capsule goes in by mouth, then down the throat along the dotted route into the gut
+  const pp = ease(clamp((p - .02) / .08, 0, 1)), pr = ease(clamp((p - .1) / .055, 0, 1));
+  let px, py, rot, pls;
+  if (pr <= 0) { px = 74 + (18 - 74) * pp; py = 64 + (42 - 64) * pp - 10 * Math.sin(Math.PI * pp); rot = -18 + 18 * pp; pls = 1 - .45 * pp; }
+  else {   // the route is drawn y-down inside the person, so its points flip into the world
+    const L = routeLen * pr, a = route.getPointAtLength(L), b = route.getPointAtLength(Math.min(routeLen, L + .5));
+    px = a.x; py = -a.y; rot = Math.atan2(-(b.y - a.y), b.x - a.x) * 180 / Math.PI; pls = .55 - .15 * pr;
+  }
+  pill.setAttribute('transform', `translate(${px.toFixed(2)} ${py.toFixed(2)}) rotate(${rot.toFixed(1)}) scale(${pls.toFixed(3)})`);
+  pill.style.opacity = (1 - clamp((p - .152) / .012, 0, 1)).toFixed(3);
+  route.style.opacity = kf(p, [[.085, 0], [.105, 1]]).toFixed(3);
+  gutRing.style.opacity = bump(p, .148, .175).toFixed(3);   // the gut answers as the capsule arrives
   person.style.opacity = kf(p, [[.13, 1], [.19, 0]]).toFixed(3);   // gone before the copy changes over
   // the gut's absorption, a warm beam carrying the molecules to the membrane
   beam.style.opacity = (kf(p, [[.08, 0], [.17, 1], [.56, 1], [.64, 0]])).toFixed(3);
