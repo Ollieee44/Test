@@ -534,7 +534,7 @@ requestAnimationFrame(loop);
 // test hook: hold the journey at progress p (0-1)
 window.__journey = window.__story = { frame: p => { hold = true; prog = p; frame(p); if (renderer) renderer.render(scene, camera); drawnSig = ''; }, setPal: v => { pal = v; applyPalette(); } };
 
-// ---------- oyster-tx.com theme: proteins as particle clouds on emerald, in the site's pink, pale blue and yellow ----------
+// ---------- oyster-tx.com theme: the site's emerald, speckle, pink, pale blue and yellow ----------
 // The story and timing are the journey's own; this restyles it. Each protein (and the proteasome) is drawn as a cloud
 // of glittering points sampled over its surface, like the hero of oyster-tx.com: the target in pink, the ligase in pale
 // blue, Elongin B and C and the proteasome in mint and cyan, all with a few yellow-green flecks. The degrader keeps its
@@ -571,19 +571,24 @@ function toCloud(mesh, n, cols, opts = {}) {
   mesh.parent.add(pts); mesh.visible = false; return pts;
 }
 const PINK = ['#F59BC8', '#F0A6CA', '#FF8FC3', '#FBC6E0'], BLUE = ['#BFE3FF', '#CEE5F3', '#9FD3F5', '#DCEFFB'], MINT = ['#6CFEED', '#30FCBA', '#B8FFF1', '#4FE8D0'];
-toCloud(P.brd4.children[0], 15000, PINK);
-toCloud(P.vhl.children[0], 15000, BLUE);
-toCloud(P.elob.children[0], 9000, MINT);
-toCloud(P.eloc.children[0], 9000, MINT);
-prot.children.filter(o => o.isMesh).forEach(m => toCloud(m, 2600, MINT, { fuzz: .8 }));
-frags.forEach(f => { f.pts = cloud(f.m.geometry, 320, PINK, .07, .25, .55); scene.add(f.pts); });
+// the proteins keep the journey's own solid, contour-lined finish in the new colours; set OTX_PARTICLES to draw them
+// as particle clouds instead, like the site's hero
+const OTX_PARTICLES = false;
+if (OTX_PARTICLES) {
+  toCloud(P.brd4.children[0], 15000, PINK);
+  toCloud(P.vhl.children[0], 15000, BLUE);
+  toCloud(P.elob.children[0], 9000, MINT);
+  toCloud(P.eloc.children[0], 9000, MINT);
+  prot.children.filter(o => o.isMesh).forEach(m => toCloud(m, 2600, MINT, { fuzz: .8 }));
+  frags.forEach(f => { f.pts = cloud(f.m.geometry, 320, PINK, .07, .25, .55); scene.add(f.pts); });
+}
 
 // the speckled ground drifts a little as the camera pans, and the points keep their size in world units
 const stars = document.getElementById('jstars');
 const frameBase = frame;
 frame = function (p) {
   frameBase(p);
-  frags.forEach(f => { f.pts.position.copy(f.m.position); f.pts.rotation.copy(f.m.rotation); f.pts.scale.copy(f.m.scale); f.pts.visible = f.m.visible; f.m.visible = false; });   // the cloud stands in for the solid piece
+  if (OTX_PARTICLES) frags.forEach(f => { f.pts.position.copy(f.m.position); f.pts.rotation.copy(f.m.rotation); f.pts.scale.copy(f.m.scale); f.pts.visible = f.m.visible; f.m.visible = false; });   // the cloud stands in for the solid piece
   const fov = THREE.MathUtils.degToRad(camera.fov);
   ptMat.uniforms.uPx.value = renderer ? renderer.domElement.height / (2 * Math.tan(fov / 2)) : 600;
   const k = stage.clientHeight / (2 * camera.position.z * Math.tan(fov / 2));
