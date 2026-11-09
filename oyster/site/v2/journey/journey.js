@@ -73,7 +73,7 @@ function frame(p0) {
   // ---- 01 oral dosing: the capsule goes in by mouth, then down the throat along the dotted route into the gut
   const pp = ease(clamp((p - .02) / .08, 0, 1)), pr = ease(clamp((p - .1) / .055, 0, 1));
   let px, py, rot, pls;
-  if (pr <= 0) { px = 74 + (18 - 74) * pp; py = 64 + (42 - 64) * pp - 10 * Math.sin(Math.PI * pp); rot = -18 + 18 * pp; pls = 1 - .45 * pp; }
+  if (pr <= 0) { px = 74 + (19 - 74) * pp; py = 64 + (44.4 - 64) * pp - 10 * Math.sin(Math.PI * pp); rot = -18 + 18 * pp; pls = 1 - .45 * pp; }
   else {   // the route is drawn y-down inside the person, so its points flip into the world
     const L = routeLen * pr, a = route.getPointAtLength(L), b = route.getPointAtLength(Math.min(routeLen, L + .5));
     px = a.x; py = -a.y; rot = Math.atan2(-(b.y - a.y), b.x - a.x) * 180 / Math.PI; pls = .55 - .15 * pr;

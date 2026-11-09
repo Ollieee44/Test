@@ -77,13 +77,15 @@ membrane = (f'<g id="jmem"><path d="{band}" style="fill:var(--ink);fill-opacity:
             f'<g style="stroke:var(--ink);stroke-opacity:.28;stroke-width:1">{"".join(tails)}</g>'
             f'<g style="fill:var(--muted);fill-opacity:.75">{"".join(heads)}</g></g>')
 # the person in side profile, facing right, drawn y-down and flipped into the world (the lips about y -42, the gut at
-# y -25): skull, brow, nose, lips and chin, the jaw into the throat, chest and back, with a faint edge and an ear
-HEAD_NECK = ('M -4,-82 C 6,-83 13,-76 15,-67 C 16,-63 16.5,-60 16.8,-57.5 C 17.2,-55.5 17.8,-54 19,-52 C 21,-49 23,-47.6 22.5,-46.6 '
-             'C 22,-45.6 19.5,-45.4 18.3,-45 C 18.8,-44 19.2,-43.2 18.9,-42.4 C 18.4,-41.8 17.6,-41.6 17.6,-41.2 C 18.6,-40.6 18.8,-39.4 18.1,-38.6 '
-             'C 17.2,-37.8 16.4,-37.6 16.6,-36.6 C 17.4,-35 17.6,-32 16,-30.2 C 13.5,-28 9,-27.5 6.5,-27 C 6,-22 6.5,-16 8,-12 ')
+# y -25): the head, the jaw into the throat, chest and back, with a faint edge
+# a natural skull, the face one smooth curve from the forehead with only the lips and chin shaped (no nose or ear),
+# the jaw, and a neck into the chest
+HEAD_NECK = ('M -2,-78 C 8,-79 15,-73 17,-64 C 18.2,-58 18.6,-53 18.2,-49 C 18.4,-47.5 19.4,-46.6 19.6,-45.6 '
+             'C 19.7,-44.8 19,-44.2 18.4,-44 C 19.2,-43.4 19.4,-42.2 18.8,-41.4 C 18,-40.4 17,-40 17.4,-38.6 '
+             'C 17.8,-36.6 17.2,-34.4 15,-33.4 C 12,-32.2 8.5,-32 6.5,-31 C 6.6,-26 7,-18 8,-12 ')
 FRONT = 'C 11,-8 16,-5 19,1 C 23,9 24,16 23,26 C 22.5,34 23.5,42 24,52 C 24.5,62 23.5,72 23,88'
 BACK = ('M -21,88 C -21.5,70 -22,56 -21,44 C -20,34 -19.5,24 -20.5,14 C -21.5,4 -21,-4 -17,-10 C -15,-14 -13,-19 -12,-24 '
-        'C -12,-30 -14,-34 -16,-38 C -21,-46 -23,-58 -20,-68 C -17,-77 -11,-82 -4,-82')
+        'C -12,-29 -13.5,-33 -15.5,-37 C -20,-43 -22,-55 -19,-65 C -16,-73 -10,-78 -2,-78')
 PERSON_D = HEAD_NECK + FRONT + ' L -21,88 ' + BACK[len('M -21,88 '):] + ' Z'          # the filled silhouette
 EDGE_D = HEAD_NECK + FRONT + ' M ' + BACK[2:]                                       # its outline, open at the bottom
 ARM = 'M -9,-8 C -7,-15 4,-17 9,-10 C 12,-5 11,8 10,24 C 9.5,34 9,42 8,50 C 6,53 -6,53 -8,50 C -9.5,40 -10.5,20 -9,-8 Z'
@@ -102,12 +104,11 @@ GUT = (f'<circle cx="0" cy="25" r="22" style="fill:var(--paper);fill-opacity:.92
        f'<circle id="jgutring" cx="0" cy="25" r="25.5" style="fill:none;stroke:var(--accent);stroke-width:2;opacity:0"/>'
        f'<g id="jtract">{tube(COLON, 4.4, 2)}{tube(SMALL, 3.2, 1.3)}<path d="{STOMACH}" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round"/><path d="M 4.5 12.4 C 4.5 15 3 17 1 18.6" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round"/></g>')
 # the capsule's route: in at the lips, back through the mouth, down the middle of the neck and the chest to the gut
-ROUTE = 'M 17.5,-41.6 C 12,-40.5 6.5,-38.5 4,-34 C 1.8,-30 1.5,-24 1.5,-18 C 1.5,-10 0.8,-3 0.5,2.5'
+ROUTE = 'M 18.6,-44.4 C 13,-43.5 7,-41 4.5,-37 C 2,-32 1.5,-25 1.5,-18 C 1.5,-10 0.8,-3 0.5,2.5'
 person = (f'<g id="jperson"><g transform="scale(1 -1)">'
           f'<path d="{PERSON_D}" style="fill:url(#jpersonG)"/>'
           f'<path d="{ARM}" style="fill:var(--ink);fill-opacity:.05;stroke:url(#jedgeG);stroke-width:1"/>'
           f'<path d="{EDGE_D}" style="fill:none;stroke:url(#jedgeG);stroke-width:1.1;stroke-linejoin:round;stroke-linecap:round"/>'
-          f'<path d="{EAR}" style="fill:none;stroke:var(--ink);stroke-opacity:.35;stroke-width:1;stroke-linecap:round"/>'
           f'<path id="jroute" d="{ROUTE}" style="fill:none;stroke:var(--accent);stroke-opacity:.7;stroke-width:1.4;stroke-dasharray:2 3;stroke-linecap:round;opacity:0"/>'
           f'</g></g>'
           f'<g id="jgut"><g transform="scale(1 -1)">{GUT}</g></g>')
