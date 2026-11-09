@@ -4,7 +4,8 @@ blood-brain barrier; the halves clasped back together in a ternary complex; tagg
 
 The scene setup (palettes, renderer, the protein parts, the degrader, ubiquitin, the proteasome) is the story's own,
 taken from ../../palettes.html up to its timeline; journey.js adds the left-to-right timeline. The page shell is the
-v2 Science page's (site.css and site.js, published beside it), with the logo and palette switch and no page links.
+v2 Science page's styles (site.css, published beside it). It stands alone, in the Tidepool palette only: no header,
+palette switch or page sections, and the structure credit sits in the end card.
 The person, the gut, the absorption beam and the membrane are flat illustrations drawn in the 3D scene's plane.
 Run ../build_v2.py first."""
 import math, os, re
@@ -123,22 +124,34 @@ beats = [
 copy = ''.join(f'<div class="beat"><span class="k">{k}</span><{h}>{t}</{h}><p>{d}</p></div>' for k, h, t, d in beats)
 rail = ''.join(f'<div><span>{n}</span><i><b></b></i></div>' for n in ('Oral', 'Equilibrium', 'Barrier', 'Complex', 'Degraded'))
 DOWN = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v10M3 8l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+# a standalone animation in Tidepool: no header, palette switch or page sections; the credit sits in the end card
+end = end.replace('<a href="#more">About this story</a>',
+                  '<a href="#story">Watch again</a><p class="ecr">BRD4, VHL and Elongin B and C from PDB 5T35 (Gadd et al., Nat. Chem. Biol. 2017), ubiquitin from PDB 1UBQ. '
+                  f'The degrader is generic and stands in for a {TM} compound; the proteasome is a stand-in, and the person, gut and membrane are illustrations.</p>')
 story = (f'<section class="story" id="story" aria-label="How a SELFTAC degrader goes from a pill to a cleared protein">'
          f'<div class="stage" id="stage">{svg}<canvas id="gl" aria-hidden="true"></canvas>{labels}'
          f'<div class="copy" id="copy">{copy}</div>{end}'
          f'<div class="hint" id="hint"><span>Scroll to follow a {TM} molecule</span><i aria-hidden="true"></i></div>'
-         f'<a class="skip" id="skip" href="#more">Skip the story{DOWN}</a>'
-         f'<div class="rail" id="rail" aria-hidden="true">{rail}</div></div></section>\n')
-more = (f'<section class="band" id="more"><div class="wrap"><p class="eyebrow rv">{CG}<span>About this story</span></p>'
-        '<h2 class="say rv">From a pill to a cleared protein.</h2>'
-        '<p class="lede rv">The proteins are smoothed surfaces of real structures: BRD4, VHL and Elongin B and C from PDB 5T35 (Gadd et al., Nat. Chem. Biol. 2017), '
-        f'and ubiquitin from PDB 1UBQ. The degrader is drawn generically and stands in for a {TM} compound, and the proteasome is a stand-in. '
-        'The person, the gut and the membrane are illustrations.</p></div></section>\n')
+         f'<a class="skip" id="skip" href="#storyEnd">Skip to the end{DOWN}</a>'
+         f'<div class="rail" id="rail" aria-hidden="true">{rail}</div></div><div id="storyEnd" class="story-end"></div></section>\n')
+SMALL = """<script type="module">
+// the skip control stays until the end card; every visit starts at the top
+const skip = document.getElementById('skip'), story = document.getElementById('story');
+try { history.scrollRestoration = 'manual'; } catch (e) {}
+if (location.hash.length < 2) scrollTo(0, 0);
+let q = false;
+addEventListener('scroll', () => { if (q) return; q = true; requestAnimationFrame(() => { q = false; const r = story.getBoundingClientRect();
+  skip.classList.toggle('gone', -r.top / Math.max(1, r.height - innerHeight) > .92); }); }, { passive: true });
+</script>
+"""
+head = head.replace('<html lang="en">', '<html lang="en" data-palette="tidepool">', 1)
+head = re.sub(r'<meta name="theme-color" content="[^"]*">', '<meta name="theme-color" content="#0F4C4A">', head)
+head = head.replace('</style>\n', """.story-end { position: absolute; left: 0; right: 0; bottom: 0; height: 100vh; height: 100svh; pointer-events: none; }
+.end .ecr { max-width: 62ch; margin: 6px auto 0; padding: 0 24px; font: 400 12px/1.5 var(--sans); color: var(--muted); }
+.skip { top: auto; }
+@media (max-width: 760px) { .skip { top: calc(16px + env(safe-area-inset-top, 0px)); bottom: auto; } .hint { top: calc(70px + env(safe-area-inset-top, 0px)); } }
+</style>\n""", 1)
 meshes = re.search(r'<script type="application/json" id="meshes">.*?</script>', sci, re.S).group(0)
-page = (head + '<canvas id="bgArt" aria-hidden="true"></canvas>\n<a class="sr-only" href="#more">Skip to content</a>\n' + header + '\n'
-        + '<main id="main">\n' + story + more + '</main>\n' + meshes + '\n<script type="module">' + prefix + open(D + 'journey.js').read() + '</script>\n'
-        + '<script type="module" src="site.js"></script>\n')
-for gone in ('href="index.html"', 'href="science.html"'):
-    assert gone not in header, gone
+page = (head + '<main id="main">\n' + story + '</main>\n' + meshes + '\n<script type="module">' + prefix + "\npal = 'tidepool';   // Tidepool only\n" + open(D + 'journey.js').read() + '</script>\n' + SMALL)
 open(D + 'index.html', 'w').write(page)
 print('index.html', os.path.getsize(D + 'index.html') // 1024, 'KB')
