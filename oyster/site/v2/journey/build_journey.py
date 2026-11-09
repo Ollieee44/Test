@@ -100,15 +100,17 @@ SMALL = 'M 6 20.5 C 2 19.3 -6 19.3 -8.5 21.3 C -10 23.3 -6 24.8 0 24.4 C 6 24 9.
 STOMACH = 'M -1.6 3.2 L -1.6 6.2 C -1.6 9.6 1.4 12.2 5.2 12.6 C 9.2 13 12.8 11.4 12.9 8.2 C 13 5.2 10.4 3.4 7.6 4.6 C 5.8 5.4 4.6 6.6 3 6.6 C 1.6 6.6 1.2 5.4 1.2 3.2 Z'
 GUT = (f'<circle cx="0" cy="25" r="22" style="fill:var(--paper);fill-opacity:.92;stroke:var(--ink);stroke-width:1.6"/>'
        f'<circle id="jgutring" cx="0" cy="25" r="25.5" style="fill:none;stroke:var(--accent);stroke-width:2;opacity:0"/>'
-       f'<g>{tube(COLON, 4.4, 2)}{tube(SMALL, 3.2, 1.3)}<path d="{STOMACH}" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round"/><path d="M 4.5 12.4 C 4.5 15 3 17 1 18.6" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round"/></g>')
-ROUTE = 'M 17.5,-41.6 C 13,-39 9.5,-33 8,-25 C 6.5,-16 4,-6 0.5,2.5'
+       f'<g id="jtract">{tube(COLON, 4.4, 2)}{tube(SMALL, 3.2, 1.3)}<path d="{STOMACH}" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round"/><path d="M 4.5 12.4 C 4.5 15 3 17 1 18.6" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round"/></g>')
+# the capsule's route: in at the lips, back through the mouth, down the middle of the neck and the chest to the gut
+ROUTE = 'M 17.5,-41.6 C 12,-40.5 6.5,-38.5 4,-34 C 1.8,-30 1.5,-24 1.5,-18 C 1.5,-10 0.8,-3 0.5,2.5'
 person = (f'<g id="jperson"><g transform="scale(1 -1)">'
           f'<path d="{PERSON_D}" style="fill:url(#jpersonG)"/>'
           f'<path d="{ARM}" style="fill:var(--ink);fill-opacity:.05;stroke:url(#jedgeG);stroke-width:1"/>'
           f'<path d="{EDGE_D}" style="fill:none;stroke:url(#jedgeG);stroke-width:1.1;stroke-linejoin:round;stroke-linecap:round"/>'
           f'<path d="{EAR}" style="fill:none;stroke:var(--ink);stroke-opacity:.35;stroke-width:1;stroke-linecap:round"/>'
           f'<path id="jroute" d="{ROUTE}" style="fill:none;stroke:var(--accent);stroke-opacity:.7;stroke-width:1.4;stroke-dasharray:2 3;stroke-linecap:round;opacity:0"/>'
-          f'{GUT}</g></g>')
+          f'</g></g>'
+          f'<g id="jgut"><g transform="scale(1 -1)">{GUT}</g></g>')
 pill = ('<g id="jpill"><rect x="-8" y="-3.2" width="16" height="6.4" rx="3.2" style="fill:var(--mol-b, #8A73B2)"/>'
         '<path d="M 0 -3.2 L -4.8 -3.2 A 3.2 3.2 0 0 0 -4.8 3.2 L 0 3.2 Z" style="fill:var(--mol-a, #B4678B)"/>'
         '<rect x="-.9" y="-3.2" width="1.8" height="6.4" style="fill:var(--mol-c, #D9A443)"/>'
@@ -127,10 +129,10 @@ EQ = ('<svg viewBox="0 0 52 24" aria-hidden="true"><path d="M4 8 H46 L39 3" fill
       '<path d="M48 16 H6 L13 21" fill="none" stroke="var(--clasp)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>')
 def label(text, x, y, a, b, cls=''):
     return f'<span class="jl {cls}" data-x="{x}" data-y="{y}" data-a="{a}" data-b="{b}">{text}</span>'
-labels = '<span class="jl plus" id="jplus">+</span>' + ''.join([
+labels = ('<span class="jl plus" id="jplus">+</span><span class="jl" id="jdimer">Dimer</span><span class="jl" id="jmono">Monomers</span>'
+          f'<span class="jl eq" id="jeq">{EQ}</span>') + ''.join([
     label('Oral dosing', 74, 78, -1, .13),
-    label('Dimer', X['dimer'], -27, .18, .45), label('Monomers', X['mono'], -31, .18, .45),
-    label(EQ, (X['dimer'] + X['mono']) / 2 - 2, 0, .18, .45, 'eq'),
+    label('In the gut', 0, 1.5, .2, .34, 'hi'),
     label('Cell membrane &middot; blood-brain barrier', X['mem'] + 4, -50, .42, .62),
     label('Target cell', X['mem'] + 70, 52, .5, .62, 'hi'),
     label('Target protein', X['complex'] + 62, 58, .64, .84), label('E3 ligase', X['complex'] + 66, -62, .64, .84),
@@ -140,13 +142,13 @@ labels = '<span class="jl plus" id="jplus">+</span>' + ''.join([
 TM = '<span translate="no">SELFTAC&reg;</span>'
 beats = [
     ('01 &middot; Oral dosing', 'h1', 'Taken by mouth, as a pill.', f'{TM} degraders are designed to be small enough to be swallowed, not injected.'),
-    ('02 &middot; Dimer &#8652; monomers', 'h2', 'Two halves that come apart and back together.', f'A reversible linker lets each {TM} molecule shift between one degrader, the dimer, and its two small monomers.'),
+    ('02 &middot; In the gut', 'h2', 'The dimer comes apart into two monomers.', f'In the gut, each {TM} dimer dissociates at its reversible linker into two small monomers, which are absorbed.'),
     ('03 &middot; The barrier', 'h2', 'Small enough to cross into the cell.', 'As monomers, each half crosses the cell membrane, and the blood-brain barrier into the brain.'),
     ('04 &middot; Ternary complex', 'h2', 'Inside the cell, the halves clasp back together.', 'One end holds the target protein, the other an E3 ligase: a ternary complex.'),
     ('05 &middot; Degradation', 'h2', 'Tagged, then broken down.', 'Ubiquitin marks the target and the proteasome destroys it. The degrader is free to find the next one.'),
 ]
 copy = ''.join(f'<div class="beat"><span class="k">{k}</span><{h}>{t}</{h}><p>{d}</p></div>' for k, h, t, d in beats)
-rail = ''.join(f'<div><span>{n}</span><i><b></b></i></div>' for n in ('Oral', 'Equilibrium', 'Barrier', 'Complex', 'Degraded'))
+rail = ''.join(f'<div><span>{n}</span><i><b></b></i></div>' for n in ('Oral', 'Gut', 'Barrier', 'Complex', 'Degraded'))
 DOWN = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v10M3 8l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 # a standalone animation in Tidepool: no header, palette switch or page sections; the credit sits in the end card
 end = end.replace('<a href="#more">About this story</a>',

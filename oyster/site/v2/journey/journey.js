@@ -17,8 +17,6 @@ const cg = new THREE.Group(), inner = new THREE.Group(); cg.add(inner); scene.ad
 inner.position.copy(degC).negate(); cg.scale.setScalar(SC);
 inner.add(mol.group); ['brd4', 'vhl', 'elob', 'eloc'].forEach(k => inner.add(P[k]));
 // a second SELFTAC, the dimer of the equilibrium
-const m2 = makeMolecule(THREE, DATA, Q, geom, V3(0, -1, .25)), g2 = new THREE.Group();
-g2.add(m2.group); m2.group.position.copy(degC).negate(); g2.scale.setScalar(SC); scene.add(g2);
 // the proteasome stands upright, as on the slide
 const qProt = new THREE.Quaternion(), eProt = new THREE.Euler(0, 0, Math.PI / 2, 'ZYX');
 // fragments of the target, falling out of the proteasome
@@ -35,23 +33,26 @@ const ubLocal = (() => { const g = P.brd4.children[0].geometry, pos = g.attribut
 // ---------- palette: the capsule takes the two halves' colours ----------
 const applyBase = applyPalette;
 applyPalette = function () {
-  applyBase(); const c = PAL[pal]; m2.setColors(c);
+  applyBase(); const c = PAL[pal];
   root.style.setProperty('--mol-a', c.warhead); root.style.setProperty('--mol-b', c.e3lig); root.style.setProperty('--mol-c', c.clasp);
 };
 
 // ---------- the timeline ----------
 const BEATS = [[0, .17], [.17, .42], [.42, .6], [.6, .8], [.8, 1]];
-const CAMX = curve([[0, 14], [.12, 14], [.22, X.dimer + 44], [.38, X.dimer + 46], [.5, X.mem + 6], [.62, X.complex - 6], [.79, X.complex], [.88, (X.complex + X.prot) / 2 + 12], [.95, X.prot - 18], [1, 320]]);
-const CAMY = curve([[0, 4], [.12, 4], [.22, 0], [.58, 0], [.66, -4], [.86, -4], [.95, -6], [1, 0]]);
-const DIST = curve([[0, 440], [.12, 440], [.22, 370], [.38, 370], [.5, 440], [.62, 560], [.79, 560], [.9, 560], [.95, 600], [1, 1500]]);
-const HX = curve([[.2, 12], [.44, 12], [.56, 30], [.6, 30], [.67, GAPJ]]);   // half-separation of the hero
-const HERO_X = curve([[0, X.mono], [.42, X.mono], [.6, X.inside], [.68, X.complex], [1, X.complex]]);
+const CAMX = curve([[0, 14], [.12, 14], [.16, 8], [.22, 0], [.31, 0], [.42, X.mono - 30], [.5, X.mem + 6], [.62, X.complex - 6], [.79, X.complex], [.88, (X.complex + X.prot) / 2 + 12], [.95, X.prot - 18], [1, 320]]);
+const CAMY = curve([[0, 4], [.12, 4], [.22, -25], [.31, -25], [.42, 0], [.58, 0], [.66, -4], [.86, -4], [.95, -6], [1, 0]]);
+const DIST = curve([[0, 440], [.12, 440], [.16, 400], [.22, 130], [.31, 130], [.42, 370], [.5, 440], [.62, 560], [.79, 560], [.9, 560], [.95, 600], [1, 1500]]);
+// the hero: a dimer released in the gut (at y -25), which dissociates there into its two monomers, then leaves
+const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.56, 30], [.6, 30], [.67, GAPJ]]);   // half-separation
+const HERO_X = curve([[0, 0], [.31, 0], [.42, X.mono], [.6, X.inside], [.68, X.complex], [1, X.complex]]);
+const HERO_Y = curve([[0, -25], [.31, -25], [.42, 0], [1, 0]]);
 
 // ---------- the flat layer (SVG, world units in the z = 0 plane) and the labels ----------
 const svgNS = 'http://www.w3.org/2000/svg', world = document.getElementById('jworld');
 const route = document.getElementById('jroute'), routeLen = route.getTotalLength(), gutRing = document.getElementById('jgutring');
 const pill = document.getElementById('jpill'), beam = document.getElementById('jbeam'), membrane = document.getElementById('jmem'), person = document.getElementById('jperson');
-const plus = document.getElementById('jplus');
+const plus = document.getElementById('jplus'), gut = document.getElementById('jgut'), tract = document.getElementById('jtract');
+const dynL = ['jdimer', 'jmono', 'jeq'].map(id => document.getElementById(id));
 const LABELS = [...document.querySelectorAll('.jl[data-x]')].map(el => ({ el, x: +el.dataset.x, y: +el.dataset.y, a: +el.dataset.a, b: +el.dataset.b }));
 const vtmp = V3();
 function toScreen(x, y) { vtmp.set(x, y, 0).project(camera); return [(vtmp.x + 1) / 2 * stage.clientWidth, (1 - vtmp.y) / 2 * stage.clientHeight]; }
@@ -81,24 +82,20 @@ function frame(p0) {
   pill.style.opacity = (1 - clamp((p - .152) / .012, 0, 1)).toFixed(3);
   route.style.opacity = kf(p, [[.085, 0], [.105, 1]]).toFixed(3);
   gutRing.style.opacity = bump(p, .148, .175).toFixed(3);   // the gut answers as the capsule arrives
-  person.style.opacity = kf(p, [[.13, 1], [.19, 0]]).toFixed(3);   // gone before the copy changes over
+  person.style.opacity = kf(p, [[.15, 1], [.21, 0]]).toFixed(3);   // the body goes as the camera zooms into the gut
+  gut.style.opacity = kf(p, [[.33, 1], [.37, 0]]).toFixed(3);   // gone before it would sit behind the copy
+  tract.style.opacity = kf(p, [[.19, 1], [.22, .3], [.34, .3], [.38, 1]]).toFixed(3);   // quieter while the molecule is in front of it
   // the gut's absorption, a warm beam carrying the molecules to the membrane
-  beam.style.opacity = (kf(p, [[.08, 0], [.17, 1], [.56, 1], [.64, 0]])).toFixed(3);
+  beam.style.opacity = (kf(p, [[.3, 0], [.38, 1], [.56, 1], [.64, 0]])).toFixed(3);   // absorption, once there are monomers
   membrane.style.opacity = (kf(p, [[.3, 0], [.42, 1], [.56, 1], [.64, .28], [.95, .28], [1, .55]])).toFixed(3);   // back once the halves are through, clear of the copy
 
-  // ---- 02 the equilibrium: the dimer splits and rejoins while the pair of monomers joins and splits again
-  const s2 = kf(p, [[.12, .001], [.18, 1], [.5, 1], [.56, .001]]);
-  g2.visible = s2 > .01; g2.scale.setScalar(SC * s2); g2.position.set(X.dimer, 0, 0); g2.rotation.z = .1 * Math.sin(p * 14);
-  const j2 = 1, f2 = 0, hx2 = 7;   // the dimer stays whole; the equilibrium is the arrows between it and the monomers
-  m2.update(V3(-hx2, 0, 0), V3(hx2, 0, 0), new THREE.Quaternion().setFromEuler(new THREE.Euler(f2 * .3 * Math.sin(p * 41), f2 * .4 * Math.sin(p * 29), 0)),
-    new THREE.Quaternion().setFromEuler(new THREE.Euler(f2 * -.3 * Math.sin(p * 37), f2 * .35 * Math.cos(p * 33), 0)), j2);
-
-  // ---- the hero SELFTAC: monomers in the equilibrium, across the membrane, upright and rejoined in the cell
-  const sh = kf(p, [[.12, .001], [.18, 1]]);
-  cg.position.set(HERO_X(p), 0, 0); cg.scale.setScalar(SC * sh); cg.visible = sh > .01;
-  cg.rotation.z = kf(p, [[.44, 0], [.58, -Math.PI / 2]]);
-  const j = kf(p, [[.64, 0], [.68, 1]]);
-  const free = (1 - j) * clamp((.66 - p) / .05, 0, 1), hx = p < .2 ? 12 : HX(p);
+  // ---- 02 in the gut: the capsule releases a dimer, which dissociates at its reversible linker into two monomers;
+  // then the hero monomers leave the gut, are absorbed, cross the membrane, and rejoin upright in the cell
+  const sh = kf(p, [[.18, .001], [.21, .45], [.31, .45], [.42, 1]]);
+  cg.position.set(HERO_X(p), HERO_Y(p), 0); cg.scale.setScalar(SC * sh); cg.visible = sh > .01;
+  cg.rotation.z = kf(p, [[.44, 0], [.58, -Math.PI / 2]]) + (p < .31 ? .12 * Math.sin(p * 30) : 0);
+  const j = kf(p, [[.27, 1], [.31, 0], [.64, 0], [.68, 1]]);
+  const free = (1 - j) * clamp((.66 - p) / .05, 0, 1), hx = p < .27 ? 7 : HX(p);
   const rW = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * .32 * Math.sin(p * 47), free * .42 * Math.sin(p * 31), 0));
   const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(p * 43), free * .4 * Math.cos(p * 35), 0));
   const brk = mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j);
@@ -108,9 +105,11 @@ function frame(p0) {
   ['vhl', 'elob', 'eloc'].forEach(key => { P[key].position.set(GAPJ + 130 * tIn, 0, 0); P[key].visible = p > .57; });
   P.brd4.visible = p > .57;
   cg.updateMatrixWorld(true);
-  // the bond clicking shut in the complex
-  const fx = bump(p, .655, .7); flash.position.copy(mol.group.localToWorld(brk.clone())); flash.scale.setScalar(SC * (1 + 3 * clamp((p - .655) / .045, 0, 1)));
-  flash.material.opacity = fx * .9; flash.visible = fx > .01; flash.lookAt(camera.position);
+  // the bond: a flash as it breaks in the gut, and again as it clicks shut in the complex
+  const fb = bump(p, .27, .31), fj = bump(p, .655, .7), fx = Math.max(fb, fj);
+  flash.position.copy(mol.group.localToWorld(brk.clone()));
+  flash.scale.setScalar(SC * sh * (fb > fj ? .7 + 1.4 * clamp((p - .27) / .04, 0, 1) : 1 + 3 * clamp((p - .655) / .045, 0, 1)));   // a finer flash for the break
+  flash.material.opacity = (fb > fj ? .6 : .9) * fx; flash.visible = fx > .01; flash.lookAt(camera.position);
 
   // ---- 05 degradation: ubiquitin tags the target, it goes into the proteasome, and comes out in pieces
   const PROT = V3(X.prot, 6, 0), ps = kf(p, [[.8, .001], [.85, 1.15], [.97, 1.15], [1, 1]]);
@@ -146,6 +145,10 @@ function frame(p0) {
     b.style.opacity = o.toFixed(3); b.style.transform = 'translateY(calc(-50% + ' + ((1 - o) * 16).toFixed(1) + 'px))'; });
   document.querySelectorAll('.rail b').forEach((b, i) => { b.style.setProperty('--f', clamp((p - BEATS[i][0]) / (BEATS[i][1] - BEATS[i][0]), 0, 1).toFixed(3)); b.closest('.rail > div').classList.toggle('on', p >= BEATS[i][0]); });
   plus.style.opacity = (winO(p, .19, .64) * (1 - j)).toFixed(3);   // '+' between the two monomers, riding with them
+  // the dimer, then the monomers, named under the molecule in the gut, with the reversible arrows above it
+  const hc = cg.localToWorld(V3(0, 0, 0)), dyn = [[winO(p, .215, .29), -15], [winO(p, .3, .44), -17], [winO(p, .255, .34), 15]];
+  dynL.forEach((el, i) => { const [o, dy] = dyn[i]; el.style.opacity = (o * (1 - endO)).toFixed(3);
+    if (o > 0) { const [x, y] = toScreen(hc.x, hc.y + dy * sh * SC); el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`; } });
   if (+plus.style.opacity > 0) { const c = cg.localToWorld(V3(0, 0, 0)); const [x, y] = toScreen(c.x, c.y); plus.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`; }
   LABELS.forEach(l => { const o = winO(p, l.a, l.b) * (1 - endO); l.el.style.opacity = o.toFixed(3);
     if (o > 0) { let [x, y] = toScreen(l.x, l.y); const hw = (l.w = l.w || l.el.offsetWidth) / 2 + 10;   // kept on screen, with a margin
