@@ -96,8 +96,8 @@ frame = function (p0) {
       vtmp.set(cx, cy, cz).project(camera); const sx = (vtmp.x + 1) / 2 * stage.clientWidth, sy = (1 - vtmp.y) / 2 * stage.clientHeight;
       x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }
     if (t.side === 'left') {    // beside the object on its left, level with its middle
-      const w = (t.w = t.w || t.el.offsetWidth), xl = Math.max(x0 - t.gap - w, 8);
-      t.el.style.transform = `translate(${xl.toFixed(1)}px, ${((y0 + y1) / 2).toFixed(1)}px) translate(0, -50%)`; return; }
+      const w = (t.w = t.w || t.el.offsetWidth), xl = x0 - t.gap - w;   // no room there: under it, as usual
+      if (xl >= 8) { t.el.style.transform = `translate(${xl.toFixed(1)}px, ${((y0 + y1) / 2).toFixed(1)}px) translate(0, -50%)`; return; } }
     if (t.side === 'right') {   // beside the object, level with its middle (persistent labels)
       const hw2 = (t.w = t.w || t.el.offsetWidth) + 8, xr = Math.min(x1 + t.gap, stage.clientWidth - hw2);
       t.el.style.transform = `translate(${xr.toFixed(1)}px, ${((y0 + y1) / 2).toFixed(1)}px) translate(0, -50%)`; return; }

@@ -484,10 +484,10 @@ function frame(p0) {
   const p = WARP(clamp(p0, 0, 1)), CMP = 5 * kf(WARP(clamp(p0, 0, 1)), [[.735, 0], [.78, 1], [.86, 1], [.9, 0]]);   // the journey's own timeline, held back for the bloodstream beat
   // ---- camera: copy on the left on wide screens (the subject sits right of centre); on a card below on phones
   const narrow = camera.aspect < .9, fov = THREE.MathUtils.degToRad(camera.fov);
-  const dist = DIST(p) * (narrow ? Math.max(1, 1.05 / camera.aspect) * .8 : 1);
+  const tagW = camera.aspect < .9 ? kf(p, [[.76, 0], [.82, 1], [.9, 1], [.95, 0]]) : 0, dist = DIST(p) * (narrow ? Math.max(1, 1.05 / camera.aspect) * .8 : 1) * (1 + .16 * tagW);
   const vh = 2 * dist * Math.tan(fov / 2), vw = vh * camera.aspect, settle = 1 - clamp((p - .955) / .04, 0, 1);
   let ax = CAMX(p), ay = CAMY(p);
-  if (narrow) ay -= .22 * vh * settle; else { ax -= (.2 + .1 * kf(p, [[.855, 0], [.885, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }
+  if (narrow) { ay -= .22 * vh * settle; ax -= .09 * vw * tagW; } else { ax -= (.2 + .1 * kf(p, [[.855, 0], [.885, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }
   camera.position.set(ax, ay, dist); camera.lookAt(ax, ay, 0); camera.updateMatrixWorld();
   const k = stage.clientHeight / vh, tx = stage.clientWidth / 2 - ax * k, ty = stage.clientHeight / 2 + ay * k;
   world.setAttribute('transform', `matrix(${k.toFixed(5)} 0 0 ${(-k).toFixed(5)} ${tx.toFixed(2)} ${ty.toFixed(2)})`);
@@ -766,8 +766,8 @@ frame = function (p0) {
       vtmp.set(cx, cy, cz).project(camera); const sx = (vtmp.x + 1) / 2 * stage.clientWidth, sy = (1 - vtmp.y) / 2 * stage.clientHeight;
       x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }
     if (t.side === 'left') {    // beside the object on its left, level with its middle
-      const w = (t.w = t.w || t.el.offsetWidth), xl = Math.max(x0 - t.gap - w, 8);
-      t.el.style.transform = `translate(${xl.toFixed(1)}px, ${((y0 + y1) / 2).toFixed(1)}px) translate(0, -50%)`; return; }
+      const w = (t.w = t.w || t.el.offsetWidth), xl = x0 - t.gap - w;   // no room there: under it, as usual
+      if (xl >= 8) { t.el.style.transform = `translate(${xl.toFixed(1)}px, ${((y0 + y1) / 2).toFixed(1)}px) translate(0, -50%)`; return; } }
     if (t.side === 'right') {   // beside the object, level with its middle (persistent labels)
       const hw2 = (t.w = t.w || t.el.offsetWidth) + 8, xr = Math.min(x1 + t.gap, stage.clientWidth - hw2);
       t.el.style.transform = `translate(${xr.toFixed(1)}px, ${((y0 + y1) / 2).toFixed(1)}px) translate(0, -50%)`; return; }
