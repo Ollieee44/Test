@@ -38,7 +38,7 @@ function bouncer(pn, R) {
   const [B0, BY] = at(R, BOUNCER.u, BOUNCER.v), BC = memX(BY) - HALF;   // where it starts, where it meets the membrane
   let x = B0, spin = 0;
   if (pn > .5 && pn <= .585) { const t = (pn - .5) / .085; x = B0 + (BC - B0) * t * t; }              // speeds up toward it
-  else if (pn > .585) { const t = clamp((pn - .585) / .13, 0, 1); x = BC - 62 * (1 - (1 - t) * (1 - t)); spin = 1.3 * (1 - (1 - t) * (1 - t)); }   // and is thrown back
+  else if (pn > .585) { const t = clamp((pn - .585) / .13, 0, 1); x = BC - 34 * (1 - (1 - t) * (1 - t)); spin = 1.1 * (1 - (1 - t) * (1 - t)); }   // and is turned back, a short way
   return { x, y: BY + (pn > .585 ? -10 * clamp((pn - .585) / .13, 0, 1) : 0), spin };
 }
 const I = new THREE.Quaternion();
@@ -60,10 +60,17 @@ frame = function (p0) {
     else c.m.update(V3(-c.hx, 0, 0), V3(c.hx, 0, 0), qE(.3 * Math.sin(pn * 40 + c.ph), .4 * Math.sin(pn * 27 + c.ph)), qE(-.3 * Math.sin(pn * 33 + c.ph), .35 * Math.cos(pn * 29 + c.ph)), 0);
   });
   // the bouncer
-  const bIn = kf(pn, [[.37, .001], [.41, 1], [.66, 1], [.71, .001]]), b = bouncer(pn, R);
+  const bIn = kf(pn, [[.37, .001], [.41, 1], [.643, 1], [.664, .001]]), b = bouncer(pn, R);   // turned away, it bows out before the camera moves on
   BOUNCER.g.visible = bIn > .01;
   if (BOUNCER.g.visible) {
     BOUNCER.g.position.set(b.x, b.y, 0); BOUNCER.g.scale.setScalar(SC * BOUNCER.s * bIn); BOUNCER.g.rotation.z = .08 * Math.sin(pn * 20) + b.spin;
+    // never over the copy: on wide screens the copy is a column on the left, so keep the dimer's left end right of it
+    if (camera.aspect >= .9) {
+      const cr = document.getElementById('copy').getBoundingClientRect(), sr = stage.getBoundingClientRect();
+      const k = stage.clientHeight / (2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
+      const minX = camera.position.x + (cr.right - sr.left + 32 - stage.clientWidth / 2) / k + HALF;
+      if (BOUNCER.g.position.x < minX) BOUNCER.g.position.x = minX;
+    }
     if (!BOUNCER.built) { BOUNCER.m.update(V3(-7, 0, 0), V3(7, 0, 0), I, I, 1); BOUNCER.built = true; }
   }
   // the blood vessel: in from the gut's edge as the monomers leave it, out once they are inside the cell

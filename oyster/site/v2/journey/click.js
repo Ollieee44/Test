@@ -2,7 +2,7 @@
 // The page does not scroll; each step plays the journey from one stop to the next (eased, its length in proportion to
 // the distance) and holds there. Arrow keys and the space bar step too, and the rail's pearls jump to a beat.
 (() => {
-  const STOPS = [0, .145, .25, .335, .45, .585, .665, .79, .865, .92, .998];
+  const STOPS = [0, .145, .25, .335, .45, .612, .665, .79, .865, .92, .998];
   const BEAT_STOP = [0, 2, 4, 5, 7, 8];                  // the first stop of each of the six beats (the rail)
   BEATS_N[4][1] = BEATS_N[5][0] = .84;                   // the degradation copy is in by the time the tags land (stop 9)
   const J = window.__journey, next = document.getElementById('jnext'), back = document.getElementById('jback'), count = document.getElementById('jcount');
@@ -30,7 +30,7 @@
     return finished;
   }
   // the whole journey: every stop in turn, holding at each long enough to read (longer where the copy changes)
-  const HOLD = [1500, 900, 2400, 1600, 3200, 1100, 2400, 2800, 2200, 2000];   // ms at each stop (longest where the copy changes)
+  const HOLD = [800, 400, 1300, 800, 1800, 500, 1300, 1500, 1100, 1000];   // ms at each stop (longest where the copy changes)
   const wait = ms => new Promise(r => setTimeout(r, ms));
   function setPlaying(on) { playing = on; play.classList.toggle('on', on); play.setAttribute('aria-pressed', String(on));
     playLabel.textContent = on ? 'Pause' : at === STOPS.length - 1 ? 'Watch again' : at === 0 ? 'Watch the whole journey' : 'Play from here'; }

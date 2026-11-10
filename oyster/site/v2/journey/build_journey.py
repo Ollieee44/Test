@@ -258,7 +258,7 @@ pl_copy = ''.join(f'<div class="beat"><span class="k"><b>{k.split(" &middot; ")[
 pl_rail = ''.join(f'<div><span>{n}</span><i><b></b></i></div>' for n in ('Oral', 'Gut', 'Plasma', 'Barrier', 'Complex', 'Degraded'))
 pl_labels = ''.join(f'<span class="jl {c}" data-pl="{at}" data-a="{a}" data-b="{b}">{t}</span>' for at, t, a, b, c in [
     ('plasma', 'Blood vessel &middot; plasma', .39, .52, 'hi'),
-    ('bounce', 'Dimer: too large to penetrate', .588, .69, 'hi'), ('pass', 'Monomers pass through', .6, .69, 'hi')])
+    ('bounce', 'Dimer: too large to penetrate', .588, .662, 'hi'), ('pass', 'Monomers pass through', .6, .69, 'hi')])
 pl_story = re.sub(r'<div class="copy" id="copy">.*?</div></div>(?=<div class="end")', '<div class="copy" id="copy">' + pl_copy + '</div>', otx_story, count=1, flags=re.S)
 assert pl_copy in pl_story, 'copy not replaced'
 pl_story = re.sub(r'<div class="rail" id="rail" aria-hidden="true">.*?</div></div><div id="storyEnd"', f'<div class="rail" id="rail" aria-hidden="true">{pl_rail}</div></div><div id="storyEnd"', pl_story, count=1, flags=re.S)
