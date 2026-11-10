@@ -301,6 +301,8 @@ pl_js = open(D + 'journey.js').read()
 pl_js = once(pl_js, 'const BEATS = [[0, .17], [.17, .42], [.42, .6], [.6, .8], [.8, 1]];', 'const BEATS = [[0, .17], [.17, .42], [.42, .6], [.6, .8], [.8, 1], [2, 3]];   // plasma.js sets the six beats')
 pl_js = once(pl_js, '  const p = clamp(p0, 0, 1);', '  const p = WARP(clamp(p0, 0, 1));   // the journey\'s own timeline, held back for the bloodstream beat')
 pl_js = once(pl_js, "const LABELS = [...document.querySelectorAll('.jl[data-x]')]", "const LABELS = [...document.querySelectorAll('.jl[data-x]:not([data-pl])')]")
+# goTo: move the journey without drawing; its own loop draws once per screen refresh (the click version's transitions)
+pl_js = once(pl_js, 'setPal: v => { pal = v; applyPalette(); } };', 'goTo: p => { hold = true; prog = p; }, setPal: v => { pal = v; applyPalette(); } };')
 os.makedirs(D + 'plasma', exist_ok=True)
 # ubiquitin and the proteasome share a lavender accent, distinct from the pink target: the tags and the machinery that acts on them
 PL_PAL = OTX_PAL + "PAL.otx.ub = '#B9A6F5'; PAL.otx.prot = '#B9A6F5';\n"

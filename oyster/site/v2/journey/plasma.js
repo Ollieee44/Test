@@ -56,7 +56,7 @@ frame = function (p0) {
     const [cx, cy] = at(R, c.u, c.v);
     c.g.position.set(cx + (pn - .44) * 30, cy + 4 * Math.sin(pn * 30 + c.ph), 0);
     c.g.scale.setScalar(SC * c.s * cIn); c.g.rotation.z = c.r + .25 * Math.sin(pn * 9 + c.ph);
-    if (c.kind === 'dimer') c.m.update(V3(-7, 0, 0), V3(7, 0, 0), I, I, 1);
+    if (c.kind === 'dimer') { if (!c.built) { c.m.update(V3(-7, 0, 0), V3(7, 0, 0), I, I, 1); c.built = true; } }   // a dimer's shape never changes: build its strand once
     else c.m.update(V3(-c.hx, 0, 0), V3(c.hx, 0, 0), qE(.3 * Math.sin(pn * 40 + c.ph), .4 * Math.sin(pn * 27 + c.ph)), qE(-.3 * Math.sin(pn * 33 + c.ph), .35 * Math.cos(pn * 29 + c.ph)), 0);
   });
   // the bouncer
@@ -64,7 +64,7 @@ frame = function (p0) {
   BOUNCER.g.visible = bIn > .01;
   if (BOUNCER.g.visible) {
     BOUNCER.g.position.set(b.x, b.y, 0); BOUNCER.g.scale.setScalar(SC * BOUNCER.s * bIn); BOUNCER.g.rotation.z = .08 * Math.sin(pn * 20) + b.spin;
-    BOUNCER.m.update(V3(-7, 0, 0), V3(7, 0, 0), I, I, 1);
+    if (!BOUNCER.built) { BOUNCER.m.update(V3(-7, 0, 0), V3(7, 0, 0), I, I, 1); BOUNCER.built = true; }
   }
   // the blood vessel: in from the gut's edge as the monomers leave it, out once they are inside the cell
   vessel.style.opacity = kf(pn, [[.33, 0], [.39, 1], [.68, 1], [.74, 0]]).toFixed(3);
