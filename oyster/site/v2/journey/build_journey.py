@@ -249,22 +249,40 @@ print('otx/index.html', os.path.getsize(D + 'otx/index.html') // 1024, 'KB')
 pl_beats = [
     ('01 &middot; Oral dosing', 'h1', 'Taken by mouth, as a pill.', f'{TM} degraders are designed to be small enough to be swallowed, not injected.'),
     ('02 &middot; In the gut', 'h2', 'The dimer comes apart into two monomers.', f'In the gut, each {TM} dimer dissociates at its reversible linker into two small monomers, which are absorbed.'),
-    ('03 &middot; In the bloodstream', 'h2', 'Dimer and monomers, side by side.', 'The linker is reversible, so in the blood all three exist together: the intact dimer and both of its monomers, in equilibrium.'),
-    ('04 &middot; The barrier', 'h2', 'Only the monomers get through.', 'The dimer is too large to cross the cell membrane or the blood-brain barrier, and bounces off. Each small monomer passes through on its own.'),
+    ('03 &middot; In the bloodstream', 'h2', 'Dimer and monomers, side by side.', 'Absorbed into the blood vessels, they circulate in plasma. The linker is reversible, so all three exist together: the intact dimer and both of its monomers, in equilibrium.'),
+    ('04 &middot; The barrier', 'h2', 'Only the monomers get through.', 'The dimer is too large to penetrate the cell membrane or the blood-brain barrier. Each small monomer passes through on its own.'),
     ('05 &middot; Ternary complex', 'h2', 'Inside the cell, the halves clasp back together.', 'One end holds the target protein, the other an E3 ligase: a ternary complex.'),
     ('06 &middot; Degradation', 'h2', 'Tagged, then broken down.', 'Ubiquitin marks the target and the proteasome destroys it. The degrader is free to find the next one.'),
 ]
 pl_copy = ''.join(f'<div class="beat"><span class="k"><b>{k.split(" &middot; ")[0]}</b>{k.split(" &middot; ")[1]}</span><{h}>{t}</{h}><p>{d}</p></div>' for k, h, t, d in pl_beats)
 pl_rail = ''.join(f'<div><span>{n}</span><i><b></b></i></div>' for n in ('Oral', 'Gut', 'Plasma', 'Barrier', 'Complex', 'Degraded'))
 pl_labels = ''.join(f'<span class="jl {c}" data-pl="{at}" data-a="{a}" data-b="{b}">{t}</span>' for at, t, a, b, c in [
-    ('plasma', 'Bloodstream &middot; plasma', .39, .52, 'hi'), ('dimer', 'Dimer', .41, .52, ''),
-    ('bounce', 'Dimer: too large, bounces off', .588, .69, 'hi'), ('pass', 'Monomers pass through', .6, .69, 'hi')])
+    ('plasma', 'Blood vessel &middot; plasma', .39, .52, 'hi'), ('dimer', 'Dimer', .41, .52, ''),
+    ('bounce', 'Dimer: too large to penetrate', .588, .69, 'hi'), ('pass', 'Monomers pass through', .6, .69, 'hi')])
 pl_story = re.sub(r'<div class="copy" id="copy">.*?</div></div>(?=<div class="end")', '<div class="copy" id="copy">' + pl_copy + '</div>', otx_story, count=1, flags=re.S)
 assert pl_copy in pl_story, 'copy not replaced'
 pl_story = re.sub(r'<div class="rail" id="rail" aria-hidden="true">.*?</div></div><div id="storyEnd"', f'<div class="rail" id="rail" aria-hidden="true">{pl_rail}</div></div><div id="storyEnd"', pl_story, count=1, flags=re.S)
 pl_story = pl_story.replace('<div class="copy" id="copy">', pl_labels + '<div class="copy" id="copy">', 1)
+# the blood vessel from the gut to the barrier, in the flat layer (world units, y up): two walls widening out of the gut,
+# a faint plasma fill, and a few red blood cells (in the site's pink) that drift along it; its far end meets the membrane
+VY = 66; VX1 = X['mem'] + R - math.sqrt((R + BAND) ** 2 - VY ** 2)   # the membrane's blood-facing surface at the walls
+wall_t = f'M 16 -14 C 46 -10 64 {VY} 112 {VY} L {VX1:.1f} {VY}'
+wall_b = f'M 16 -36 C 46 -40 64 {-VY} 112 {-VY} L {VX1:.1f} {-VY}'
+lumen = f'M 16 -14 C 46 -10 64 {VY} 112 {VY} L {VX1:.1f} {VY} L {VX1:.1f} {-VY} L 112 {-VY} C 64 {-VY} 46 -40 16 -36 Z'
+rnd2 = random.Random(5); rbcs = ''
+for i in range(9):
+    x, y, r, a = rnd2.uniform(120, VX1 - 30), rnd2.uniform(-VY + 14, VY - 14), rnd2.uniform(6, 8.5), rnd2.uniform(-40, 40)
+    rbcs += (f'<g transform="translate({x:.1f} {y:.1f}) rotate({a:.0f})"><ellipse rx="{r:.1f}" ry="{r * .62:.1f}" style="fill:#F59BC8;fill-opacity:.72;stroke:#FBC6E0;stroke-opacity:.9;stroke-width:1"/>'
+             f'<ellipse rx="{r * .45:.1f}" ry="{r * .24:.1f}" style="fill:#D9719F;fill-opacity:.55"/></g>')
+VESSEL = (f'<g id="jvessel" style="opacity:0"><path d="{lumen}" style="fill:#FFFFFF;fill-opacity:.07"/>'
+          f'<g id="jrbc">{rbcs}</g>'
+          + ''.join(f'<path d="{w}" style="fill:none;stroke:var(--ink);stroke-opacity:.16;stroke-width:9;stroke-linecap:round"/>'
+                    f'<path d="{w}" style="fill:none;stroke:var(--ink);stroke-opacity:.55;stroke-width:1.3;stroke-linecap:round"/>' for w in (wall_t, wall_b))
+          + '</g>')
+pl_story = once(pl_story, '<g id="jmem">', VESSEL + '<g id="jmem">')
 pl_head = otx_head.replace('<title>SELFTAC Journey, New Site</title>', '<title>SELFTAC Journey, Plasma</title>', 1)
 pl_head += '''<style>
+#jbeam { display: none; }   /* the vessel carries the molecules from the gut instead */
 /* six beats: a longer scroll, and the gold pearl on the fifth (the clasp closing) */
 .story { height: 1550vh; }
 @media (max-width: 760px) { .story { height: 1350vh; } }
