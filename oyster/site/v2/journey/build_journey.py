@@ -368,15 +368,12 @@ c2_head = ck_head.replace('<title>SELFTAC Journey, Click-Through</title>', '<tit
 .jl.key { font: 600 15px/1 var(--sans); letter-spacing: .01em; text-transform: none; padding: 8px 13px 8px 11px; border-radius: 999px; color: #FFFFFF;
   background: rgba(8, 58, 41, .86); border: 1px solid rgba(255, 255, 255, .18); display: inline-flex; align-items: center; gap: 9px; }
 .jl.key::before { content: ""; width: 11px; height: 11px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 2px rgba(255, 255, 255, .25); }
-/* the key, in the left column under the copy */
-.jkey { position: absolute; left: clamp(16px, 4vw, 64px); bottom: 118px; z-index: 2; display: grid; gap: 11px; opacity: 0; pointer-events: none;
-  padding: 16px 20px 16px 16px; border-radius: 14px; background: rgba(8, 58, 41, .55); border: 1px solid rgba(255, 255, 255, .12); }
-.jkey-t { font: 400 12px/1 var(--pixel); letter-spacing: .08em; text-transform: uppercase; color: #8AC3B1; margin-bottom: 2px; }
-.jkey-r { display: flex; align-items: center; gap: 11px; font: 500 16px/1.2 var(--sans); color: #FFFFFF; }
-.jkey-r i { width: 14px; height: 14px; border-radius: 50%; flex: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, .25); }
-.jkey-r i.sel { background: linear-gradient(90deg, #F0A6CA 0 42%, #F7D16B 42% 58%, #CEE5F3 58%); border-radius: 7px; width: 22px; }
-.jkey-r sup { font-size: .6em; }
-@media (max-width: 760px) { .jkey { display: none; } .jl.key { font-size: 12px; padding: 5px 9px 5px 8px; } .jl.eqf { font-size: 11px; } }
+/* larger copy on the left: the click-through holds each step, so it reads like a slide */
+.copy { width: min(36vw, 540px); }
+.beat .k { font-size: 17px; }
+.beat h1, .beat h2 { font-size: clamp(38px, 4.1vw, 66px); line-height: 1.02; }
+.beat p { font-size: clamp(17px, 1.45vw, 23px); line-height: 1.45; max-width: 36ch; margin-top: 20px; }
+@media (max-width: 760px) { .copy { width: auto; } .beat .k { font-size: 14px; } .beat h1, .beat h2 { font-size: 28px; } .beat p { font-size: 16px; margin-top: 12px; } .jl.key { font-size: 12px; padding: 5px 9px 5px 8px; } .jl.eqf { font-size: 11px; } }
 </style>
 '''
 c2_click = open(D + 'click.js').read()
