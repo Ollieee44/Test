@@ -350,3 +350,43 @@ ck_page = (ck_head + '<main id="main">\n' + ck_story + '</main>\n' + meshes + '\
 os.makedirs(D + 'click', exist_ok=True)
 open(D + 'click/index.html', 'w').write(ck_page)
 print('click/index.html', os.path.getsize(D + 'click/index.html') // 1024, 'KB')
+
+# ---------- click-through v2 (click2/index.html): a live equilibrium, a population in the cell, persistent labels ----------
+c2_beats = list(pl_beats)
+c2_beats[2] = ('03 &middot; In the bloodstream', 'h2', 'Monomers and dimer, in equilibrium.',
+               'In the plasma, two monomers keep joining into the dimer and coming apart again at the reversible linker: a dynamic equilibrium.')
+c2_beats[4] = ('05 &middot; Ternary complex', 'h2', 'Inside the cell, a dimer forms the ternary complex.',
+               'Monomers and dimers are in equilibrium here too. One dimer binds the target protein and an E3 ligase: a ternary complex.')
+c2_copy = ''.join(f'<div class="beat"><span class="k"><b>{k.split(" &middot; ")[0]}</b>{k.split(" &middot; ")[1]}</span><{h}>{t}</{h}><p>{d}</p></div>' for k, h, t, d in c2_beats)
+c2_story = re.sub(r'<div class="copy" id="copy">.*?</div></div>(?=<div class="end")', '<div class="copy" id="copy">' + c2_copy + '</div>', ck_story, count=1, flags=re.S)
+assert c2_copy in c2_story
+c2_head = ck_head.replace('<title>SELFTAC Journey, Click-Through</title>', '<title>SELFTAC Journey, Click-Through 2</title>', 1) + '''<style>
+/* the equilibrium formula in the blood */
+.jl.eqf { font-size: 14px; letter-spacing: .1em; }
+.jl.eqf b { font-weight: 400; color: var(--clasp); margin: 0 .35em; font-size: 1.25em; }
+/* persistent labels beside the proteins and ubiquitin: larger, plain type, a swatch in the protein's colour */
+.jl.key { font: 600 15px/1 var(--sans); letter-spacing: .01em; text-transform: none; padding: 8px 13px 8px 11px; border-radius: 999px; color: #FFFFFF;
+  background: rgba(8, 58, 41, .86); border: 1px solid rgba(255, 255, 255, .18); display: inline-flex; align-items: center; gap: 9px; }
+.jl.key::before { content: ""; width: 11px; height: 11px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 2px rgba(255, 255, 255, .25); }
+/* the key, in the left column under the copy */
+.jkey { position: absolute; left: clamp(16px, 4vw, 64px); bottom: 118px; z-index: 2; display: grid; gap: 11px; opacity: 0; pointer-events: none;
+  padding: 16px 20px 16px 16px; border-radius: 14px; background: rgba(8, 58, 41, .55); border: 1px solid rgba(255, 255, 255, .12); }
+.jkey-t { font: 400 12px/1 var(--pixel); letter-spacing: .08em; text-transform: uppercase; color: #8AC3B1; margin-bottom: 2px; }
+.jkey-r { display: flex; align-items: center; gap: 11px; font: 500 16px/1.2 var(--sans); color: #FFFFFF; }
+.jkey-r i { width: 14px; height: 14px; border-radius: 50%; flex: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, .25); }
+.jkey-r i.sel { background: linear-gradient(90deg, #F0A6CA 0 42%, #F7D16B 42% 58%, #CEE5F3 58%); border-radius: 7px; width: 22px; }
+.jkey-r sup { font-size: .6em; }
+@media (max-width: 760px) { .jkey { display: none; } .jl.key { font-size: 12px; padding: 5px 9px 5px 8px; } .jl.eqf { font-size: 11px; } }
+</style>
+'''
+c2_click = open(D + 'click.js').read()
+c2_click = re.sub(r'const HOLD = \[[^\]]*\];', 'const HOLD = [300, 150, 550, 300, 2400, 200, 550, 2200, 450, 400];   // longer where an equilibrium is playing', c2_click, count=1)
+c2_click = once(c2_click, '  J.frame(0); show(); setPlaying(false);', '''  J.frame(0); show(); setPlaying(false);
+  // while a stop holds a live equilibrium, keep drawing it (one redraw a frame, only when nothing else is moving)
+  (function idle() { if (!anim && window.__liveAt && window.__liveAt(p)) J.redraw(); requestAnimationFrame(idle); })();''')
+c2_js = once(pl_js, 'goTo: p => { hold = true; prog = p; },', "goTo: p => { hold = true; prog = p; }, redraw: () => { drawnSig = ''; },")
+c2_page = (c2_head + '<main id="main">\n' + c2_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + PL_PAL
+           + c2_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '\n' + open(D + 'cell.js').read() + '\n' + c2_click + '</script>\n')
+os.makedirs(D + 'click2', exist_ok=True)
+open(D + 'click2/index.html', 'w').write(c2_page)
+print('click2/index.html', os.path.getsize(D + 'click2/index.html') // 1024, 'KB')
