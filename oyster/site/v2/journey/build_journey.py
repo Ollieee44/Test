@@ -308,3 +308,36 @@ pl_page = (pl_head + '<main id="main">\n' + pl_story + '</main>\n' + meshes + '\
            + pl_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '</script>\n' + SMALL)
 open(D + 'plasma/index.html', 'w').write(pl_page)
 print('plasma/index.html', os.path.getsize(D + 'plasma/index.html') // 1024, 'KB')
+
+# ---------- the click-through version (click/index.html): the plasma journey stepped with Next / Back ----------
+# Same content; the page does not scroll, and click.js plays the journey from one key moment to the next.
+CK_CONTROLS = ('<div class="jctl" id="jctl"><span class="jcount" id="jcount" aria-live="polite">1 / 11</span>'
+               '<button type="button" class="jbtn" id="jback" aria-label="Back"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M12 7H2M6 3L2 7l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+               '<button type="button" class="jbtn jnext" id="jnext"><span>Next</span><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>')
+ck_story = re.sub(r'<a class="skip" id="skip".*?</a>', CK_CONTROLS, pl_story, count=1, flags=re.S)
+assert 'id="jctl"' in ck_story
+ck_story = re.sub(r'<div class="hint" id="hint"><span>.*?molecule</span>', '<div class="hint" id="hint"><span>Press Next, or use the arrow keys</span>', ck_story, count=1, flags=re.S)
+assert 'arrow keys</span>' in ck_story and 'molecule</span><i' not in ck_story
+ck_head = pl_head.replace('<title>SELFTAC Journey, Plasma</title>', '<title>SELFTAC Journey, Click-Through</title>', 1) + '''<style>
+/* click-through: one screen, no scrolling; Next and Back bottom right, the rail's pearls clickable */
+.story, .story { height: 100vh; height: 100svh; }
+@media (max-width: 760px) { .story { height: 100svh; } }
+html, body { overflow: hidden; overscroll-behavior: none; }
+.jctl { position: absolute; right: clamp(16px, 3vw, 40px); bottom: 76px; z-index: 4; display: flex; align-items: center; gap: 10px; }
+.jcount { font: 400 12px/1 var(--mono); letter-spacing: .12em; color: var(--muted); margin-right: 6px; font-variant-numeric: tabular-nums; }
+.jbtn { display: inline-flex; align-items: center; gap: 10px; height: 46px; min-width: 46px; justify-content: center; padding: 0 14px; border-radius: 12px; cursor: pointer;
+  background: rgba(255, 255, 255, .17); border: 1px solid rgba(255, 255, 255, .14); color: #FFFFFF; font: 500 15px/1 var(--sans); transition: background-color .2s, transform .2s; }
+.jbtn svg { width: 15px; height: 15px; }
+.jbtn.jnext { padding: 0 20px; background: rgba(255, 255, 255, .92); color: #0E5C42; }
+.jbtn:hover { background: rgba(255, 255, 255, .28); } .jbtn.jnext:hover { background: #FFFFFF; transform: translateX(2px); }
+.jbtn:disabled { opacity: .35; cursor: default; transform: none; }
+.jbtn:focus-visible, .rail > div:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.rail > div { cursor: pointer; }
+@media (max-width: 760px) { .jctl { top: calc(14px + env(safe-area-inset-top, 0px)); bottom: auto; right: 12px; } .jbtn { height: 40px; min-width: 40px; font-size: 14px; } .jbtn.jnext { padding: 0 14px; } }
+</style>
+'''
+ck_page = (ck_head + '<main id="main">\n' + ck_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + PL_PAL
+           + pl_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '\n' + open(D + 'click.js').read() + '</script>\n')
+os.makedirs(D + 'click', exist_ok=True)
+open(D + 'click/index.html', 'w').write(ck_page)
+print('click/index.html', os.path.getsize(D + 'click/index.html') // 1024, 'KB')
