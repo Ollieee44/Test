@@ -369,10 +369,10 @@ c2_head = ck_head.replace('<title>SELFTAC Journey, Click-Through</title>', '<tit
   background: rgba(8, 58, 41, .86); border: 1px solid rgba(255, 255, 255, .18); display: inline-flex; align-items: center; gap: 9px; }
 .jl.key::before { content: ""; width: 11px; height: 11px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 2px rgba(255, 255, 255, .25); }
 /* larger copy on the left: the click-through holds each step, so it reads like a slide */
-.copy { width: min(36vw, 540px); }
+.copy { width: min(34vw, 520px); }
 .beat .k { font-size: 17px; }
 .beat h1, .beat h2 { font-size: clamp(38px, 4.1vw, 66px); line-height: 1.02; }
-.beat p { font-size: clamp(17px, 1.45vw, 23px); line-height: 1.45; max-width: 36ch; margin-top: 20px; }
+.beat p { font-size: clamp(17px, 1.45vw, 23px); line-height: 1.45; max-width: 32ch; margin-top: 20px; }
 @media (max-width: 760px) { .copy { width: auto; } .beat .k { font-size: 14px; } .beat h1, .beat h2 { font-size: 28px; } .beat p { font-size: 16px; margin-top: 12px; } .jl.key { font-size: 12px; padding: 5px 9px 5px 8px; } .jl.eqf { font-size: 11px; } }
 </style>
 '''
@@ -382,6 +382,11 @@ c2_click = once(c2_click, '  J.frame(0); show(); setPlaying(false);', '''  J.fra
   // while a stop holds a live equilibrium, keep drawing it (one redraw a frame, only when nothing else is moving)
   (function idle() { if (!anim && window.__liveAt && window.__liveAt(p)) J.redraw(); requestAnimationFrame(idle); })();''')
 c2_js = once(pl_js, 'goTo: p => { hold = true; prog = p; },', "goTo: p => { hold = true; prog = p; }, redraw: () => { drawnSig = ''; },")
+# the larger copy takes more of the left: the subject sits further right, and further still once the target is in the
+# proteasome, so the complex left behind stays clear of the degradation copy; inside the cell it sits a little higher,
+# clear of the controls
+c2_js = once(c2_js, 'if (narrow) ay -= .17 * vh * settle; else ax -= .17 * vw * settle;',
+             'if (narrow) ay -= .17 * vh * settle; else { ax -= (.2 + .1 * kf(p, [[.855, 0], [.885, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }')
 c2_page = (c2_head + '<main id="main">\n' + c2_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + PL_PAL
            + c2_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '\n' + open(D + 'cell.js').read() + '\n' + c2_click + '</script>\n')
 os.makedirs(D + 'click2', exist_ok=True)

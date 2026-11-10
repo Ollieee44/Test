@@ -38,11 +38,22 @@ POP.forEach(c => {
 function label2(text, cls) { const el = document.createElement('span'); el.className = 'jl ' + cls; el.innerHTML = text; el.setAttribute('aria-hidden', 'true');
   stage.insertBefore(el, document.getElementById('copy')); return el; }
 const EQ_LBL = label2('Monomer + Monomer <b>⇌</b> Dimer', 'big eqf'), STATE = label2('Monomers', 'big');
-// ---- persistent labels on the proteins and ubiquitin, beside each one ----
-const KEY = [['Target protein', '#F0A6CA', () => P.brd4, winOf(.715, .945)], ['E3 ligase', '#CEE5F3', () => P.vhl, winOf(.715, .985)],
-  ['Ubiquitin', '#B9A6F5', () => ubs[2], pn => winOf(.848, .945)(pn) * (ubs[2].visible ? 1 : 0)]];
+// ---- persistent labels on the proteins and ubiquitin, beside each one; the target's and ubiquitin's go as they enter the proteasome ----
+const KEY = [['Target protein', '#F0A6CA', () => P.brd4, winOf(.715, .912, .015)], ['E3 ligase', '#CEE5F3', () => P.vhl, pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)],   // on a phone the complex leaves the screen
+  ['Ubiquitin', '#B9A6F5', () => ubs[2], pn => winOf(.848, .912, .015)(pn) * (ubs[2].visible ? 1 : 0)]];
 KEY.forEach(([t, col, at, win]) => { const k = tag(t, 'key', at, win, 14); k.side = 'right'; k.el.style.setProperty('--dot', col); TAGS.push(k); });
-document.querySelectorAll('.jl[data-x]').forEach(el => { if (/^(Target protein|E3 ligase)$/.test(el.textContent.trim())) el.style.display = 'none'; });
+document.querySelectorAll('.jl[data-x]').forEach(el => { if (/^(Target protein|E3 ligase|Ternary complex)$/.test(el.textContent.trim())) el.style.display = 'none'; });
+// ---- red cells that drift under the copy fade out, so the text always reads ----
+const RBC = [...rbc.children].map(g => { const m = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(g.getAttribute('transform')); return { g, x: +m[1], y: +m[2], o: 1 }; });
+const beats = [...document.querySelectorAll('.beat')];
+function clearCopy(pn) {
+  if (+vessel.style.opacity <= 0) return;
+  const rs = beats.filter(b => +b.style.opacity > .01).map(b => b.getBoundingClientRect()), s0 = stage.getBoundingClientRect(), drift = (pn - .4) * 70;
+  RBC.forEach(r => { const [x, y] = toScreen(r.x + drift, r.y); let o = 1;
+    rs.forEach(b => { const dx = Math.max(b.left - s0.left - x, x - (b.right - s0.left), 0), dy = Math.max(b.top - s0.top - y, y - (b.bottom - s0.top), 0);
+      o = Math.min(o, clamp((Math.hypot(dx, dy) - 40) / 30, 0, 1)); });
+    if (Math.abs(o - r.o) > .01) { r.o = o; r.g.style.opacity = o.toFixed(2); } });
+}
 
 const frameP = frame;
 frame = function (p0) {
@@ -62,6 +73,7 @@ frame = function (p0) {
   });
   frameP(pn);
   const endO = clamp((WARP(pn) - .965) / .03, 0, 1);
+  clearCopy(pn);
   CROWD.forEach(c => { c.g.visible = false; });
   // the bouncer: only for the barrier beat
   const bA = kf(pn, [[.5, .001], [.535, 1]]);
