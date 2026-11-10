@@ -1,8 +1,9 @@
 """Give every slide of stage1.pptx the Morph transition (by object), lasting what out/timing.json says, and advance on
 its own once the Morph has played (a click still advances, and the last slide waits). Apps without Morph fade instead.
-Usage: python post_deck.py stage1.pptx out/timing.json selftac-journey.pptx"""
+Usage: python post_deck.py stage1.pptx out/timing.json selftac-journey.pptx [--click]  (--click: advance on click only)"""
 import json, re, sys, zipfile
 src, timing_f, dst = sys.argv[1:4]
+CLICK_ONLY = '--click' in sys.argv           # every slide waits for a click (Morph still plays on each)
 timing = json.load(open(timing_f))
 HOLD = 350                                   # a breath after each Morph before the next slide starts
 zin = zipfile.ZipFile(src); files = {n: zin.read(n) for n in zin.namelist()}
@@ -13,6 +14,7 @@ for i, name in enumerate(slides):
     dur = timing[i] if i < len(timing) and timing[i] else 900
     nxt = timing[i + 1] if i + 1 < len(timing) and timing[i + 1] else None
     adv = f' advTm="{(1600 if i == 0 else HOLD)}"' if nxt else ''
+    if CLICK_ONLY: adv = ''
     t = ('<mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">'
          '<mc:Choice xmlns:p159="http://schemas.microsoft.com/office/powerpoint/2015/09/main" Requires="p159">'
          f'<p:transition xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" spd="slow" p14:dur="{dur}"{adv}><p159:morph option="byObject"/></p:transition>'
