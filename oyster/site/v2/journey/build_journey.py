@@ -242,3 +242,45 @@ otx_page = (otx_head + '<main id="main">\n' + otx_story + '</main>\n' + meshes +
             + open(D + 'journey.js').read() + '\n' + open(D + 'otx.js').read() + '</script>\n' + SMALL)
 open(D + 'otx/index.html', 'w').write(otx_page)
 print('otx/index.html', os.path.getsize(D + 'otx/index.html') // 1024, 'KB')
+
+# ---------- the plasma version (plasma/index.html): the oyster-tx.com journey with a bloodstream beat ----------
+# After the gut, the bloodstream holds dimers and monomers together; at the membrane a dimer bounces off while the
+# monomers pass through (plasma.js, which also re-times the journey and its copy to six beats).
+pl_beats = [
+    ('01 &middot; Oral dosing', 'h1', 'Taken by mouth, as a pill.', f'{TM} degraders are designed to be small enough to be swallowed, not injected.'),
+    ('02 &middot; In the gut', 'h2', 'The dimer comes apart into two monomers.', f'In the gut, each {TM} dimer dissociates at its reversible linker into two small monomers, which are absorbed.'),
+    ('03 &middot; In the bloodstream', 'h2', 'Dimer and monomers, side by side.', 'The linker is reversible, so in the blood all three exist together: the intact dimer and both of its monomers, in equilibrium.'),
+    ('04 &middot; The barrier', 'h2', 'Only the monomers get through.', 'The dimer is too large to cross the cell membrane or the blood-brain barrier, and bounces off. Each small monomer passes through on its own.'),
+    ('05 &middot; Ternary complex', 'h2', 'Inside the cell, the halves clasp back together.', 'One end holds the target protein, the other an E3 ligase: a ternary complex.'),
+    ('06 &middot; Degradation', 'h2', 'Tagged, then broken down.', 'Ubiquitin marks the target and the proteasome destroys it. The degrader is free to find the next one.'),
+]
+pl_copy = ''.join(f'<div class="beat"><span class="k"><b>{k.split(" &middot; ")[0]}</b>{k.split(" &middot; ")[1]}</span><{h}>{t}</{h}><p>{d}</p></div>' for k, h, t, d in pl_beats)
+pl_rail = ''.join(f'<div><span>{n}</span><i><b></b></i></div>' for n in ('Oral', 'Gut', 'Plasma', 'Barrier', 'Complex', 'Degraded'))
+pl_labels = ''.join(f'<span class="jl {c}" data-pl="{at}" data-a="{a}" data-b="{b}">{t}</span>' for at, t, a, b, c in [
+    ('plasma', 'Bloodstream &middot; plasma', .39, .52, 'hi'), ('dimer', 'Dimer', .41, .52, ''),
+    ('bounce', 'Dimer: too large, bounces off', .588, .69, 'hi'), ('pass', 'Monomers pass through', .6, .69, 'hi')])
+pl_story = re.sub(r'<div class="copy" id="copy">.*?</div></div>(?=<div class="end")', '<div class="copy" id="copy">' + pl_copy + '</div>', otx_story, count=1, flags=re.S)
+assert pl_copy in pl_story, 'copy not replaced'
+pl_story = re.sub(r'<div class="rail" id="rail" aria-hidden="true">.*?</div></div><div id="storyEnd"', f'<div class="rail" id="rail" aria-hidden="true">{pl_rail}</div></div><div id="storyEnd"', pl_story, count=1, flags=re.S)
+pl_story = pl_story.replace('<div class="copy" id="copy">', pl_labels + '<div class="copy" id="copy">', 1)
+pl_head = otx_head.replace('<title>SELFTAC Journey, New Site</title>', '<title>SELFTAC Journey, Plasma</title>', 1)
+pl_head += '''<style>
+/* six beats: a longer scroll, and the gold pearl on the fifth (the clasp closing) */
+.story { height: 1550vh; }
+@media (max-width: 760px) { .story { height: 1350vh; } }
+.rail { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.rail div:nth-child(4)::before { width: 12px; height: 12px; }
+.rail div:nth-child(4).on::before { background: #fff; box-shadow: none; border-color: var(--ink); }
+.rail div:nth-child(5)::before { width: 14px; height: 14px; }
+.rail div:nth-child(5).on::before { background: var(--clasp); border-color: var(--ink); box-shadow: 0 0 0 5px color-mix(in srgb, var(--clasp) 28%, transparent); }
+</style>
+'''
+pl_js = open(D + 'journey.js').read()
+pl_js = once(pl_js, 'const BEATS = [[0, .17], [.17, .42], [.42, .6], [.6, .8], [.8, 1]];', 'const BEATS = [[0, .17], [.17, .42], [.42, .6], [.6, .8], [.8, 1], [2, 3]];   // plasma.js sets the six beats')
+pl_js = once(pl_js, '  const p = clamp(p0, 0, 1);', '  const p = WARP(clamp(p0, 0, 1));   // the journey\'s own timeline, held back for the bloodstream beat')
+pl_js = once(pl_js, "const LABELS = [...document.querySelectorAll('.jl[data-x]')]", "const LABELS = [...document.querySelectorAll('.jl[data-x]:not([data-pl])')]")
+os.makedirs(D + 'plasma', exist_ok=True)
+pl_page = (pl_head + '<main id="main">\n' + pl_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + OTX_PAL
+           + pl_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '</script>\n' + SMALL)
+open(D + 'plasma/index.html', 'w').write(pl_page)
+print('plasma/index.html', os.path.getsize(D + 'plasma/index.html') // 1024, 'KB')
