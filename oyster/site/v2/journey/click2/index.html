@@ -444,7 +444,7 @@ for (let i = 0; i < 18; i++) {
 }
 // where the ubiquitin tags sit on the target: the far side of BRD4 from the degrader (the top, once upright)
 const ubLocal = (() => { const g = P.brd4.children[0].geometry, pos = g.attributes.position, v = V3(); let best = null, bs = -1e9;
-  for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyQuaternion(Q); const s = -v.x + .35 * v.z + .2 * v.y; if (s > bs) { bs = s; best = v.clone(); } } return best; })();
+  for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyQuaternion(Q); const s = .5 * v.x - v.y + .3 * v.z; if (s > bs) { bs = s; best = v.clone(); } } return best; })();
 
 // ---------- palette: the capsule takes the two halves' colours ----------
 const applyBase = applyPalette;
@@ -456,6 +456,8 @@ applyPalette = function () {
 const UBC = {"g": [9.73, 11.17, 20.05], "poses": [[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], [0.5308, -0.6393, 0.5563, 0.0058, -6.72, 10.3, 18.61], [-0.0531, 0.0828, -0.9951, 0.0016, 15.59, 21.72, 0.87], [-0.5607, -0.5097, 0.0113, 0.6524, 24.72, 7.58, 16.22]]};
 const UBQ = UBC.poses.map(q => new THREE.Quaternion(q[0], q[1], q[2], q[3])), UBT = UBC.poses.map(q => V3(q[4], q[5], q[6])), UBG = V3(...UBC.g);
 const UBAX = UBT.reduce((a, t) => a.add(t), V3(0, 0, 0)).multiplyScalar(1 / UBT.length).sub(UBG).normalize();   // the chain, from its root
+const E3SPOT = (() => { const g = P.vhl.children[0].geometry, pos = g.attributes.position, v = V3(); let best = null, bs = -1e9;   // the ligase flank the ubiquitin comes from
+  for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyQuaternion(Q); const s = -.4 * v.x - v.y + .3 * v.z; if (s > bs) { bs = s; best = v.clone(); } } return best; })();
 const B4C = (() => { const g = P.brd4.children[0].geometry; g.computeBoundingBox(); return g.boundingBox.getCenter(V3()).applyQuaternion(Q); })();
 // ---------- the timeline ----------
 const BEATS = [[0, .17], [.17, .42], [.42, .6], [.6, .8], [.8, 1], [2, 3]];   // plasma.js sets the six beats
@@ -479,7 +481,7 @@ function toScreen(x, y) { vtmp.set(x, y, 0).project(camera); return [(vtmp.x + 1
 const winO = (p, a, b, f = .02) => clamp(Math.min((p - a) / f, (b - p) / f), 0, 1);
 
 function frame(p0) {
-  const p = WARP(clamp(p0, 0, 1));   // the journey's own timeline, held back for the bloodstream beat
+  const p = WARP(clamp(p0, 0, 1)), CMP = 5 * kf(WARP(clamp(p0, 0, 1)), [[.735, 0], [.78, 1], [.86, 1], [.9, 0]]);   // the journey's own timeline, held back for the bloodstream beat
   // ---- camera: copy on the left on wide screens (the subject sits right of centre); on a card below on phones
   const narrow = camera.aspect < .9, fov = THREE.MathUtils.degToRad(camera.fov);
   const dist = DIST(p) * (narrow ? Math.max(1, 1.05 / camera.aspect) * .8 : 1);
@@ -515,14 +517,14 @@ function frame(p0) {
   cg.position.set(HERO_X(p), HERO_Y(p), 0); cg.scale.setScalar(SC * sh); cg.visible = sh > .01;
   cg.rotation.z = kf(p, [[.295, 0], [.32, -Math.PI / 2], [.37, -Math.PI / 2], [.395, 0], [.425, 0], [.47, -Math.PI / 2]]) + (p < .31 ? .12 * Math.sin(p * 30) : 0);
   const j = kf(p, [[.27, 1], [.31, 0], [.64, 0], [.68, 1]]);
-  const free = (1 - j) * clamp((.66 - p) / .05, 0, 1), hx = p < .27 ? 7 : HX(p);
+  const free = (1 - j) * clamp((.66 - p) / .05, 0, 1), hx = p < .27 ? 7 : HX(p) - CMP;
   const rW = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * .32 * Math.sin(p * 47), free * .42 * Math.sin(p * 31), 0));
   const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(p * 43), free * .4 * Math.cos(p * 35), 0));
   const brk = mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j);
   // the proteins come in: the target from above, the ligase from below
   const tIn = kf(p, [[.58, 1], [.66, 0]]);
-  P.brd4.position.set(-GAPJ - 110 * tIn, 0, 0); P.brd4.scale.setScalar(1);
-  ['vhl', 'elob', 'eloc'].forEach(key => { P[key].position.set(GAPJ + 130 * tIn, 0, 0); P[key].visible = p > .57; });
+  P.brd4.position.set(-GAPJ + CMP - 110 * tIn, 0, 0); P.brd4.scale.setScalar(1);
+  ['vhl', 'elob', 'eloc'].forEach(key => { P[key].position.set(GAPJ - CMP + 130 * tIn, 0, 0); P[key].visible = p > .57; });
   P.brd4.visible = p > .57;
   cg.updateMatrixWorld(true);
   // the bond: a flash as it breaks in the gut, and again as it clicks shut in the complex
@@ -538,18 +540,18 @@ function frame(p0) {
   const go = kf(p, [[.86, 0], [.92, 1]]);
   if (go > 0) {
     // the holder scales about its origin, so the protein's centre is kept on the proteasome as it shrinks
-    const sc = 1 - .82 * clamp((go - .55) / .45, 0, 1), home = V3(-GAPJ, 0, 0), into = inner.worldToLocal(PROT.clone().add(V3(0, -PMID * PK * 1.15, 0))).sub(S('brd4').multiplyScalar(sc));
+    const sc = 1 - .82 * clamp((go - .55) / .45, 0, 1), home = V3(-GAPJ + CMP, 0, 0), into = inner.worldToLocal(PROT.clone().add(V3(0, -PMID * PK * 1.15, 0))).sub(S('brd4').multiplyScalar(sc));
     P.brd4.position.lerpVectors(home, into, go); P.brd4.scale.setScalar(sc);
     P.brd4.visible = p < .935;
   }
   P.brd4.updateMatrixWorld(true);
   {
-    const spot = P.brd4.localToWorld(ubLocal.clone()), out = spot.clone().sub(P.brd4.localToWorld(B4C.clone())).normalize().add(V3(-.3, .1, .35)).normalize();
-    const Ro = new THREE.Quaternion().setFromUnitVectors(UBAX, out), s = .42 * SC * P.brd4.scale.x;
+    const spot = P.brd4.localToWorld(ubLocal.clone()), out = spot.clone().sub(P.brd4.localToWorld(B4C.clone())).normalize().add(V3(-.1, .3, .35)).normalize();
+    const from = P.vhl.localToWorld(E3SPOT.clone()).sub(spot), Ro = new THREE.Quaternion().setFromUnitVectors(UBAX, out), s = .42 * SC * P.brd4.scale.x;
     ubs.forEach((u, i) => {
       const on = clamp((p - (.745 + i * .022)) / .03, 0, 1), e = ease(on);
       u.quaternion.copy(Ro).multiply(UBQ[i]);
-      u.position.copy(UBT[i]).sub(UBG).applyQuaternion(Ro).multiplyScalar(s).add(spot).addScaledVector(out, 22 * (1 - e));
+      u.position.copy(UBT[i]).sub(UBG).applyQuaternion(Ro).multiplyScalar(s).add(spot).addScaledVector(from, 1 - e).addScaledVector(out, 6 * Math.sin(Math.PI * e));
       u.scale.setScalar(s * (.55 + .45 * e)); u.visible = on > .01 && P.brd4.visible;
     });
   }
@@ -763,6 +765,9 @@ frame = function (p0) {
     for (const cx of [box.min.x, box.max.x]) for (const cy of [box.min.y, box.max.y]) for (const cz of [box.min.z, box.max.z]) {
       vtmp.set(cx, cy, cz).project(camera); const sx = (vtmp.x + 1) / 2 * stage.clientWidth, sy = (1 - vtmp.y) / 2 * stage.clientHeight;
       x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }
+    if (t.side === 'left') {    // beside the object on its left, level with its middle
+      const w = (t.w = t.w || t.el.offsetWidth), xl = Math.max(x0 - t.gap - w, 8);
+      t.el.style.transform = `translate(${xl.toFixed(1)}px, ${((y0 + y1) / 2).toFixed(1)}px) translate(0, -50%)`; return; }
     if (t.side === 'right') {   // beside the object, level with its middle (persistent labels)
       const hw2 = (t.w = t.w || t.el.offsetWidth) + 8, xr = Math.min(x1 + t.gap, stage.clientWidth - hw2);
       t.el.style.transform = `translate(${xr.toFixed(1)}px, ${((y0 + y1) / 2).toFixed(1)}px) translate(0, -50%)`; return; }
@@ -829,8 +834,8 @@ const EQ_LBL = label2('Monomer + Monomer <b>⇌</b> Dimer', 'big eqf'), STATE = 
 // ---- persistent labels on the proteins and ubiquitin, beside each one; the target's and ubiquitin's go as they enter the proteasome ----
 const KEY = [['Target protein', '#F0A6CA', () => P.brd4, winOf(.715, .892, .015)], ['E3 ligase', '#CEE5F3', () => P.vhl, pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)],   // on a phone the complex leaves the screen
   ['Ubiquitin', '#B9A6F5', () => ubs[2], pn => winOf(.848, .892, .015)(pn) * (ubs[2].visible ? 1 : 0)]];
-const KEY_TAGS = [];
-KEY.forEach(([t, col, at, win], i) => { const k = tag(t, 'key', at, win, 14); KEY_TAGS.push(k); k.side = 'right'; k.seq = [0, 500, 0][i]; k.el.style.setProperty('--dot', col); TAGS.push(k); });
+const KEY_TAGS = [];   // ubiquitin's label on the left: the chain sits on the target's left flank
+KEY.forEach(([t, col, at, win], i) => { const k = tag(t, 'key', at, win, 14); KEY_TAGS.push(k); k.side = i === 2 ? 'left' : 'right'; k.seq = [0, 500, 0][i]; k.el.style.setProperty('--dot', col); TAGS.push(k); });
 document.querySelectorAll('.jl[data-x]').forEach(el => { if (/^(Target protein|E3 ligase|Ternary complex)$/.test(el.textContent.trim())) el.style.display = 'none'; });
 // ---- red cells that drift under the copy fade out, so the text always reads ----
 const RBC = [...rbc.children].map(g => { const m = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(g.getAttribute('transform')); return { g, x: +m[1], y: +m[2], o: 1 }; });
@@ -892,6 +897,7 @@ frame = function (p0) {
     const st = s > .5 ? 'Dimer' : 'Monomers'; if (STATE.textContent !== st) STATE.textContent = st;
     STATE.style.transform = `translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px) translate(-50%, -50%)`;
   }
+  KEY_TAGS[2].side = stage.clientWidth < 760 ? '' : 'left';   // on a phone the chain is near the edge: its label goes under it
   staggerLabels();
 };
 // ---- labels in the busy spots come in one after another, in reading order: each waits its turn (ms) from the moment

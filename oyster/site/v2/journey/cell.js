@@ -41,8 +41,8 @@ const EQ_LBL = label2('Monomer + Monomer <b>⇌</b> Dimer', 'big eqf'), STATE = 
 // ---- persistent labels on the proteins and ubiquitin, beside each one; the target's and ubiquitin's go as they enter the proteasome ----
 const KEY = [['Target protein', '#F0A6CA', () => P.brd4, winOf(.715, .892, .015)], ['E3 ligase', '#CEE5F3', () => P.vhl, pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)],   // on a phone the complex leaves the screen
   ['Ubiquitin', '#B9A6F5', () => ubs[2], pn => winOf(.848, .892, .015)(pn) * (ubs[2].visible ? 1 : 0)]];
-const KEY_TAGS = [];
-KEY.forEach(([t, col, at, win], i) => { const k = tag(t, 'key', at, win, 14); KEY_TAGS.push(k); k.side = 'right'; k.seq = [0, 500, 0][i]; k.el.style.setProperty('--dot', col); TAGS.push(k); });
+const KEY_TAGS = [];   // ubiquitin's label on the left: the chain sits on the target's left flank
+KEY.forEach(([t, col, at, win], i) => { const k = tag(t, 'key', at, win, 14); KEY_TAGS.push(k); k.side = i === 2 ? 'left' : 'right'; k.seq = [0, 500, 0][i]; k.el.style.setProperty('--dot', col); TAGS.push(k); });
 document.querySelectorAll('.jl[data-x]').forEach(el => { if (/^(Target protein|E3 ligase|Ternary complex)$/.test(el.textContent.trim())) el.style.display = 'none'; });
 // ---- red cells that drift under the copy fade out, so the text always reads ----
 const RBC = [...rbc.children].map(g => { const m = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(g.getAttribute('transform')); return { g, x: +m[1], y: +m[2], o: 1 }; });
@@ -104,6 +104,7 @@ frame = function (p0) {
     const st = s > .5 ? 'Dimer' : 'Monomers'; if (STATE.textContent !== st) STATE.textContent = st;
     STATE.style.transform = `translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px) translate(-50%, -50%)`;
   }
+  KEY_TAGS[2].side = stage.clientWidth < 760 ? '' : 'left';   // on a phone the chain is near the edge: its label goes under it
   staggerLabels();
 };
 // ---- labels in the busy spots come in one after another, in reading order: each waits its turn (ms) from the moment

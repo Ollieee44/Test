@@ -395,6 +395,16 @@ c2_click = once(c2_click, '  J.frame(0); show(); setPlaying(false);', '''  J.fra
 c2_js = once(pl_js, 'goTo: p => { hold = true; prog = p; },', "goTo: p => { hold = true; prog = p; }, redraw: () => { drawnSig = ''; },")
 # the two monomers cross side by side: the pair turns across its path as it leaves the gut and again before the membrane
 # (horizontal in the bloodstream between, under its equilibrium), so both cross each boundary at the same moment
+# the complex tightens for ubiquitination: the ligase and the target close in (the degrader shortening with them) while
+# the chain is built, and ease apart again as the target leaves for the proteasome
+c2_js = once(c2_js, 'const p = WARP(clamp(p0, 0, 1));', 'const p = WARP(clamp(p0, 0, 1)), CMP = 5 * kf(WARP(clamp(p0, 0, 1)), [[.735, 0], [.78, 1], [.86, 1], [.9, 0]]);')
+c2_js = once(c2_js, 'hx = p < .27 ? 7 : HX(p);', 'hx = p < .27 ? 7 : HX(p) - CMP;')
+c2_js = once(c2_js, 'P.brd4.position.set(-GAPJ - 110 * tIn, 0, 0);', 'P.brd4.position.set(-GAPJ + CMP - 110 * tIn, 0, 0);')
+c2_js = once(c2_js, 'P[key].position.set(GAPJ + 130 * tIn, 0, 0);', 'P[key].position.set(GAPJ - CMP + 130 * tIn, 0, 0);')
+c2_js = once(c2_js, 'home = V3(-GAPJ, 0, 0)', 'home = V3(-GAPJ + CMP, 0, 0)')
+# the chain goes on a lysine on the target's flank near the ligase (in the turned crystal frame +x is toward the ligase,
+# -y the screen-left flank once the complex stands upright), and each ubiquitin is handed over from the ligase's side
+c2_js = once(c2_js, 'const s = -v.x + .35 * v.z + .2 * v.y;', 'const s = .5 * v.x - v.y + .3 * v.z;')
 # ubiquitin as a real K48-linked chain (PDB 2O6V, see tools/ub_chain.py): built on the target one at a time, proximal
 # first, and taken into the proteasome with it
 UB_OLD = """  ubs.forEach((u, i) => {
@@ -404,12 +414,12 @@ UB_OLD = """  ubs.forEach((u, i) => {
     u.visible = on > .01 && P.brd4.visible;
   });"""
 UB_NEW = """  {
-    const spot = P.brd4.localToWorld(ubLocal.clone()), out = spot.clone().sub(P.brd4.localToWorld(B4C.clone())).normalize().add(V3(-.3, .1, .35)).normalize();
-    const Ro = new THREE.Quaternion().setFromUnitVectors(UBAX, out), s = .42 * SC * P.brd4.scale.x;
+    const spot = P.brd4.localToWorld(ubLocal.clone()), out = spot.clone().sub(P.brd4.localToWorld(B4C.clone())).normalize().add(V3(-.1, .3, .35)).normalize();
+    const from = P.vhl.localToWorld(E3SPOT.clone()).sub(spot), Ro = new THREE.Quaternion().setFromUnitVectors(UBAX, out), s = .42 * SC * P.brd4.scale.x;
     ubs.forEach((u, i) => {
       const on = clamp((p - (.745 + i * .022)) / .03, 0, 1), e = ease(on);
       u.quaternion.copy(Ro).multiply(UBQ[i]);
-      u.position.copy(UBT[i]).sub(UBG).applyQuaternion(Ro).multiplyScalar(s).add(spot).addScaledVector(out, 22 * (1 - e));
+      u.position.copy(UBT[i]).sub(UBG).applyQuaternion(Ro).multiplyScalar(s).add(spot).addScaledVector(from, 1 - e).addScaledVector(out, 6 * Math.sin(Math.PI * e));
       u.scale.setScalar(s * (.55 + .45 * e)); u.visible = on > .01 && P.brd4.visible;
     });
   }"""
@@ -417,6 +427,8 @@ UBC = json.load(open(D + 'ubchain.json'))
 UB_SETUP = ('const UBC = ' + json.dumps(UBC) + ';\n'
             'const UBQ = UBC.poses.map(q => new THREE.Quaternion(q[0], q[1], q[2], q[3])), UBT = UBC.poses.map(q => V3(q[4], q[5], q[6])), UBG = V3(...UBC.g);\n'
             'const UBAX = UBT.reduce((a, t) => a.add(t), V3(0, 0, 0)).multiplyScalar(1 / UBT.length).sub(UBG).normalize();   // the chain, from its root\n'
+            'const E3SPOT = (() => { const g = P.vhl.children[0].geometry, pos = g.attributes.position, v = V3(); let best = null, bs = -1e9;   // the ligase flank the ubiquitin comes from\n'
+            '  for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyQuaternion(Q); const s = -.4 * v.x - v.y + .3 * v.z; if (s > bs) { bs = s; best = v.clone(); } } return best; })();\n'
             'const B4C = (() => { const g = P.brd4.children[0].geometry; g.computeBoundingBox(); return g.boundingBox.getCenter(V3()).applyQuaternion(Q); })();\n')
 c2_js = once(c2_js, UB_OLD, UB_NEW)
 c2_js = once(c2_js, '// ---------- the timeline ----------', UB_SETUP + '// ---------- the timeline ----------')
