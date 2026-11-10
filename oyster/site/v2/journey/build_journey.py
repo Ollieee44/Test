@@ -302,7 +302,9 @@ pl_js = once(pl_js, 'const BEATS = [[0, .17], [.17, .42], [.42, .6], [.6, .8], [
 pl_js = once(pl_js, '  const p = clamp(p0, 0, 1);', '  const p = WARP(clamp(p0, 0, 1));   // the journey\'s own timeline, held back for the bloodstream beat')
 pl_js = once(pl_js, "const LABELS = [...document.querySelectorAll('.jl[data-x]')]", "const LABELS = [...document.querySelectorAll('.jl[data-x]:not([data-pl])')]")
 os.makedirs(D + 'plasma', exist_ok=True)
-pl_page = (pl_head + '<main id="main">\n' + pl_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + OTX_PAL
+# ubiquitin and the proteasome share a lavender accent, distinct from the pink target: the tags and the machinery that acts on them
+PL_PAL = OTX_PAL + "PAL.otx.ub = '#B9A6F5'; PAL.otx.prot = '#B9A6F5';\n"
+pl_page = (pl_head + '<main id="main">\n' + pl_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + PL_PAL
            + pl_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '</script>\n' + SMALL)
 open(D + 'plasma/index.html', 'w').write(pl_page)
 print('plasma/index.html', os.path.getsize(D + 'plasma/index.html') // 1024, 'KB')
