@@ -311,7 +311,9 @@ print('plasma/index.html', os.path.getsize(D + 'plasma/index.html') // 1024, 'KB
 
 # ---------- the click-through version (click/index.html): the plasma journey stepped with Next / Back ----------
 # Same content; the page does not scroll, and click.js plays the journey from one key moment to the next.
-CK_CONTROLS = ('<div class="jctl" id="jctl"><span class="jcount" id="jcount" aria-live="polite">1 / 11</span>'
+CK_CONTROLS = ('<div class="jctl" id="jctl">'
+               '<button type="button" class="jbtn jplay" id="jplay" aria-pressed="false"><i aria-hidden="true"></i><span>Watch the whole journey</span></button>'
+               '<span class="jcount" id="jcount" aria-live="polite">1 / 11</span>'
                '<button type="button" class="jbtn" id="jback" aria-label="Back"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M12 7H2M6 3L2 7l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
                '<button type="button" class="jbtn jnext" id="jnext"><span>Next</span><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>')
 ck_story = re.sub(r'<a class="skip" id="skip".*?</a>', CK_CONTROLS, pl_story, count=1, flags=re.S)
@@ -333,7 +335,12 @@ html, body { overflow: hidden; overscroll-behavior: none; }
 .jbtn:disabled { opacity: .35; cursor: default; transform: none; }
 .jbtn:focus-visible, .rail > div:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .rail > div { cursor: pointer; }
-@media (max-width: 760px) { .jctl { top: calc(14px + env(safe-area-inset-top, 0px)); bottom: auto; right: 12px; } .jbtn { height: 40px; min-width: 40px; font-size: 14px; } .jbtn.jnext { padding: 0 14px; } }
+/* the whole journey: a play triangle that turns to pause bars while it plays */
+.jbtn.jplay { padding: 0 16px 0 14px; margin-right: 8px; }
+.jplay i { width: 0; height: 0; border-left: 9px solid currentColor; border-top: 5.5px solid transparent; border-bottom: 5.5px solid transparent; }
+.jplay.on i { width: 9px; height: 11px; border: 0; border-left: 3px solid currentColor; border-right: 3px solid currentColor; }
+.jplay.on { background: rgba(48, 252, 186, .22); border-color: rgba(48, 252, 186, .5); }
+@media (max-width: 760px) { .jctl { top: calc(14px + env(safe-area-inset-top, 0px)); bottom: auto; right: 12px; left: 12px; justify-content: flex-end; flex-wrap: wrap; } .jbtn.jplay { margin-right: auto; padding: 0 12px; } .jcount { display: none; } .jbtn { height: 40px; min-width: 40px; font-size: 14px; } .jbtn.jnext { padding: 0 14px; } }
 </style>
 '''
 ck_page = (ck_head + '<main id="main">\n' + ck_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + PL_PAL
