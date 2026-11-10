@@ -373,6 +373,14 @@ c2_head = ck_head.replace('<title>SELFTAC Journey, Click-Through</title>', '<tit
 .beat .k { font-size: 17px; }
 .beat h1, .beat h2 { font-size: clamp(38px, 4.1vw, 66px); line-height: 1.02; }
 .beat p { font-size: clamp(17px, 1.45vw, 23px); line-height: 1.45; max-width: 32ch; margin-top: 20px; }
+/* phones: Play, Back and Next in one row under the copy card, above the rail; the top of the screen is the scene's */
+@media (max-width: 760px) {
+  .jctl { top: auto; bottom: calc(44px + env(safe-area-inset-bottom, 0px)); flex-wrap: nowrap; gap: 8px; }
+  .copy { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .hint { display: none; }   /* keyboard advice; the buttons are right there */
+  .jbtn.jplay { font-size: 13px; padding: 0 11px; white-space: nowrap; min-width: 0; overflow: hidden; }
+}
+@media (max-width: 760px) and (max-height: 700px) { .beat { padding: 13px 15px 14px; } .beat h1, .beat h2 { font-size: 23px !important; margin-top: 8px; } .beat p { font-size: 14px !important; margin-top: 8px; } }
 @media (max-width: 760px) { .copy { width: auto; } .beat .k { font-size: 14px; } .beat h1, .beat h2 { font-size: 28px; } .beat p { font-size: 16px; margin-top: 12px; } .jl.key { font-size: 12px; padding: 5px 9px 5px 8px; } .jl.eqf { font-size: 11px; } }
 </style>
 '''
@@ -390,7 +398,7 @@ c2_js = once(c2_js, 'cg.rotation.z = kf(p, [[.44, 0], [.58, -Math.PI / 2]])',
 # proteasome, so the complex left behind stays clear of the degradation copy; inside the cell it sits a little higher,
 # clear of the controls
 c2_js = once(c2_js, 'if (narrow) ay -= .17 * vh * settle; else ax -= .17 * vw * settle;',
-             'if (narrow) ay -= .17 * vh * settle; else { ax -= (.2 + .1 * kf(p, [[.855, 0], [.885, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }')
+             'if (narrow) ay -= .22 * vh * settle; else { ax -= (.2 + .1 * kf(p, [[.855, 0], [.885, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }')
 c2_page = (c2_head + '<main id="main">\n' + c2_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + PL_PAL
            + c2_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '\n' + open(D + 'cell.js').read() + '\n' + c2_click + '</script>\n')
 os.makedirs(D + 'click2', exist_ok=True)
