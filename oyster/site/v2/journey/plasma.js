@@ -77,10 +77,37 @@ frame = function (p0) {
   document.querySelectorAll('.rail b').forEach((el, i) => { el.style.setProperty('--f', clamp((pn - BEATS_N[i][0]) / (BEATS_N[i][1] - BEATS_N[i][0]), 0, 1).toFixed(3)); el.closest('.rail > div').classList.toggle('on', pn >= BEATS_N[i][0]); });
   // labels on the crowd, the bouncer and the hero's monomers
   const ATT = {
-    plasma: () => { const [x, y] = at(R, .5, 1.04); return [x, y]; }, dimer: () => { const c = CROWD[0].g.position; return [c.x, c.y - 24]; }, mono: () => { const c = CROWD[1].g.position; return [c.x, c.y - 24]; },
+    plasma: () => { const [x, y] = at(R, .5, 1.04); return [x, y]; },
     bounce: () => [BOUNCER.g.position.x - 6, BOUNCER.g.position.y + 24], pass: () => { const c = cg.position; return [c.x + 34, c.y - 30]; },
   };
   PL.forEach(l => { const o = clamp(Math.min((pn - l.a) / .02, (l.b - pn) / .02), 0, 1) * (1 - endO); l.el.style.opacity = o.toFixed(3);
     if (o > 0) { let [x, y] = toScreen(...ATT[l.at]()); const hw = (l.w = l.w || l.el.offsetWidth) / 2 + 10; x = clamp(x, hw, stage.clientWidth - hw);
       l.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`; } });
+  // a label on every molecule in the bloodstream: small on the crowd, larger on the focal dimer and monomers
+  const cInL = clamp((cIn - .5) / .5, 0, 1);
+  TAGS.forEach(t => {
+    const o = t.win(pn) * (1 - endO); t.el.style.opacity = o.toFixed(3); if (o <= 0) return;
+    // just under the molecule's outline on screen, kept inside the frame
+    const box = new THREE.Box3().setFromObject(t.at()); let x0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const cx of [box.min.x, box.max.x]) for (const cy of [box.min.y, box.max.y]) for (const cz of [box.min.z, box.max.z]) {
+      vtmp.set(cx, cy, cz).project(camera); const sx = (vtmp.x + 1) / 2 * stage.clientWidth, sy = (1 - vtmp.y) / 2 * stage.clientHeight;
+      x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y1 = Math.max(y1, sy); }
+    const hw = (t.w = t.w || t.el.offsetWidth) / 2 + 8, x = clamp((x0 + x1) / 2 + t.dx, hw, stage.clientWidth - hw), y = y1 + t.gap + (camera.aspect < .9 ? t.narrowDrop || 0 : 0);   // phones: the focal pair's labels on two rows
+    t.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, 0)`;
+  });
+  const jm = document.getElementById('jmono'); if (pn > .37 && jm) jm.style.opacity = 0;   // the per-monomer labels take over
 };
+// the labels themselves: a span each, placed under the object it names (gap: pixels below its outline, dx: sideways)
+function tag(text, cls, at, win, gap = 6, dx = 0) {
+  const el = document.createElement('span'); el.className = 'jl ' + cls; el.textContent = text; el.setAttribute('aria-hidden', 'true');
+  stage.insertBefore(el, document.getElementById('copy')); return { el, at, win, gap, dx };
+}
+const crowdWin = pn => clamp(Math.min((pn - .41) / .02, (.52 - pn) / .02), 0, 1);
+const TAGS = [];
+CROWD.forEach(c => {
+  if (c.kind === 'dimer') TAGS.push(tag('Dimer', 'sm', () => c.g, crowdWin));
+  else [0, 1].forEach(i => TAGS.push(tag('Monomer', 'sm', () => c.m.group.children[i], crowdWin)));
+});
+TAGS.push(tag('Dimer', 'big', () => BOUNCER.g, pn => clamp(Math.min((pn - .41) / .02, (.583 - pn) / .015), 0, 1), 8));
+['Monomer · target end', 'Monomer · ligase end'].forEach((t, i) =>
+  TAGS.push(Object.assign(tag(t, 'big', () => mol.group.children[i], pn => clamp(Math.min((pn - .41) / .02, (.598 - pn) / .015), 0, 1), 8, i ? 30 : -30), { narrowDrop: i ? 26 : 0 })));

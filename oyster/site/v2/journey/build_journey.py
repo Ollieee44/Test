@@ -257,7 +257,7 @@ pl_beats = [
 pl_copy = ''.join(f'<div class="beat"><span class="k"><b>{k.split(" &middot; ")[0]}</b>{k.split(" &middot; ")[1]}</span><{h}>{t}</{h}><p>{d}</p></div>' for k, h, t, d in pl_beats)
 pl_rail = ''.join(f'<div><span>{n}</span><i><b></b></i></div>' for n in ('Oral', 'Gut', 'Plasma', 'Barrier', 'Complex', 'Degraded'))
 pl_labels = ''.join(f'<span class="jl {c}" data-pl="{at}" data-a="{a}" data-b="{b}">{t}</span>' for at, t, a, b, c in [
-    ('plasma', 'Blood vessel &middot; plasma', .39, .52, 'hi'), ('dimer', 'Dimer', .41, .52, ''),
+    ('plasma', 'Blood vessel &middot; plasma', .39, .52, 'hi'),
     ('bounce', 'Dimer: too large to penetrate', .588, .69, 'hi'), ('pass', 'Monomers pass through', .6, .69, 'hi')])
 pl_story = re.sub(r'<div class="copy" id="copy">.*?</div></div>(?=<div class="end")', '<div class="copy" id="copy">' + pl_copy + '</div>', otx_story, count=1, flags=re.S)
 assert pl_copy in pl_story, 'copy not replaced'
@@ -283,6 +283,10 @@ pl_story = once(pl_story, '<g id="jmem">', VESSEL + '<g id="jmem">')
 pl_head = otx_head.replace('<title>SELFTAC Journey, New Site</title>', '<title>SELFTAC Journey, Plasma</title>', 1)
 pl_head += '''<style>
 #jbeam { display: none; }   /* the vessel carries the molecules from the gut instead */
+/* labels on each molecule in the bloodstream: small on the crowd, larger and highlighted on the focal ones */
+.jl.sm { font-size: 9px; letter-spacing: .1em; padding: 3px 7px; background: rgba(12, 92, 64, .45); color: rgba(245, 255, 252, .85); }
+.jl.big { font-size: 12.5px; font-weight: 500; letter-spacing: .12em; padding: 6px 11px; color: var(--accent); background: rgba(9, 70, 49, .78); border: 1px solid rgba(48, 252, 186, .45); }
+@media (max-width: 760px) { .jl.sm { font-size: 8px; padding: 2px 5px; } .jl.big { font-size: 10px; padding: 4px 8px; } }
 /* six beats: a longer scroll, and the gold pearl on the fifth (the clasp closing) */
 .story { height: 1550vh; }
 @media (max-width: 760px) { .story { height: 1350vh; } }
