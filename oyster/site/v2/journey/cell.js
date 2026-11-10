@@ -39,9 +39,8 @@ function label2(text, cls) { const el = document.createElement('span'); el.class
   stage.insertBefore(el, document.getElementById('copy')); return el; }
 const EQ_LBL = label2('Monomer + Monomer <b>⇌</b> Dimer', 'big eqf'), STATE = label2('Monomers', 'big');
 // ---- persistent labels on the proteins and ubiquitin, beside each one; the target's and ubiquitin's go as they enter the proteasome ----
-let UB_FREE = false;   // the chain, released at the proteasome: its label goes under its lowest subunit
-const KEY = [['Target protein', '#F0A6CA', () => P.brd4, winOf(.715, .912, .015)], ['E3 ligase', '#CEE5F3', () => P.vhl, pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)],   // on a phone the complex leaves the screen
-  ['Ubiquitin', '#B9A6F5', () => (UB_FREE ? ubs.reduce((a, u) => u.position.y < a.position.y ? u : a) : ubs[2]), pn => winOf(.848, .93, .015)(pn) * (ubs[2].visible ? 1 : 0)]];
+const KEY = [['Target protein', '#F0A6CA', () => P.brd4, winOf(.715, .892, .015)], ['E3 ligase', '#CEE5F3', () => P.vhl, pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)],   // on a phone the complex leaves the screen
+  ['Ubiquitin', '#B9A6F5', () => ubs[2], pn => winOf(.848, .892, .015)(pn) * (ubs[2].visible ? 1 : 0)]];
 const KEY_TAGS = [];
 KEY.forEach(([t, col, at, win], i) => { const k = tag(t, 'key', at, win, 14); KEY_TAGS.push(k); k.side = 'right'; k.seq = [0, 500, 0][i]; k.el.style.setProperty('--dot', col); TAGS.push(k); });
 document.querySelectorAll('.jl[data-x]').forEach(el => { if (/^(Target protein|E3 ligase|Ternary complex)$/.test(el.textContent.trim())) el.style.display = 'none'; });
@@ -105,10 +104,6 @@ frame = function (p0) {
     const st = s > .5 ? 'Dimer' : 'Monomers'; if (STATE.textContent !== st) STATE.textContent = st;
     STATE.style.transform = `translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px) translate(-50%, -50%)`;
   }
-  // once the chain is released beside the proteasome, its label says what happens to it
-  UB_FREE = WARP(pn) > .9; const ubT = KEY_TAGS[2].el, ubTxt = UB_FREE ? 'Ubiquitin · recycled' : 'Ubiquitin';
-  if (ubT.textContent !== ubTxt) { ubT.textContent = ubTxt; KEY_TAGS[2].w = 0; KEY_TAGS[2].side = ubTxt === 'Ubiquitin' ? 'right' : '';   // beside it on the target, under it once free
-    KEY_TAGS[2].gap = ubTxt === 'Ubiquitin' ? 14 : 8; }
   staggerLabels();
 };
 // ---- labels in the busy spots come in one after another, in reading order: each waits its turn (ms) from the moment

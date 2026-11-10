@@ -357,8 +357,6 @@ c2_beats[2] = ('03 &middot; In the bloodstream', 'h2', 'Monomers and dimer, in e
                'In the plasma, two monomers keep joining into the dimer and coming apart again at the reversible linker: a dynamic equilibrium.')
 c2_beats[4] = ('05 &middot; Ternary complex', 'h2', 'Inside the cell, a dimer forms the ternary complex.',
                'Monomers and dimers are in equilibrium here too. One dimer binds the target protein and an E3 ligase: a ternary complex.')
-c2_beats[5] = (c2_beats[5][0], c2_beats[5][1], c2_beats[5][2],
-               'Ubiquitin marks the target and the proteasome destroys it; the ubiquitin is released and recycled. The degrader is free to find the next one.')
 c2_copy = ''.join(f'<div class="beat"><span class="k"><b>{k.split(" &middot; ")[0]}</b>{k.split(" &middot; ")[1]}</span><{h}>{t}</{h}><p>{d}</p></div>' for k, h, t, d in c2_beats)
 c2_story = re.sub(r'<div class="copy" id="copy">.*?</div></div>(?=<div class="end")', '<div class="copy" id="copy">' + c2_copy + '</div>', ck_story, count=1, flags=re.S)
 assert c2_copy in c2_story
@@ -398,7 +396,7 @@ c2_js = once(pl_js, 'goTo: p => { hold = true; prog = p; },', "goTo: p => { hold
 # the two monomers cross side by side: the pair turns across its path as it leaves the gut and again before the membrane
 # (horizontal in the bloodstream between, under its equilibrium), so both cross each boundary at the same moment
 # ubiquitin as a real K48-linked chain (PDB 2O6V, see tools/ub_chain.py): built on the target one at a time, proximal
-# first, then released beside the proteasome as the target goes in (the ubiquitin is recycled)
+# first, and taken into the proteasome with it
 UB_OLD = """  ubs.forEach((u, i) => {
     const t0 = .8 + i * .012, on = clamp((p - t0) / .012, 0, 1);
     const spot = P.brd4.localToWorld(ubLocal.clone().add(V3(-2 - 3 * i, (i % 2 ? 3 : -3), 4)));
@@ -407,13 +405,12 @@ UB_OLD = """  ubs.forEach((u, i) => {
   });"""
 UB_NEW = """  {
     const spot = P.brd4.localToWorld(ubLocal.clone()), out = spot.clone().sub(P.brd4.localToWorld(B4C.clone())).normalize().add(V3(-.3, .1, .35)).normalize();
-    const Ro = new THREE.Quaternion().setFromUnitVectors(UBAX, out), rel = kf(p, [[.885, 0], [.915, 1]]);
-    const anchor = spot.clone().lerp(PROT.clone().add(V3(-54, 20, 12)), rel), s = .42 * SC * (P.brd4.scale.x + (1 - P.brd4.scale.x) * rel);
+    const Ro = new THREE.Quaternion().setFromUnitVectors(UBAX, out), s = .42 * SC * P.brd4.scale.x;
     ubs.forEach((u, i) => {
       const on = clamp((p - (.745 + i * .022)) / .03, 0, 1), e = ease(on);
       u.quaternion.copy(Ro).multiply(UBQ[i]);
-      u.position.copy(UBT[i]).sub(UBG).applyQuaternion(Ro).multiplyScalar(s).add(anchor).addScaledVector(out, 22 * (1 - e));
-      u.scale.setScalar(s * (.55 + .45 * e)); u.visible = on > .01 && (P.brd4.visible || rel > 0);
+      u.position.copy(UBT[i]).sub(UBG).applyQuaternion(Ro).multiplyScalar(s).add(spot).addScaledVector(out, 22 * (1 - e));
+      u.scale.setScalar(s * (.55 + .45 * e)); u.visible = on > .01 && P.brd4.visible;
     });
   }"""
 UBC = json.load(open(D + 'ubchain.json'))
@@ -430,7 +427,24 @@ c2_js = once(c2_js, 'cg.rotation.z = kf(p, [[.44, 0], [.58, -Math.PI / 2]])',
 # clear of the controls
 c2_js = once(c2_js, 'if (narrow) ay -= .17 * vh * settle; else ax -= .17 * vw * settle;',
              'if (narrow) ay -= .22 * vh * settle; else { ax -= (.2 + .1 * kf(p, [[.855, 0], [.885, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }')
-c2_page = (c2_head + '<main id="main">\n' + c2_story + '</main>\n' + meshes + '\n<script type="module">' + otx_prefix + '\n' + PL_PAL
+# the proteasome: the human 26S (PDB 6MSB, tools/proteasome_mesh.py), core and cap, cap up; the target goes into the core
+PROT_OLD = re.search(r"const prot = new THREE.Group\(\); scene.add\(prot\);\n.*?prot.add\(c\); \}\n", otx_prefix, re.S).group(0)
+PROT_NEW = """const prot = new THREE.Group(); scene.add(prot);
+// scale, and the middle of its length (A); the cap a lighter lavender than the core
+const PDATA = JSON.parse(document.getElementById('protmesh').textContent), PK = .225, PMID = 76;
+for (const key of ['core', 'cap']) { const g = geom(PDATA[key]); g.translate(-PMID, 0, 0); g.computeBoundingSphere();
+  const mat = cmat(key === 'cap' ? 'protcap' : 'prot', 9, g.boundingSphere.center.clone()); mats.push(mat); const m = new THREE.Mesh(g, mat); m.scale.setScalar(PK); addOutline(m, 2); prot.add(m); }
+"""
+c2_prefix = once(otx_prefix, PROT_OLD, PROT_NEW)
+c2_js = once(c2_js, 'const PROT = V3(X.prot, 6, 0)', 'const PROT = V3(X.prot - 10, 6, 0)')   # the real cap is wider: a little further in from the edge
+c2_js = once(c2_js, 'into = inner.worldToLocal(PROT.clone())', 'into = inner.worldToLocal(PROT.clone().add(V3(0, -PMID * PK * 1.15, 0)))')   # the core's middle
+c2_story = once(c2_story, 'data-x="640" data-y="50"', 'data-x="630" data-y="58"')
+c2_story = once(c2_story, 'data-x="640" data-y="-86"', 'data-x="630" data-y="-86"')
+c2_story = once(c2_story, 'ubiquitin from PDB 1UBQ. ', 'ubiquitin from PDB 1UBQ, arranged as the K48-linked chain of PDB 2O6V (Eddins et al., J. Mol. Biol. 2007); the human 26S proteasome from PDB 6MSB (Dong et al., Nature 2019). ')
+c2_story = once(c2_story, 'the proteasome is a stand-in, and the person', 'the person')
+C2_PAL = PL_PAL + "PAL.otx.protcap = '#D6CBFA';\n"
+PROTMESH = '<script type="application/json" id="protmesh">' + open(D + 'proteasome.json').read() + '</script>'
+c2_page = (c2_head + '<main id="main">\n' + c2_story + '</main>\n' + meshes + '\n' + PROTMESH + '\n<script type="module">' + c2_prefix + '\n' + C2_PAL
            + c2_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '\n' + open(D + 'cell.js').read() + '\n' + c2_click + '</script>\n')
 os.makedirs(D + 'click2', exist_ok=True)
 open(D + 'click2/index.html', 'w').write(c2_page)
