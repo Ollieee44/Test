@@ -499,7 +499,7 @@ function frame(p0) {
   // then the hero monomers leave the gut, are absorbed, cross the membrane, and rejoin upright in the cell
   const sh = kf(p, [[.18, .001], [.21, .45], [.31, .45], [.42, 1]]);
   cg.position.set(HERO_X(p), HERO_Y(p), 0); cg.scale.setScalar(SC * sh); cg.visible = sh > .01;
-  cg.rotation.z = kf(p, [[.44, 0], [.58, -Math.PI / 2]]) + (p < .31 ? .12 * Math.sin(p * 30) : 0);
+  cg.rotation.z = kf(p, [[.295, 0], [.32, -Math.PI / 2], [.37, -Math.PI / 2], [.395, 0], [.425, 0], [.47, -Math.PI / 2]]) + (p < .31 ? .12 * Math.sin(p * 30) : 0);
   const j = kf(p, [[.27, 1], [.31, 0], [.64, 0], [.68, 1]]);
   const free = (1 - j) * clamp((.66 - p) / .05, 0, 1), hx = p < .27 ? 7 : HX(p);
   const rW = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * .32 * Math.sin(p * 47), free * .42 * Math.sin(p * 31), 0));
@@ -798,11 +798,11 @@ const POP = [
   { at: 'cell', kind: 'split', dx: -76, y: -58, s: .68, r: -.3, hx: 24, ph: 2, win: pn => cellIn(pn) * clamp((.845 - pn) / .02, 0, 1) },
   { at: 'cell', kind: 'eq', dx: 86, y: 70, s: .68, r: -.45, ph: 1.7, win: pn => cellIn(pn) * clamp((.9 - pn) / .02, 0, 1) },
 ].map(c => ({ ...c, ...extra() }));
-POP.forEach(c => {
+POP.forEach(c => { const d0 = c.at === 'cell' ? 1000 : 900, d = d0 + { dimer: 0, split: 450, eq: 900 }[c.kind];   // after the focal labels
   if (c.kind === 'dimer') c.tags = [tag('Dimer', 'sm', () => c.g, c.win)];
   else if (c.kind === 'split') c.tags = [0, 1].map(i => tag('Monomer', 'sm', () => c.m.group.children[i], c.win));
   else c.tags = [tag('Monomers', 'sm', () => c.g, c.win)];
-  c.tags.forEach(t => TAGS.push(t));
+  c.tags.forEach(t => { t.seq = d; TAGS.push(t); });
 });
 // ---- the equilibrium labels in the blood ----
 function label2(text, cls) { const el = document.createElement('span'); el.className = 'jl ' + cls; el.innerHTML = text; el.setAttribute('aria-hidden', 'true');
@@ -811,7 +811,7 @@ const EQ_LBL = label2('Monomer + Monomer <b>⇌</b> Dimer', 'big eqf'), STATE = 
 // ---- persistent labels on the proteins and ubiquitin, beside each one; the target's and ubiquitin's go as they enter the proteasome ----
 const KEY = [['Target protein', '#F0A6CA', () => P.brd4, winOf(.715, .912, .015)], ['E3 ligase', '#CEE5F3', () => P.vhl, pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)],   // on a phone the complex leaves the screen
   ['Ubiquitin', '#B9A6F5', () => ubs[2], pn => winOf(.848, .912, .015)(pn) * (ubs[2].visible ? 1 : 0)]];
-KEY.forEach(([t, col, at, win]) => { const k = tag(t, 'key', at, win, 14); k.side = 'right'; k.el.style.setProperty('--dot', col); TAGS.push(k); });
+KEY.forEach(([t, col, at, win], i) => { const k = tag(t, 'key', at, win, 14); k.side = 'right'; k.seq = [0, 500, 0][i]; k.el.style.setProperty('--dot', col); TAGS.push(k); });
 document.querySelectorAll('.jl[data-x]').forEach(el => { if (/^(Target protein|E3 ligase|Ternary complex)$/.test(el.textContent.trim())) el.style.display = 'none'; });
 // ---- red cells that drift under the copy fade out, so the text always reads ----
 const RBC = [...rbc.children].map(g => { const m = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(g.getAttribute('transform')); return { g, x: +m[1], y: +m[2], o: 1 }; });
@@ -842,6 +842,11 @@ frame = function (p0) {
       const st = e > .5 ? 'Dimer' : 'Monomers'; if (c.tags[0].el.textContent !== st) c.tags[0].el.textContent = st; }
   });
   frameP(pn);
+  // in the gut the pair turns across its path to leave side by side: its "Monomers" label moves from under it to beside it
+  const jm = document.getElementById('jmono');
+  if (jm && +jm.style.opacity > 0) { const q = WARP(pn), sh = kf(q, [[.18, .001], [.21, .45], [.31, .45], [.42, 1]]), c = cg.localToWorld(V3(0, 0, 0)), r = Math.min(1, Math.abs(cg.rotation.z) / (Math.PI / 2));
+    const [bx, by] = toScreen(c.x, c.y - 17 * sh * SC), [rx, ry] = toScreen(c.x + 15 * sh * SC, c.y), hw = jm.offsetWidth / 2;
+    jm.style.transform = `translate(${(bx + (rx + hw - bx) * r).toFixed(1)}px, ${(by + (ry - by) * r).toFixed(1)}px) translate(-50%, -50%)`; }
   const endO = clamp((WARP(pn) - .965) / .03, 0, 1);
   clearCopy(pn);
   CROWD.forEach(c => { c.g.visible = false; });
@@ -868,9 +873,33 @@ frame = function (p0) {
     const st = s > .5 ? 'Dimer' : 'Monomers'; if (STATE.textContent !== st) STATE.textContent = st;
     STATE.style.transform = `translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px) translate(-50%, -50%)`;
   }
+  staggerLabels();
 };
-// the click driver's idle loop asks for a redraw while a stop holds a live equilibrium
-window.__liveAt = p => (p > .4 && p < .53) || (p > .66 && p < .99);
+// ---- labels in the busy spots come in one after another, in reading order: each waits its turn (ms) from the moment
+// its own window opens, and pops in. Named by their text for the journey's own labels, by .seq for the ones made here ----
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const byText = (txt, d) => [...document.querySelectorAll('.jl')].filter(el => el.textContent.replace(/\s+/g, ' ').trim() === txt).map(el => ({ el, d }));
+const SEQ = [
+  { el: EQ_LBL, d: 0 }, { el: STATE, d: 400 },                                        // the bloodstream: the equilibrium, then the crowd
+  ...byText('Cell membrane · blood-brain barrier', 0), ...byText('Dimer: too large to penetrate', 300),   // the barrier
+  ...byText('Target cell', 700), ...byText('Monomers pass through', 1200),
+  ...byText('Proteasome', 700),                                                        // tagging: ubiquitin first, then where it leads
+  ...TAGS.filter(t => t.seq !== undefined).map(t => ({ el: t.el, d: t.seq })),
+].map(s => ({ ...s, t0: 0 }));
+let busyUntil = 0;
+function staggerLabels() {
+  const now = performance.now();
+  SEQ.forEach(s => { const base = +s.el.style.opacity || 0;
+    if (base <= .01) { s.t0 = 0; return; }
+    if (!s.t0) { s.t0 = now; busyUntil = Math.max(busyUntil, now + s.d + 450); }
+    const f = REDUCE ? 1 : clamp((now - s.t0 - s.d) / 320, 0, 1);
+    if (f >= 1) return;
+    s.el.style.opacity = (base * f).toFixed(3);
+    if (f > 0) s.el.style.transform += ` scale(${(.82 + .18 * (1 - Math.pow(1 - f, 3))).toFixed(3)})`;   // a small pop as it lands
+  });
+}
+// the click driver's idle loop asks for a redraw while a stop holds a live equilibrium, or labels are still coming in
+window.__liveAt = p => (p > .4 && p < .53) || (p > .66 && p < .99) || performance.now() < busyUntil;
 
 // ---------- the click-through version: Next / Back step between the story's key moments ----------
 // The page does not scroll; each step plays the journey from one stop to the next (eased, its length in proportion to

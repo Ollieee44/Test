@@ -382,6 +382,10 @@ c2_click = once(c2_click, '  J.frame(0); show(); setPlaying(false);', '''  J.fra
   // while a stop holds a live equilibrium, keep drawing it (one redraw a frame, only when nothing else is moving)
   (function idle() { if (!anim && window.__liveAt && window.__liveAt(p)) J.redraw(); requestAnimationFrame(idle); })();''')
 c2_js = once(pl_js, 'goTo: p => { hold = true; prog = p; },', "goTo: p => { hold = true; prog = p; }, redraw: () => { drawnSig = ''; },")
+# the two monomers cross side by side: the pair turns across its path as it leaves the gut and again before the membrane
+# (horizontal in the bloodstream between, under its equilibrium), so both cross each boundary at the same moment
+c2_js = once(c2_js, 'cg.rotation.z = kf(p, [[.44, 0], [.58, -Math.PI / 2]])',
+             'cg.rotation.z = kf(p, [[.295, 0], [.32, -Math.PI / 2], [.37, -Math.PI / 2], [.395, 0], [.425, 0], [.47, -Math.PI / 2]])')
 # the larger copy takes more of the left: the subject sits further right, and further still once the target is in the
 # proteasome, so the complex left behind stays clear of the degradation copy; inside the cell it sits a little higher,
 # clear of the controls
