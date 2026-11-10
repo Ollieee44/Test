@@ -22,7 +22,8 @@
     if (i === at && Math.abs(p - STOPS[i]) < 1e-6) return Promise.resolve();
     let done; const finished = new Promise(r => { done = r; });
     const from = p, to = STOPS[i], d = Math.abs(to - from), ease = glide ? easeInOut : easeOut;
-    const dur = reduce ? 0 : glide ? Math.max(900, Math.min(2000, 700 + d * 5000)) : Math.max(600, Math.min(1600, 450 + d * 4200)), t0 = performance.now();
+    // unhurried moves: autoplay 1.6-3.4 s, a click 1.1-2.6 s, longer for longer journeys
+    const dur = reduce ? 0 : glide ? Math.max(1600, Math.min(3400, 1300 + d * 9000)) : Math.max(1100, Math.min(2600, 900 + d * 7000)), t0 = performance.now();
     at = i; show(); if (anim) cancelAnimationFrame(anim);
     // only the progress moves here; the journey's loop draws it, once per screen refresh
     const tick = now => { const t = dur ? Math.min(1, (now - t0) / dur) : 1; p = from + (to - from) * ease(t); J.goTo(p); if (t < 1) anim = requestAnimationFrame(tick); else { anim = null; done(); } };
@@ -30,7 +31,7 @@
     return finished;
   }
   // the whole journey: every stop in turn, holding at each long enough to read (longer where the copy changes)
-  const HOLD = [800, 400, 1300, 800, 1800, 500, 1300, 1500, 1100, 1000];   // ms at each stop (longest where the copy changes)
+  const HOLD = [300, 150, 550, 300, 800, 200, 550, 650, 450, 400];   // a brief pause at each stop (longest where the copy changes)
   const wait = ms => new Promise(r => setTimeout(r, ms));
   function setPlaying(on) { playing = on; play.classList.toggle('on', on); play.setAttribute('aria-pressed', String(on));
     playLabel.textContent = on ? 'Pause' : at === STOPS.length - 1 ? 'Watch again' : at === 0 ? 'Watch the whole journey' : 'Play from here'; }
