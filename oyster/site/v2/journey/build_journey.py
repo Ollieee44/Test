@@ -8,7 +8,7 @@ v2 Science page's styles (site.css, published beside it). It stands alone, in th
 palette switch or page sections, and the structure credit sits in the end card.
 The person, the gut, the absorption beam and the membrane are flat illustrations drawn in the 3D scene's plane.
 Run ../build_v2.py first."""
-import math, os, re
+import json, math, os, re
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
 SITE = D + '../../'
 pal = open(SITE + 'palettes.html').read()
@@ -357,6 +357,8 @@ c2_beats[2] = ('03 &middot; In the bloodstream', 'h2', 'Monomers and dimer, in e
                'In the plasma, two monomers keep joining into the dimer and coming apart again at the reversible linker: a dynamic equilibrium.')
 c2_beats[4] = ('05 &middot; Ternary complex', 'h2', 'Inside the cell, a dimer forms the ternary complex.',
                'Monomers and dimers are in equilibrium here too. One dimer binds the target protein and an E3 ligase: a ternary complex.')
+c2_beats[5] = (c2_beats[5][0], c2_beats[5][1], c2_beats[5][2],
+               'Ubiquitin marks the target and the proteasome destroys it; the ubiquitin is released and recycled. The degrader is free to find the next one.')
 c2_copy = ''.join(f'<div class="beat"><span class="k"><b>{k.split(" &middot; ")[0]}</b>{k.split(" &middot; ")[1]}</span><{h}>{t}</{h}><p>{d}</p></div>' for k, h, t, d in c2_beats)
 c2_story = re.sub(r'<div class="copy" id="copy">.*?</div></div>(?=<div class="end")', '<div class="copy" id="copy">' + c2_copy + '</div>', ck_story, count=1, flags=re.S)
 assert c2_copy in c2_story
@@ -385,6 +387,9 @@ c2_head = ck_head.replace('<title>SELFTAC Journey, Click-Through</title>', '<tit
 </style>
 '''
 c2_click = open(D + 'click.js').read()
+c2_click = once(c2_click, 'const dur = reduce ? 0 :', 'const dur = (SLOW[i] || 1) * (reduce ? 0 :')
+c2_click = once(c2_click, ', t0 = performance.now();\n    at = i;', '), t0 = performance.now();\n    at = i;')
+c2_click = once(c2_click, '  const BEAT_STOP', '  const SLOW = { 8: 1.8, 9: 1.7 };                          // tagging and degradation: unhurried\n  const BEAT_STOP')
 c2_click = re.sub(r'const HOLD = \[[^\]]*\];', 'const HOLD = [300, 150, 550, 300, 2400, 200, 550, 2200, 450, 400];   // longer where an equilibrium is playing', c2_click, count=1)
 c2_click = once(c2_click, '  J.frame(0); show(); setPlaying(false);', '''  J.frame(0); show(); setPlaying(false);
   // while a stop holds a live equilibrium, keep drawing it (one redraw a frame, only when nothing else is moving)
@@ -392,6 +397,32 @@ c2_click = once(c2_click, '  J.frame(0); show(); setPlaying(false);', '''  J.fra
 c2_js = once(pl_js, 'goTo: p => { hold = true; prog = p; },', "goTo: p => { hold = true; prog = p; }, redraw: () => { drawnSig = ''; },")
 # the two monomers cross side by side: the pair turns across its path as it leaves the gut and again before the membrane
 # (horizontal in the bloodstream between, under its equilibrium), so both cross each boundary at the same moment
+# ubiquitin as a real K48-linked chain (PDB 2O6V, see tools/ub_chain.py): built on the target one at a time, proximal
+# first, then released beside the proteasome as the target goes in (the ubiquitin is recycled)
+UB_OLD = """  ubs.forEach((u, i) => {
+    const t0 = .8 + i * .012, on = clamp((p - t0) / .012, 0, 1);
+    const spot = P.brd4.localToWorld(ubLocal.clone().add(V3(-2 - 3 * i, (i % 2 ? 3 : -3), 4)));
+    u.position.copy(spot).add(V3(0, 26 * (1 - ease(on)), 0)); u.scale.setScalar(.42 * SC * P.brd4.scale.x);
+    u.visible = on > .01 && P.brd4.visible;
+  });"""
+UB_NEW = """  {
+    const spot = P.brd4.localToWorld(ubLocal.clone()), out = spot.clone().sub(P.brd4.localToWorld(B4C.clone())).normalize().add(V3(-.3, .1, .35)).normalize();
+    const Ro = new THREE.Quaternion().setFromUnitVectors(UBAX, out), rel = kf(p, [[.885, 0], [.915, 1]]);
+    const anchor = spot.clone().lerp(PROT.clone().add(V3(-54, 20, 12)), rel), s = .42 * SC * (P.brd4.scale.x + (1 - P.brd4.scale.x) * rel);
+    ubs.forEach((u, i) => {
+      const on = clamp((p - (.745 + i * .022)) / .03, 0, 1), e = ease(on);
+      u.quaternion.copy(Ro).multiply(UBQ[i]);
+      u.position.copy(UBT[i]).sub(UBG).applyQuaternion(Ro).multiplyScalar(s).add(anchor).addScaledVector(out, 22 * (1 - e));
+      u.scale.setScalar(s * (.55 + .45 * e)); u.visible = on > .01 && (P.brd4.visible || rel > 0);
+    });
+  }"""
+UBC = json.load(open(D + 'ubchain.json'))
+UB_SETUP = ('const UBC = ' + json.dumps(UBC) + ';\n'
+            'const UBQ = UBC.poses.map(q => new THREE.Quaternion(q[0], q[1], q[2], q[3])), UBT = UBC.poses.map(q => V3(q[4], q[5], q[6])), UBG = V3(...UBC.g);\n'
+            'const UBAX = UBT.reduce((a, t) => a.add(t), V3(0, 0, 0)).multiplyScalar(1 / UBT.length).sub(UBG).normalize();   // the chain, from its root\n'
+            'const B4C = (() => { const g = P.brd4.children[0].geometry; g.computeBoundingBox(); return g.boundingBox.getCenter(V3()).applyQuaternion(Q); })();\n')
+c2_js = once(c2_js, UB_OLD, UB_NEW)
+c2_js = once(c2_js, '// ---------- the timeline ----------', UB_SETUP + '// ---------- the timeline ----------')
 c2_js = once(c2_js, 'cg.rotation.z = kf(p, [[.44, 0], [.58, -Math.PI / 2]])',
              'cg.rotation.z = kf(p, [[.295, 0], [.32, -Math.PI / 2], [.37, -Math.PI / 2], [.395, 0], [.425, 0], [.47, -Math.PI / 2]])')
 # the larger copy takes more of the left: the subject sits further right, and further still once the target is in the
