@@ -668,6 +668,8 @@ _cells = ''.join(f"  {{ at: 'cell', kind: '{_kinds[i % 3]}', dx: {x - X['complex
 c3_cell, n = re.subn(r"(  \{ at: 'cell', kind: [^\n]*\n)+", lambda m: _cells, c3_cell, count=1)
 assert n == 1
 c3_cell = once(c3_cell, 'const e = eqWave(7.8, c.ph), hx = 22 - 15 * e', 'const e = eqWave(7.8, c.ph), hx = 13 - 6 * e')   # the cycling pair stays compact
+# the gut's equilibrium arrows go once the dimer has split, before the monomers leave the gut
+c3_js = once(c3_js, '[winO(p, .255, .34), 15]', '[winO(p, .255, .305), 15]')
 c3_click = c2_click
 c3_click = once(c3_click, 'const STOPS = [0, .145, .25, .335, .45, .612, .665, .79, .865, .92, .998];', 'const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];')
 c3_click = once(c3_click, 'const BEAT_STOP = [0, 2, 4, 5, 7, 8];', 'const BEAT_STOP = [0, 1, 3, 4, 6, 7];')
@@ -711,6 +713,16 @@ body { background: #1A372A; }
 .jedit header, .jedit footer, .jedit fieldset { border-color: #2E6149; }
 .jedit-btn { background: #2E6149; border-color: #408967; color: #EBEBE3; }
 .end .tag { color: #EBEBE3; } .end .tag em { color: #67B791; } .end a { background: #2E6149; color: #EBEBE3; border-color: #408967; }
+/* the palette's gold, more: the progress bar (its dots and fill) and the Next button */
+.rail i { background: #2E6149; } .rail i b { background: #DCA84E; }
+.rail div::before { border-color: #408967; }
+.rail div.on::before, .rail div:nth-child(4).on::before { background: #DCA84E; border-color: #DCA84E; }
+.jbtn.jnext { background: #DCA84E; border-color: #DCA84E; color: #070D0A; } .jbtn.jnext:hover { background: #EBEBE3; border-color: #EBEBE3; }
+/* the hint's mouse clicks (its left button flashes gold) rather than scrolls */
+.hint i::before { content: ""; position: absolute; left: 50%; top: 0; width: 1.5px; height: 42%; margin-left: -.75px; background: #EBEBE3; }
+.hint i::after { left: 0; top: 0; width: 50%; height: 42%; margin: 0; border-radius: 10px 0 0 0; background: #DCA84E; animation: jclick 1.6s ease-in-out infinite; }
+@keyframes jclick { 0%, 45%, 100% { opacity: .15; } 55%, 70% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .hint i::after { animation: none; opacity: 1; } }
 </style>
 '''
 assert "<title>SELFTAC Journey Rob's Edits v2</title>" in c4_head

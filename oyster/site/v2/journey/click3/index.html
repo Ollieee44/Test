@@ -633,7 +633,7 @@ function frame(p0) {
   document.querySelectorAll('.rail b').forEach((b, i) => { b.style.setProperty('--f', clamp((p - BEATS[i][0]) / (BEATS[i][1] - BEATS[i][0]), 0, 1).toFixed(3)); b.closest('.rail > div').classList.toggle('on', p >= BEATS[i][0]); });
   plus.style.opacity = (winO(p, .19, .64) * (1 - j)).toFixed(3);   // '+' between the two monomers, riding with them
   // the dimer, then the monomers, named under the molecule in the gut, with the reversible arrows above it
-  const hc = cg.localToWorld(V3(0, 0, 0)), dyn = [[winO(p, .215, .29), -15], [winO(p, .3, .44), -17], [winO(p, .255, .34), 15]];
+  const hc = cg.localToWorld(V3(0, 0, 0)), dyn = [[winO(p, .215, .29), -15], [winO(p, .3, .44), -17], [winO(p, .255, .305), 15]];
   dynL.forEach((el, i) => { const [o, dy] = dyn[i]; el.style.opacity = (o * (1 - endO)).toFixed(3);
     if (o > 0) { const [x, y] = toScreen(hc.x, hc.y + dy * sh * SC); el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`; } });
   if (+plus.style.opacity > 0) { const c = cg.localToWorld(V3(0, 0, 0)); const [x, y] = toScreen(c.x, c.y); plus.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`; }
