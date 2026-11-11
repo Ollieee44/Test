@@ -545,6 +545,9 @@ c3_story = once(c3_story, f'data-x="{X["mem"] + 70}" data-y="52"', f'data-x="{X[
 # bottom, with the gut icon in its ring, in the theme's colours (the page's green disc in a white ring, the large intestine
 # in white, stomach and small intestine in the mint accent; strokes that scale with the zoom)
 PR = json.load(open(D + 'person_ref.json'))
+# the gut sits centred on the body: the figure (and its mouth) shift so the torso's middle is over the gut inset
+_xs = [x for x, y in PR['outline'] if -5 <= y <= 35]; GDX = round(-(min(_xs) + max(_xs)) / 2, 2)
+PR['outline'] = [(round(x + GDX, 2), y) for x, y in PR['outline']]; PR['mouth'] = (round(PR['mouth'][0] + GDX, 2), PR['mouth'][1])
 def _cr(pts, closed=False):
     n = len(pts); o = [f'M {pts[0][0]},{pts[0][1]}']
     for i in range(n if closed else n - 1):
@@ -558,7 +561,7 @@ c3_story, n = re.subn(r'<linearGradient id="jpersonG".*?</linearGradient>', lamb
 assert n == 1
 mx, my = PR['mouth']; SW = PR['stroke']
 c3_story = once(c3_story, 'd="M 18.6,-44.4 C 12,-43.6 4,-41.5 0,-37 C -3.2,-32 -3.6,-25 -3.2,-18 C -2.8,-10 -0.6,-3 0.5,2.5"',
-                f'd="M {mx},{my} C -21,-34.6 -15,-33 -12.5,-29.5 C -10,-25 -8.5,-17 -6.5,-10.5 C -4.2,-3.5 -1,1 0.6,3.8"')
+                f'd="M {mx},{my} C {mx + 5.6:.2f},-34.6 {mx + 10:.2f},-33 {mx + 11.4:.2f},-29.5 C {mx + 12.6:.2f},-25 {mx + 13.4:.2f},-17 {mx + 14:.2f},-10.5 C {mx + 14.6:.2f},-3.5 {mx + 15.4:.2f},1 0.6,3.8"')
 _st = lambda col: f'style="fill:none;stroke:{col};stroke-width:{SW};stroke-linecap:round;stroke-linejoin:round;vector-effect:none"'
 GUT3 = (f'<circle id="jgutdisc" cx="0" cy="25" r="22" style="fill:var(--paper);fill-opacity:.92;stroke:var(--ink);stroke-width:{SW};vector-effect:none"/>'
         f'<circle id="jgutring" cx="0" cy="25" r="25.5" style="fill:none;stroke:var(--accent);stroke-width:2;opacity:0"/>'

@@ -2,7 +2,7 @@
 vector data for the journey: the body's outline (its pixels, with the ring's disc filled in, contoured and simplified),
 and the icon's strokes (each colour thinned to a one-pixel centreline and walked into polylines). Kept as drawn (facing left)
 and scaled so the ring lands on the journey's gut inset (centre (0, 25), radius 22, y down).
-Usage: python trace_person_ref.py <reference.png> ../person_ref.json"""
+Usage: python trace_person_ref.py <reference.png> ../person_ref.json [<silhouette without the gut.png>]"""
 import json, sys
 import numpy as np
 from PIL import Image
@@ -11,6 +11,7 @@ from skimage import measure
 from skimage.morphology import skeletonize, remove_small_objects
 
 src, dst = sys.argv[1:3]
+body_src = sys.argv[3] if len(sys.argv) > 3 else None   # optional: the same figure without the gut, for its true outline
 img = Image.open(src).convert('RGBA'); bg = Image.new('RGBA', img.size, (255, 255, 255, 255)); bg.alpha_composite(img)
 im = np.array(bg.convert('RGB')).astype(int); H, W, _ = im.shape
 CX, CY, CR = 510, 734.5, 191                       # the ring (centre of its stroke), in the image's pixels
@@ -18,7 +19,11 @@ S = 22 / CR
 to_j = lambda x, y: (round((x - CX) * S, 2), round((y - CY) * S + 25, 2))   # as drawn: facing left, the gut to the lower right
 
 yy, xx = np.mgrid[0:H, 0:W]
-body = ((255 - im).sum(2) > 40) | (((xx - CX) ** 2 + (yy - CY) ** 2) < (CR + 4) ** 2)
+if body_src:   # the plain silhouette: its own pixels, nothing filled in
+    b2 = Image.open(body_src).convert('RGBA'); bg2 = Image.new('RGBA', b2.size, (255, 255, 255, 255)); bg2.alpha_composite(b2)
+    body = (255 - np.array(bg2.convert('RGB')).astype(int)).sum(2) > 40
+else:          # the figure with its gut drawn on: the ring's disc filled in
+    body = ((255 - im).sum(2) > 40) | (((xx - CX) ** 2 + (yy - CY) ** 2) < (CR + 4) ** 2)
 body = ndi.binary_fill_holes(body); body[945:] = False; body = ndi.binary_opening(body, iterations=1)
 c = max(measure.find_contours(np.pad(body, 2).astype(float), .5), key=len) - 2
 c = measure.approximate_polygon(c, 1.2)
