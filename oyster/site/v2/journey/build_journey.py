@@ -542,8 +542,8 @@ for txt in ['In the gut', 'Cell membrane &middot; blood-brain barrier', 'Target 
 c3_story = once(c3_story, f'data-x="{X["mem"] + 4}" data-y="-50"', f'data-x="{X["mem"] + 4}" data-y="63"')   # above the vessel (its wall at 50), at the top
 c3_story = once(c3_story, f'data-x="{X["mem"] + 70}" data-y="52"', f'data-x="{X["mem"] + 88}" data-y="46"')   # Target cell: a fixed spot, above the monomers' way in   # Target cell: inside, below the membrane's label
 # Rob's reference figure (tools/trace_person_ref.py -> person_ref.json): a soft silhouette, solid and fading out at the
-# bottom, with the gut icon in its ring (a white disc, the large intestine in navy, stomach and small intestine in light
-# blue, strokes that scale with the zoom); the disc eases to the page's green as the camera goes into the gut (rob.js)
+# bottom, with the gut icon in its ring, in the theme's colours (the page's green disc in a white ring, the large intestine
+# in white, stomach and small intestine in the mint accent; strokes that scale with the zoom)
 PR = json.load(open(D + 'person_ref.json'))
 def _cr(pts, closed=False):
     n = len(pts); o = [f'M {pts[0][0]},{pts[0][1]}']
@@ -560,10 +560,10 @@ mx, my = PR['mouth']; SW = PR['stroke']
 c3_story = once(c3_story, 'd="M 18.6,-44.4 C 12,-43.6 4,-41.5 0,-37 C -3.2,-32 -3.6,-25 -3.2,-18 C -2.8,-10 -0.6,-3 0.5,2.5"',
                 f'd="M {mx},{my} C -21,-34.6 -15,-33 -12.5,-29.5 C -10,-25 -8.5,-17 -6.5,-10.5 C -4.2,-3.5 -1,1 0.6,3.8"')
 _st = lambda col: f'style="fill:none;stroke:{col};stroke-width:{SW};stroke-linecap:round;stroke-linejoin:round;vector-effect:none"'
-GUT3 = (f'<circle id="jgutdisc" cx="0" cy="25" r="22" style="fill:#FFFFFF;stroke:#0B1230;stroke-width:{SW};vector-effect:none"/>'
+GUT3 = (f'<circle id="jgutdisc" cx="0" cy="25" r="22" style="fill:var(--paper);fill-opacity:.92;stroke:var(--ink);stroke-width:{SW};vector-effect:none"/>'
         f'<circle id="jgutring" cx="0" cy="25" r="25.5" style="fill:none;stroke:var(--accent);stroke-width:2;opacity:0"/>'
-        f'<g id="jtract">' + ''.join(f'<path d="{_cr(c)}" {_st("#9EE6FF")}/>' for c in PR['tract'])
-        + '<g id="jcolon">' + ''.join(f'<path d="{_cr(c)}" {_st("#0D1550")}/>' for c in PR['colon']) + '</g></g>')
+        f'<g id="jtract">' + ''.join(f'<path d="{_cr(c)}" {_st("var(--accent)")}/>' for c in PR['tract'])
+        + '<g id="jcolon">' + ''.join(f'<path d="{_cr(c)}" {_st("var(--ink)")}/>' for c in PR['colon']) + '</g></g>')
 c3_story = once(c3_story, GUT, GUT3)
 # once the target is degraded only 'Degradation' stays: the proteasome's label hands over to it
 c3_story = once(c3_story, 'data-a="0.84" data-b="0.99">Proteasome', 'data-a="0.84" data-b="0.925">Proteasome')

@@ -39,11 +39,6 @@ TAGS.forEach(t => { if (t.at() === BOUNCER.g) { t.win = () => 0; t.el.style.disp
     frameC(pn);
     declutter(pn);
     BOUNCER.g.visible = false;
-    // the gut icon: as drawn on the first view (a white disc, navy large intestine, dark ring); green and white once inside
-    const gi = clamp((WARP(pn) - .13) / .07, 0, 1), disc = document.getElementById('jgutdisc');
-    if (disc) { const mixc = (a, b) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), gi).getHexString();
-      disc.style.fill = mixc('#FFFFFF', '#158B63'); disc.style.stroke = mixc('#0B1230', '#F5FFFC');
-      document.querySelectorAll('#jcolon path').forEach(p => { p.style.stroke = mixc('#0D1550', '#F5FFFC'); }); }
     if (pn > .5 && pn < .7) plus.style.opacity = 0;                    // no '+' while it joins, bounces and comes apart
     // a flash as the linker breaks at the membrane
     const fb = Math.max(0, Math.sin(Math.PI * clamp((pn - .59) / .028, 0, 1)));   // the break
