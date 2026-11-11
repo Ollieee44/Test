@@ -1,0 +1,44 @@
+{
+ "sections": [
+  {
+   "title": "Oral",
+   "label": "Oral dosing",
+   "heading": "Taken by mouth, as a pill.",
+   "body": ""
+  },
+  {
+   "title": "Gut",
+   "label": "In the gut",
+   "heading": "SELFTAC disassembles into two small molecules.",
+   "body": ""
+  },
+  {
+   "title": "Plasma",
+   "label": "In the bloodstream",
+   "heading": "Monomers and dimer, in equilibrium.",
+   "body": ""
+  },
+  {
+   "title": "Barrier",
+   "label": "The barrier",
+   "heading": "Monomers readily pass through biological membranes",
+   "body": ""
+  },
+  {
+   "title": "Ternary complex",
+   "label": "Ternary complex",
+   "heading": "Inside the cell, the SELFTAC forms a ternary complex.",
+   "body": ""
+  },
+  {
+   "title": "Degraded",
+   "label": "Degradation",
+   "heading": "Target protein tagged and degraded.",
+   "body": ""
+  }
+ ],
+ "tagline": [
+  "Targeted protein degradation beyond conventional limits.",
+  ""
+ ]
+}

@@ -778,3 +778,24 @@ c5_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)'
 os.makedirs(D + 'click5', exist_ok=True)
 open(D + 'click5/index.html', 'w').write(c5_page)
 print('click5/index.html', os.path.getsize(D + 'click5/index.html') // 1024, 'KB')
+
+# ---------- Rob's edits v4 (click6/index.html): v3 with the SELFTAC drawn as pearl clusters ----------
+# The "Pearl cluster" option from the representations gallery (reps/): each half of the degrader drawn as a few glossy
+# pearls in its colour, set at centres spread along the half's mass (reps/reps_data.json), in place of the traced rings.
+# The halves keep their places, so the linker, its pearls and the gold clasp are unchanged; the pearls use the halves'
+# own materials, so colours and fades carry over. Everything else is v3.
+PEARLS = json.load(open(D + 'reps/reps_data.json'))['reps']
+c6_page = c5_page.replace("<title>SELFTAC Journey Rob's Edits v3</title>", "<title>SELFTAC Journey Rob's Edits v4</title>", 1)
+c6_page = once(c6_page, '  const [cW, cE] = heads.map(h => h.c);\n', '''  const [cW, cE] = heads.map(h => h.c);
+  // v4: each half drawn as a cluster of pearls in its colour (the traced rings hidden, their geometry kept for the
+  // linker's inside test and the halves' extents)
+  { const PC = ''' + json.dumps({k: PEARLS[k]['pearls'] for k in ('warhead', 'e3lig')}) + ''', pb = new THREE.SphereGeometry(1, 32, 22);
+    heads.forEach((h, i) => { const k = ['warhead', 'e3lig'][i]; h.mesh.material = new THREE.MeshBasicMaterial({ visible: false }); h.mesh.children[0].visible = false;   // (its own material, as the pearls share the half's)
+      PC[k].forEach(c => { const s = new THREE.Mesh(pb, mats[k]); s.position.set(...c); s.scale.setScalar(1.55); s.add(outline(s)); h.mesh.add(s); }); });
+    mats.warhead.uniforms.gloss.value = mats.e3lig.uniforms.gloss.value = .9; }
+''')
+C6_TEXT = json.load(open(D + 'text/click6.json', encoding='utf8'))
+c6_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C6_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c6_page, count=1, flags=re.S)
+os.makedirs(D + 'click6', exist_ok=True)
+open(D + 'click6/index.html', 'w').write(c6_page)
+print('click6/index.html', os.path.getsize(D + 'click6/index.html') // 1024, 'KB')
