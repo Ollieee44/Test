@@ -590,6 +590,9 @@ c3_click = c2_click
 c3_click = once(c3_click, 'const STOPS = [0, .145, .25, .335, .45, .612, .665, .79, .865, .92, .998];', 'const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];')
 c3_click = once(c3_click, 'const BEAT_STOP = [0, 2, 4, 5, 7, 8];', 'const BEAT_STOP = [0, 1, 3, 4, 6, 7];')
 c3_click = once(c3_click, 'const SLOW = { 8: 1.8, 9: 1.7 };', 'const SLOW = { 4: 1.3, 5: 2.6, 6: 1.9, 7: 1.8, 8: 1.7 };')
+# every move unhurried: about half as long again as the click-through's, clicks and autoplay alike
+c3_click = once(c3_click, 'glide ? Math.max(1600, Math.min(3400, 1300 + d * 9000)) : Math.max(1100, Math.min(2600, 900 + d * 7000))',
+                'glide ? Math.max(2300, Math.min(4800, 1900 + d * 12000)) : Math.max(1700, Math.min(4000, 1400 + d * 10500))')
 c3_click = re.sub(r'const HOLD = \[[^\]]*\];', 'const HOLD = [300, 550, 300, 2400, 900, 550, 2200, 450, 400];', c3_click, count=1)
 c3_page = (c3_head + '<main id="main">\n' + c3_story + '</main>\n' + meshes + '\n' + PROTMESH + '\n<script type="module">' + c2_prefix + '\n' + C2_PAL
            + c3_js + '\n' + open(D + 'otx.js').read() + '\n' + c3_plasma + '\n' + c3_cell + '\n' + open(D + 'rob.js').read() + '\n' + c3_click + '\n' + open(D + 'editor.js').read() + '</script>\n')

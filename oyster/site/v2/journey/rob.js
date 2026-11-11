@@ -23,8 +23,13 @@ function heroOverride(pn, brk) {
   let hx = 12 - 5 * j; if (gone > 0) hx = 7 + 6 * gone;               // apart, then joined, then apart again
   hx = hx + (hxJ - hx) * smR((pn - .64) / .04);
   const f = (1 - j) * (1 - back) * .6, t = pn * 40;
-  return mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), qE(f * .3 * Math.sin(t * 1.1), f * .4 * Math.sin(t * .8)), qE(f * -.3 * Math.sin(t * 1.3), f * .4 * Math.cos(t * .9)), j);
+  const b = mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), qE(f * .3 * Math.sin(t * 1.1), f * .4 * Math.sin(t * .8)), qE(f * -.3 * Math.sin(t * 1.3), f * .4 * Math.cos(t * .9)), j);
+  if (gone < .35) ROB_BRK.copy(b);                                     // the linker, while it still holds: where the flash goes
+  return b;
 }
+const ROB_BRK = V3(0, 0, 0);
+// no oscillating Monomers/Dimer word under the pair in the blood (the formula above it stays)
+STATE.style.display = 'none';
 // the second dimer is gone, with its label
 TAGS.forEach(t => { if (t.at() === BOUNCER.g) { t.win = () => 0; t.el.style.display = 'none'; } });
 {
@@ -35,8 +40,9 @@ TAGS.forEach(t => { if (t.at() === BOUNCER.g) { t.win = () => 0; t.el.style.disp
     BOUNCER.g.visible = false;
     if (pn > .5 && pn < .7) plus.style.opacity = 0;                    // no '+' while it joins, bounces and comes apart
     // a flash as the linker breaks at the membrane
-    const fb = Math.max(0, Math.sin(Math.PI * clamp((pn - .59) / .028, 0, 1)));
-    if (fb > .01) { mol.group.updateMatrixWorld(true); flash.position.copy(mol.group.localToWorld(V3(0, 0, 0))); flash.scale.setScalar(SC * (.8 + 1.2 * fb));
-      flash.material.opacity = .7 * fb; flash.visible = true; flash.lookAt(camera.position); }
+    const fb = Math.max(0, Math.sin(Math.PI * clamp((pn - .59) / .028, 0, 1)));   // the break
+    // a small flash on the linker as it breaks, sized like the break in the gut
+    if (fb > .01) { mol.group.updateMatrixWorld(true); flash.position.copy(mol.group.localToWorld(ROB_BRK.clone()));
+      flash.scale.setScalar(SC * (.6 + 1.1 * clamp((pn - .59) / .028, 0, 1))); flash.material.opacity = .6 * fb; flash.visible = true; flash.lookAt(camera.position); }
   };
 }
