@@ -435,14 +435,15 @@ c2_js = once(c2_js, '// ---------- the timeline ----------', UB_SETUP + '// ----
 c2_js = once(c2_js, 'cg.rotation.z = kf(p, [[.44, 0], [.58, -Math.PI / 2]])',
              'cg.rotation.z = kf(p, [[.295, 0], [.32, -Math.PI / 2], [.37, -Math.PI / 2], [.395, 0], [.425, 0], [.47, -Math.PI / 2]])')
 # the larger copy takes more of the left: the subject sits further right, and further still once the target is in the
-# proteasome, so the complex left behind stays clear of the degradation copy; inside the cell it sits a little higher,
+# proteasome, so the complex left behind stays clear of the degradation copy (spread over the whole move, so the camera
+# only ever moves on, never back); inside the cell it sits a little higher,
 # clear of the controls
 # phones: around tagging the camera pulls back a little and frames further left, so the complex and its ubiquitin
 # chain (on the target's left flank) stay on screen with room for the label
 c2_js = once(c2_js, 'const dist = DIST(p) * (narrow ? Math.max(1, 1.05 / camera.aspect) * .8 : 1);',
              'const tagW = camera.aspect < .9 ? kf(p, [[.76, 0], [.82, 1], [.9, 1], [.95, 0]]) : 0, dist = DIST(p) * (narrow ? Math.max(1, 1.05 / camera.aspect) * .8 : 1) * (1 + .16 * tagW);')
 c2_js = once(c2_js, 'if (narrow) ay -= .17 * vh * settle; else ax -= .17 * vw * settle;',
-             'if (narrow) { ay -= .22 * vh * settle; ax -= .09 * vw * tagW; } else { ax -= (.2 + .1 * kf(p, [[.855, 0], [.885, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }')
+             'if (narrow) { ay -= .22 * vh * settle; ax -= .09 * vw * tagW; } else { ax -= (.2 + .1 * kf(p, [[.8, 0], [.869, .47], [.948, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }')
 # the proteasome: the human 26S (PDB 6MSB, tools/proteasome_mesh.py), core and cap, cap up; the target goes into the core
 PROT_OLD = re.search(r"const prot = new THREE.Group\(\); scene.add\(prot\);\n.*?prot.add\(c\); \}\n", otx_prefix, re.S).group(0)
 PROT_NEW = """const prot = new THREE.Group(); scene.add(prot);

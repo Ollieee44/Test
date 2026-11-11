@@ -548,7 +548,7 @@ function frame(p0) {
   const tagW = camera.aspect < .9 ? kf(p, [[.76, 0], [.82, 1], [.9, 1], [.95, 0]]) : 0, dist = DIST(p) * (narrow ? Math.max(1, 1.05 / camera.aspect) * .8 : 1) * (1 + .16 * tagW);
   const vh = 2 * dist * Math.tan(fov / 2), vw = vh * camera.aspect, settle = 1 - clamp((p - .955) / .04, 0, 1);
   let ax = CAMX(p), ay = CAMY(p);
-  if (narrow) { ay -= .22 * vh * settle; ax -= .09 * vw * tagW; } else { ax -= (.2 + .1 * kf(p, [[.855, 0], [.885, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }
+  if (narrow) { ay -= .22 * vh * settle; ax -= .09 * vw * tagW; } else { ax -= (.2 + .1 * kf(p, [[.8, 0], [.869, .47], [.948, 1]])) * vw * settle; ay -= .035 * vh * kf(p, [[.6, 0], [.68, 1]]) * settle; }
   camera.position.set(ax, ay, dist); camera.lookAt(ax, ay, 0); camera.updateMatrixWorld();
   const k = stage.clientHeight / vh, tx = stage.clientWidth / 2 - ax * k, ty = stage.clientHeight / 2 + ay * k;
   world.setAttribute('transform', `matrix(${k.toFixed(5)} 0 0 ${(-k).toFixed(5)} ${tx.toFixed(2)} ${ty.toFixed(2)})`);
