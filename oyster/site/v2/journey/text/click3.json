@@ -16,7 +16,7 @@
    "title": "Plasma",
    "label": "In the bloodstream",
    "heading": "Monomers and dimer, in equilibrium.",
-   "body": "In the plasma, the two monomers associate to form dimer and dissociate again at the reversible linker; existing in a dynamic equilibrium."
+   "body": "In the plasma, the two monomers associate to form a dimer and dissociate again at the reversible linker, existing in a dynamic equilibrium."
   },
   {
    "title": "Barrier",
@@ -25,7 +25,7 @@
    "body": "The dimer is too large to penetrate the cell membrane or the blood-brain barrier. It comes apart at its reversible linker, and the two small monomers pass through."
   },
   {
-   "title": "Ternary Complex",
+   "title": "Ternary complex",
    "label": "Ternary complex",
    "heading": "Inside the cell, the dimer forms a ternary complex.",
    "body": "Monomers and dimers are in equilibrium here too. One dimer molecule binds one target protein and one E3 ligase bringing them into proximity by forming a ternary complex."
