@@ -468,6 +468,9 @@ def _plain(h): return re.sub(r'<[^>]+>', '', h).replace('&reg;', '\u00ae').repla
 C2_TEXT = {'sections': [{'title': r, 'label': _plain(k.split(' &middot; ')[1]), 'heading': _plain(t), 'body': _plain(d)}
                         for r, (k, h, t, d) in zip(['Oral', 'Gut', 'Plasma', 'Barrier', 'Complex', 'Degraded'], c2_beats)],
            'tagline': ['Targeted protein degradation', 'beyond conventional limits.']}
+# the version of record for the words: text/click2.json when present (pulled from the live page with tools/pull_text.py
+# after edits are saved in it), else the defaults above
+if os.path.exists(D + 'text/click2.json'): C2_TEXT = json.load(open(D + 'text/click2.json', encoding='utf8'))
 assert '<p class="tag">Targeted protein degradation <em>beyond conventional limits.</em></p>' in c2_story
 c2_story = c2_story.replace('</section>', '</section><script type="application/json" id="c2text">' + json.dumps(C2_TEXT, ensure_ascii=False).replace('<', '\\u003c')
                             + '</script><script>' + open(D + 'text_apply.js').read() + '</script>', 1)
@@ -567,6 +570,7 @@ c3_story = once(c3_story, 'data-pl="pass" data-a="0.6" data-b="0.69"', 'data-pl=
 c3_story = c3_story.replace('>1 / 11<', '>1 / 10<')
 C3_TEXT = json.loads(json.dumps(C2_TEXT))
 C3_TEXT['sections'][3]['body'] = 'The dimer is too large to penetrate the cell membrane or the blood-brain barrier. It comes apart at its reversible linker, and the two small monomers pass through.'
+if os.path.exists(D + 'text/click3.json'): C3_TEXT = json.load(open(D + 'text/click3.json', encoding='utf8'))   # the version of record, as for click2
 c3_story = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C3_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c3_story, count=1, flags=re.S)
 c3_head = c2_head.replace('<title>SELFTAC Journey, Click-Through 2</title>', "<title>SELFTAC Journey Rob's Edits</title>", 1) + '''<style>
 /* location labels: larger, white on a dark pill */
