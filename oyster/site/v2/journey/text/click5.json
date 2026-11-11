@@ -1,0 +1,44 @@
+{
+ "sections": [
+  {
+   "title": "Oral",
+   "label": "Oral dosing",
+   "heading": "Taken by mouth, as a pill.",
+   "body": "SELFTAC® degraders are designed to be small enough to be swallowed, not injected."
+  },
+  {
+   "title": "Gut",
+   "label": "In the gut",
+   "heading": "The dimer splits into two monomers.",
+   "body": "In the gut, each SELFTAC® dimer dissociates at its reversible linker into two small monomers, which are readily absorbed."
+  },
+  {
+   "title": "Plasma",
+   "label": "In the bloodstream",
+   "heading": "Monomers and dimer, in equilibrium.",
+   "body": "In the plasma, monomers associate into a dimer and dissociate again at the reversible linker: a dynamic equilibrium."
+  },
+  {
+   "title": "Barrier",
+   "label": "The barrier",
+   "heading": "Only the monomers get through.",
+   "body": "The dimer is too large to penetrate the cell membrane or blood-brain barrier; it comes apart, and the monomers pass through."
+  },
+  {
+   "title": "Ternary complex",
+   "label": "Ternary complex",
+   "heading": "Inside the cell, the dimer forms a ternary complex.",
+   "body": "Monomers and dimers are in equilibrium here too. One dimer binds the target protein and an E3 ligase, bringing them into proximity."
+  },
+  {
+   "title": "Degraded",
+   "label": "Degradation",
+   "heading": "Tagged, then broken down.",
+   "body": "Ubiquitin marks the target and the proteasome destroys it. The SELFTAC® is now free to degrade more targets."
+  }
+ ],
+ "tagline": [
+  "Targeted protein degradation beyond conventional limits.",
+  "Scroll down to see how we're applying our technology."
+ ]
+}

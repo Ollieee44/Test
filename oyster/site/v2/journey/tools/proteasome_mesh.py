@@ -3,13 +3,14 @@ The 20S core particle (entities 20-33) and the 19S regulatory particle (entities
 entity 19, is left out) are blurred from their C-alpha atoms and contoured, in the same way as the other proteins'
 surfaces (landing/build_meshes.py). The core's long axis is turned onto +x with the cap on the +x side, centred on the
 core, so the target goes into the middle of the core. Positions in 0.01 A steps, the format the page's geom() reads.
-Usage: python proteasome_mesh.py 6MSB.cif.gz ../proteasome.json   (from files.rcsb.org/download/6MSB.cif.gz)"""
+Usage: python proteasome_mesh.py 6MSB.cif.gz ../proteasome.json [grid step, default 4.6]   (from files.rcsb.org/download/6MSB.cif.gz)"""
 import base64, gzip, json, sys
 import numpy as np
 from scipy.ndimage import gaussian_filter
 from skimage import measure
 
 src, dst = sys.argv[1:3]
+SPACING = float(sys.argv[3]) if len(sys.argv) > 3 else 4.6   # grid step (A): coarser is lighter
 cols, rows = [], []
 for l in gzip.open(src, 'rt'):
     if l.startswith('_atom_site.'): cols.append(l.strip().split('.', 1)[1])
@@ -24,7 +25,8 @@ if (RP.mean(0) - o) @ ax < 0: ax = -ax
 b = V[:, 0]; c2 = np.cross(ax, b); R = np.array([ax, b, c2])
 f = lambda P: (P - o) @ R.T
 
-def surface(xyz, sigma=5, level=.12, spacing=4.6, smooth=10):
+def surface(xyz, sigma=None, level=.12, spacing=None, smooth=10):
+    spacing = spacing or SPACING; sigma = sigma or max(5, SPACING * 1.05)
     pad = 3 * sigma + 2; lo = xyz.min(0) - pad; hi = xyz.max(0) + pad
     g = np.zeros((np.ceil((hi - lo) / spacing).astype(int) + 1))
     ijk = np.round((xyz - lo) / spacing).astype(int); np.add.at(g, tuple(ijk.T), 1.0)

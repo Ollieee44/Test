@@ -739,3 +739,29 @@ c4_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)'
 os.makedirs(D + 'click4', exist_ok=True)
 open(D + 'click4/index.html', 'w').write(c4_page)
 print('click4/index.html', os.path.getsize(D + 'click4/index.html') // 1024, 'KB')
+
+# ---------- Rob's edits v3 (click5/index.html): v2 with the review's changes ----------
+# the degrader lets go and moves on after the target is degraded (v3.js); the barrier labelled "Cell membrane" (the
+# blood-brain barrier stays in the copy); a tighter autoplay (clicks unchanged); copy trimmed to about 20 words a step;
+# two label styles only (places, and things); gold kept for the SELFTAC and the next step; a lighter proteasome mesh
+c5_head = c4_head.replace("<title>SELFTAC Journey Rob's Edits v2</title>", "<title>SELFTAC Journey Rob's Edits v3</title>", 1) + '''<style>
+/* two label styles: places (mono, uppercase pills) and things (sans pills, like the protein labels) */
+.jl:not(.loc):not(.key):not(.plus):not(.eq) { font: 600 13px/1 var(--sans); letter-spacing: .01em; text-transform: none; padding: 7px 12px; border-radius: 999px;
+  background: #070D0A; border: 1px solid #408967; color: #EBEBE3; }
+.jl.eqf b { color: #DCA84E; }
+@media (max-width: 760px) { .jl:not(.loc):not(.key):not(.plus):not(.eq) { font-size: 11.5px; padding: 5px 10px; } }
+</style>
+'''
+c5_page = c5_head + c4_page[len(c4_head):]
+c5_page = c5_page.replace('>Cell membrane &middot; blood-brain barrier</span>', '>Cell membrane</span>')
+assert '>Cell membrane</span>' in c5_page
+c5_page = once(c5_page, PROTMESH, '<script type="application/json" id="protmesh">' + open(D + 'proteasome_lite.json').read() + '</script>')
+c5_page = once(c5_page, open(D + 'rob.js').read(), open(D + 'rob.js').read() + '\n' + open(D + 'v3.js').read())
+# autoplay a quarter quicker, with shorter holds where an equilibrium plays; clicks unchanged
+c5_page = once(c5_page, 'Math.max(2300, Math.min(4800, 1900 + d * 12000))', 'Math.max(1700, Math.min(3600, 1400 + d * 9000))')
+c5_page = once(c5_page, 'const HOLD = [300, 550, 300, 2400, 900, 550, 2200, 450, 400];', 'const HOLD = [250, 450, 250, 1700, 700, 450, 1600, 350, 900];')
+C5_TEXT = json.load(open(D + 'text/click5.json', encoding='utf8'))
+c5_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C5_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c5_page, count=1, flags=re.S)
+os.makedirs(D + 'click5', exist_ok=True)
+open(D + 'click5/index.html', 'w').write(c5_page)
+print('click5/index.html', os.path.getsize(D + 'click5/index.html') // 1024, 'KB')
