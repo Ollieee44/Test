@@ -604,10 +604,16 @@ c3_js = once(c3_js, 'P.brd4.position.lerpVectors(home, into, go);',
              'const capTop = inner.worldToLocal(PROT.clone().add(V3(0, (239 - PMID) * PK * 1.15 + 8, 0))).sub(S(\'brd4\').multiplyScalar(sc)); '
              'if (go < .55) P.brd4.position.lerpVectors(home, capTop, ease(go / .55)); else P.brd4.position.lerpVectors(capTop, into, (go - .55) / .45);')
 c3_story = once(c3_story, 'class="jl loc" data-x="630" data-y="58"', f'class="jl loc" data-x="{X["prot"] - 10 + 66}" data-y="14"')   # beside the cap, clear of the way in
+# the target leaves for the proteasome a little later and its labels go first: they fade as the next click starts, the
+# target only moves once they have gone (and the complex eases apart with it)
+c3_js = once(c3_js, 'const go = kf(p, [[.86, 0], [.92, 1]]);', 'const go = kf(p, [[.88, 0], [.925, 1]]);')
+c3_js = once(c3_js, '[[.735, 0], [.78, 1], [.86, 1], [.9, 0]]', '[[.735, 0], [.78, 1], [.88, 1], [.915, 0]]')
+c3_cell = once(c3_cell, "() => P.brd4, winOf(.715, .892, .015)", "() => P.brd4, winOf(.715, .872, .006)")
+c3_cell = once(c3_cell, "winOf(.848, .892, .015)", "winOf(.848, .872, .006)")
 c3_click = c2_click
 c3_click = once(c3_click, 'const STOPS = [0, .145, .25, .335, .45, .612, .665, .79, .865, .92, .998];', 'const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];')
 c3_click = once(c3_click, 'const BEAT_STOP = [0, 2, 4, 5, 7, 8];', 'const BEAT_STOP = [0, 1, 3, 4, 6, 7];')
-c3_click = once(c3_click, 'const SLOW = { 8: 1.8, 9: 1.7 };', 'const SLOW = { 4: 1.3, 5: 2.6, 6: 1.9, 7: 1.8, 8: 1.7 };')
+c3_click = once(c3_click, 'const SLOW = { 8: 1.8, 9: 1.7 };', 'const SLOW = { 4: 1.3, 5: 2.6, 6: 1.9, 7: 1.8, 8: 2.6 };')
 # every move unhurried: about half as long again as the click-through's, clicks and autoplay alike
 c3_click = once(c3_click, 'glide ? Math.max(1600, Math.min(3400, 1300 + d * 9000)) : Math.max(1100, Math.min(2600, 900 + d * 7000))',
                 'glide ? Math.max(2300, Math.min(4800, 1900 + d * 12000)) : Math.max(1700, Math.min(4000, 1400 + d * 10500))')

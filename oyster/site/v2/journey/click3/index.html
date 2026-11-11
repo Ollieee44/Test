@@ -540,7 +540,7 @@ function toScreen(x, y) { vtmp.set(x, y, 0).project(camera); return [(vtmp.x + 1
 const winO = (p, a, b, f = .02) => clamp(Math.min((p - a) / f, (b - p) / f), 0, 1);
 
 function frame(p0) {
-  const p = WARP(clamp(p0, 0, 1)), CMP = 5 * kf(WARP(clamp(p0, 0, 1)), [[.735, 0], [.78, 1], [.86, 1], [.9, 0]]);   // the journey's own timeline, held back for the bloodstream beat
+  const p = WARP(clamp(p0, 0, 1)), CMP = 5 * kf(WARP(clamp(p0, 0, 1)), [[.735, 0], [.78, 1], [.88, 1], [.915, 0]]);   // the journey's own timeline, held back for the bloodstream beat
   // ---- camera: copy on the left on wide screens (the subject sits right of centre); on a card below on phones
   const narrow = camera.aspect < .9, fov = THREE.MathUtils.degToRad(camera.fov);
   const tagW = camera.aspect < .9 ? kf(p, [[.76, 0], [.82, 1], [.9, 1], [.95, 0]]) : 0, dist = DIST(p) * (narrow ? Math.max(1, 1.05 / camera.aspect) * .8 : 1) * (1 + .16 * tagW);
@@ -596,7 +596,7 @@ function frame(p0) {
   const PROT = V3(X.prot - 10, 6, 0), ps = kf(p, [[.8, .001], [.85, 1.15], [.97, 1.15], [1, 1]]);
   prot.visible = ps > .01; prot.position.copy(PROT); prot.scale.setScalar(ps);
   eProt.set(p * 3, 0, Math.PI / 2, 'ZYX'); prot.quaternion.setFromEuler(eProt);
-  const go = kf(p, [[.86, 0], [.92, 1]]);
+  const go = kf(p, [[.88, 0], [.925, 1]]);
   if (go > 0) {
     // the holder scales about its origin, so the protein's centre is kept on the proteasome as it shrinks
     const sc = 1 - .82 * clamp((go - .55) / .45, 0, 1), home = V3(-GAPJ + CMP, 0, 0), into = inner.worldToLocal(PROT.clone().add(V3(0, -PMID * PK * 1.15, 0))).sub(S('brd4').multiplyScalar(sc));
@@ -892,8 +892,8 @@ function label2(text, cls) { const el = document.createElement('span'); el.class
   stage.insertBefore(el, document.getElementById('copy')); return el; }
 const EQ_LBL = label2('Monomer + Monomer <b>⇌</b> Dimer', 'big eqf'), STATE = label2('Monomers', 'big');
 // ---- persistent labels on the proteins and ubiquitin, beside each one; the target's and ubiquitin's go as they enter the proteasome ----
-const KEY = [['Target protein', '#F0A6CA', () => P.brd4, winOf(.715, .892, .015)], ['E3 ligase', '#CEE5F3', () => P.vhl, winOf(.715, .905)],   // on a phone the complex leaves the screen
-  ['Ubiquitin', '#B9A6F5', () => ubs[2], pn => winOf(.848, .892, .015)(pn) * (ubs[2].visible ? 1 : 0)]];
+const KEY = [['Target protein', '#F0A6CA', () => P.brd4, winOf(.715, .872, .006)], ['E3 ligase', '#CEE5F3', () => P.vhl, winOf(.715, .905)],   // on a phone the complex leaves the screen
+  ['Ubiquitin', '#B9A6F5', () => ubs[2], pn => winOf(.848, .872, .006)(pn) * (ubs[2].visible ? 1 : 0)]];
 const KEY_TAGS = [];   // ubiquitin's label on the left: the chain sits on the target's left flank
 KEY.forEach(([t, col, at, win], i) => { const k = tag(t, 'key', at, win, 8); KEY_TAGS.push(k); k.side = i === 2 ? 'left' : 'right'; k.seq = [0, 500, 0][i]; k.el.style.setProperty('--dot', col); TAGS.push(k); });
 document.querySelectorAll('.jl[data-x]').forEach(el => { if (/^(Target protein|E3 ligase|Ternary complex)$/.test(el.textContent.trim())) el.style.display = 'none'; });
@@ -1070,7 +1070,7 @@ function declutter() {
 // the distance) and holds there. Arrow keys and the space bar step too, and the rail's pearls jump to a beat.
 (() => {
   const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];
-  const SLOW = { 4: 1.3, 5: 2.6, 6: 1.9, 7: 1.8, 8: 1.7 };                          // tagging and degradation: unhurried
+  const SLOW = { 4: 1.3, 5: 2.6, 6: 1.9, 7: 1.8, 8: 2.6 };                          // tagging and degradation: unhurried
   const BEAT_STOP = [0, 1, 3, 4, 6, 7];                  // the first stop of each of the six beats (the rail)
   BEATS_N[4][1] = BEATS_N[5][0] = .84;                   // the degradation copy is in by the time the tags land (stop 9)
   const J = window.__journey, next = document.getElementById('jnext'), back = document.getElementById('jback'), count = document.getElementById('jcount');
