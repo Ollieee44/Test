@@ -876,9 +876,15 @@ frame = function (p0) {
   CROWD.forEach(c => { c.g.visible = false; });
   // the bouncer: only for the barrier beat
   const bA = kf(pn, [[.5, .001], [.535, 1]]);
-  // once the barrier beat is over it steps back (smaller, higher in the vessel), clear of the larger copy
+  // once the barrier beat is over it steps back (smaller), clear of the larger copy
   const bBack = kf(pn, [[.615, 0], [.66, 1]]);
-  if (BOUNCER.g.visible) { BOUNCER.g.scale.multiplyScalar(bA * (1 - .3 * bBack)); BOUNCER.g.position.y += 7 * bBack; BOUNCER.g.visible = bA > .01; }
+  if (BOUNCER.g.visible) { BOUNCER.g.scale.multiplyScalar(bA * (1 - .3 * bBack)); BOUNCER.g.visible = bA > .01; }
+  // and it never leaves the vessel: its whole outline stays inside the walls (inner face at 66 less the wall's half-width)
+  // and short of the membrane, however it has turned
+  if (BOUNCER.g.visible && pn > .5) { BOUNCER.g.updateMatrixWorld(true); const bb = new THREE.Box3().setFromObject(BOUNCER.g), IN = 66 - 7;
+    const dy = Math.min(0, IN - bb.max.y) + Math.max(0, -IN - bb.min.y), cy = (bb.min.y + bb.max.y) / 2 + dy;
+    const dx = Math.min(0, memX(cy + Math.sign(cy) * (bb.max.y - bb.min.y) / 2) - 3 - bb.max.x);
+    if (dx || dy) { BOUNCER.g.position.x += dx; BOUNCER.g.position.y += dy; BOUNCER.g.updateMatrixWorld(true); } }
   // our two monomers, joining and parting in the blood
   const w = clamp(Math.min((pn - .405) / .03, (.525 - pn) / .03), 0, 1);
   let s = 0;
