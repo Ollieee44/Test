@@ -541,6 +541,30 @@ for txt in ['In the gut', 'Cell membrane &middot; blood-brain barrier', 'Target 
     assert n == 1, txt
 c3_story = once(c3_story, f'data-x="{X["mem"] + 4}" data-y="-50"', f'data-x="{X["mem"] + 4}" data-y="63"')   # above the vessel (its wall at 50), at the top
 c3_story = once(c3_story, f'data-x="{X["mem"] + 70}" data-y="52"', f'data-x="{X["mem"] + 88}" data-y="46"')   # Target cell: a fixed spot, above the monomers' way in   # Target cell: inside, below the membrane's label
+# Rob's reference figure (tools/trace_person_ref.py -> person_ref.json): a soft silhouette, solid and fading out at the
+# bottom, with the gut icon in its ring (a white disc, the large intestine in navy, stomach and small intestine in light
+# blue, strokes that scale with the zoom); the disc eases to the page's green as the camera goes into the gut (rob.js)
+PR = json.load(open(D + 'person_ref.json'))
+def _cr(pts, closed=False):
+    n = len(pts); o = [f'M {pts[0][0]},{pts[0][1]}']
+    for i in range(n if closed else n - 1):
+        p0 = pts[(i - 1) % n] if (closed or i > 0) else pts[i]; p1, p2 = pts[i], pts[(i + 1) % n]; p3 = pts[(i + 2) % n] if (closed or i + 2 < n) else p2
+        o.append(f'C {p1[0] + (p2[0] - p0[0]) / 6:.2f},{p1[1] + (p2[1] - p0[1]) / 6:.2f} {p2[0] - (p3[0] - p1[0]) / 6:.2f},{p2[1] - (p3[1] - p1[1]) / 6:.2f} {p2[0]},{p2[1]}')
+    return ' '.join(o) + (' Z' if closed else '')
+c3_story = once(c3_story, f'd="{P_FILL}"', f'd="{_cr(PR["outline"], True)}"')
+c3_story = once(c3_story, f'd="{P_EDGE}"', 'd=""')
+c3_story, n = re.subn(r'<linearGradient id="jpersonG".*?</linearGradient>', lambda m: '<linearGradient id="jpersonG" gradientUnits="userSpaceOnUse" x1="0" y1="-60" x2="0" y2="52">'
+    '<stop offset="0" style="stop-color:var(--ink);stop-opacity:.2"/><stop offset=".86" style="stop-color:var(--ink);stop-opacity:.2"/><stop offset="1" style="stop-color:var(--ink);stop-opacity:0"/></linearGradient>', c3_story, count=1, flags=re.S)
+assert n == 1
+mx, my = PR['mouth']; SW = PR['stroke']
+c3_story = once(c3_story, 'd="M 18.6,-44.4 C 12,-43.6 4,-41.5 0,-37 C -3.2,-32 -3.6,-25 -3.2,-18 C -2.8,-10 -0.6,-3 0.5,2.5"',
+                f'd="M {mx},{my} C -21,-34.6 -15,-33 -12.5,-29.5 C -10,-25 -8.5,-17 -6.5,-10.5 C -4.2,-3.5 -1,1 0.6,3.8"')
+_st = lambda col: f'style="fill:none;stroke:{col};stroke-width:{SW};stroke-linecap:round;stroke-linejoin:round;vector-effect:none"'
+GUT3 = (f'<circle id="jgutdisc" cx="0" cy="25" r="22" style="fill:#FFFFFF;stroke:#0B1230;stroke-width:{SW};vector-effect:none"/>'
+        f'<circle id="jgutring" cx="0" cy="25" r="25.5" style="fill:none;stroke:var(--accent);stroke-width:2;opacity:0"/>'
+        f'<g id="jtract">' + ''.join(f'<path d="{_cr(c)}" {_st("#9EE6FF")}/>' for c in PR['tract'])
+        + '<g id="jcolon">' + ''.join(f'<path d="{_cr(c)}" {_st("#0D1550")}/>' for c in PR['colon']) + '</g></g>')
+c3_story = once(c3_story, GUT, GUT3)
 # once the target is degraded only 'Degradation' stays: the proteasome's label hands over to it
 c3_story = once(c3_story, 'data-a="0.84" data-b="0.99">Proteasome', 'data-a="0.84" data-b="0.925">Proteasome')
 # the vessel: narrower, its wall drawn in layers (tissue, endothelium, outer edge), flattened nuclei along the lining, and a
@@ -630,6 +654,7 @@ c3_js = once(c3_js, 'const go = kf(p, [[.86, 0], [.92, 1]]);', 'const go = kf(p,
 c3_js = once(c3_js, '[[.735, 0], [.78, 1], [.86, 1], [.9, 0]]', '[[.735, 0], [.78, 1], [.88, 1], [.915, 0]]')
 c3_cell = once(c3_cell, "() => P.brd4, winOf(.715, .892, .015)", "() => P.brd4, winOf(.715, .872, .006)")
 c3_cell = once(c3_cell, "winOf(.848, .892, .015)", "winOf(.848, .872, .006)")
+c3_js = once(c3_js, 'px = 74 + (19 - 74) * pp; py = 64 + (44.4 - 64) * pp - 10 * Math.sin(Math.PI * pp); rot = -18 + 18 * pp;', f'px = -50 + ({mx} + 50) * pp; py = 64 + ({-my} - 64) * pp - 10 * Math.sin(Math.PI * pp); rot = 18 - 18 * pp;')   # in from the left, into the traced mouth (the figure faces left)
 c3_click = c2_click
 c3_click = once(c3_click, 'const STOPS = [0, .145, .25, .335, .45, .612, .665, .79, .865, .92, .998];', 'const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];')
 c3_click = once(c3_click, 'const BEAT_STOP = [0, 2, 4, 5, 7, 8];', 'const BEAT_STOP = [0, 1, 3, 4, 6, 7];')
