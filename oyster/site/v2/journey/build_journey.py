@@ -579,6 +579,7 @@ assert "<title>SELFTAC Journey Rob's Edits</title>" in c3_head
 # the journey hands the molecule to rob.js at the barrier
 c3_js = once(c2_js, 'const brk = mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j);', 'const brk = heroOverride(clamp(p0, 0, 1), mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j));')
 c3_plasma = once(open(D + 'plasma.js').read(), 'const VESSEL_IN = 50;', 'const VESSEL_IN = 36;')
+c3_plasma = once(c3_plasma, 'pass: () => { const c = cg.position; return [c.x + 34, c.y - 30]; }', 'pass: () => { const c = cg.position; return [c.x + 44, c.y]; }')   # beside the pair, not under it
 c3_plasma = once(c3_plasma, 'bounce: () => [BOUNCER.g.position.x - 6, BOUNCER.g.position.y + 24]', 'bounce: () => [cg.position.x - 4, cg.position.y + 30]')
 # the protein labels measured against the proteins' actual surfaces (not their loose bounding boxes), and set close
 c3_plasma = once(c3_plasma, 'const box = new THREE.Box3().setFromObject(t.at());', 'const box = new THREE.Box3().setFromObject(t.at(), !!t.side);')

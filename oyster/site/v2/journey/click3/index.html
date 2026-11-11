@@ -810,7 +810,7 @@ frame = function (p0) {
   // labels on the crowd, the bouncer and the hero's monomers
   const ATT = {
     plasma: () => { const [x] = at(R, .5, 1.04); return [x, 61]; },
-    bounce: () => [cg.position.x - 4, cg.position.y + 30], pass: () => { const c = cg.position; return [c.x + 34, c.y - 30]; },
+    bounce: () => [cg.position.x - 4, cg.position.y + 30], pass: () => { const c = cg.position; return [c.x + 44, c.y]; },
   };
   PL.forEach(l => { const o = clamp(Math.min((pn - l.a) / .02, (l.b - pn) / .02), 0, 1) * (1 - endO); l.el.style.opacity = o.toFixed(3);
     if (o > 0) { let [x, y] = toScreen(...ATT[l.at]()); const hw = (l.w = l.w || l.el.offsetWidth) / 2 + 10; x = clamp(x, hw, stage.clientWidth - hw);
@@ -1041,10 +1041,22 @@ TAGS.forEach(t => { if (t.at() === BOUNCER.g) { t.win = () => 0; t.el.style.disp
       flash.scale.setScalar(SC * (.6 + 1.1 * clamp((pn - .59) / .028, 0, 1))); flash.material.opacity = .6 * fb; flash.visible = true; flash.lookAt(camera.position); }
   };
 }
-// labels never sit on one another: after each frame, any label overlapping one above it is nudged down just clear of it
+// labels never sit on one another or on the molecule we follow: after each frame a label over one of its two halves is moved
+// just clear of it (up or down, whichever is shorter), then any label overlapping one above it is nudged down clear of it
 function declutter() {
+  const obs = [];
+  if (cg.visible) mol.group.children.slice(0, 2).forEach(ch => { const bx = new THREE.Box3().setFromObject(ch); if (bx.isEmpty()) return; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const cx of [bx.min.x, bx.max.x]) for (const cy of [bx.min.y, bx.max.y]) for (const cz of [bx.min.z, bx.max.z]) {
+      vtmp.set(cx, cy, cz).project(camera); const sx = (vtmp.x + 1) / 2 * stage.clientWidth, sy = (1 - vtmp.y) / 2 * stage.clientHeight;
+      x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }
+    const s0 = stage.getBoundingClientRect(); obs.push({ left: x0 + s0.left, right: x1 + s0.left, top: y0 + s0.top, bottom: y1 + s0.top }); });
   const rs = [...document.querySelectorAll('.jl')].filter(e => e.style.display !== 'none' && +e.style.opacity > .05)
-    .map(e => ({ e, r: e.getBoundingClientRect() })).sort((a, b) => a.r.top - b.r.top);
+    .map(e => ({ e, r: e.getBoundingClientRect() }));
+  rs.forEach(o => { const b = o.r; let dy = 0;
+    obs.forEach(a => { if (b.left < a.right + 4 && b.right > a.left - 4 && b.top + dy < a.bottom + 4 && b.bottom + dy > a.top - 4) {
+      const up = a.top - 4 - b.bottom, down = a.bottom + 4 - b.top; dy = Math.abs(up) < Math.abs(down) ? up : down; } });
+    if (dy) { o.e.style.transform += ` translate(0, ${dy.toFixed(1)}px)`; o.r = { left: b.left, right: b.right, top: b.top + dy, bottom: b.bottom + dy }; } });
+  rs.sort((a, b) => a.r.top - b.r.top);
   for (let i = 1; i < rs.length; i++) {
     let b = rs[i].r, dy = 0;
     for (let k = 0; k < i; k++) { const a = rs[k].r;
