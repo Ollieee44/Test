@@ -717,7 +717,7 @@ body { background: #1A372A; }
 .rail i { background: #2E6149; } .rail i b { background: #DCA84E; }
 .rail div::before { border-color: #408967; }
 .rail div.on::before, .rail div:nth-child(4).on::before { background: #DCA84E; border-color: #DCA84E; }
-.jbtn.jnext { background: #DCA84E; border-color: #DCA84E; color: #070D0A; } .jbtn.jnext:hover { background: #EBEBE3; border-color: #EBEBE3; }
+.jbtn.jnext { background: #DCA84E; border-color: #DCA84E; color: #070D0A; } .jbtn.jnext:hover { background: #DCA84E; border-color: #DCA84E; }   /* stays gold (it nudges right on hover) */
 /* the hint's mouse clicks (its left button flashes gold) rather than scrolls */
 .hint i::before { content: ""; position: absolute; left: 50%; top: 0; width: 1.5px; height: 42%; margin-left: -.75px; background: #EBEBE3; }
 .hint i::after { left: 0; top: 0; width: 50%; height: 42%; margin: 0; border-radius: 10px 0 0 0; background: #DCA84E; animation: jclick 1.6s ease-in-out infinite; }
@@ -736,8 +736,19 @@ for a, b in (('%23CFFFFF', '%23BADECD'), ('%2396FF87', '%2367B791'), ('%23FFB36B
     c4_page = c4_page.replace(a, b)
 C4_TEXT = json.load(open(D + 'text/click4.json', encoding='utf8'))   # this page's own words (its version of record)
 c4_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C4_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c4_page, count=1, flags=re.S)
+# v2 takes v3's larger proteasome too (and the cell's molecules measured around it); c4_page itself stays as v3's base
+def big_proteasome(pg):
+    pg = once(pg, 'PK = .225, PMID = 76;', 'PK = .28, PMID = 76;')
+    pg = once(pg, 'PROT.y - 30 - f.dy * ease(t)', 'PROT.y - 44 - f.dy * ease(t)')
+    pg = once(pg, 'const PROT = V3(X.prot - 10, 6, 0)', 'const PROT = V3(X.prot - 22, 6, 0)')
+    pg = once(pg, f'class="jl loc" data-x="{X["prot"] - 10 + 66}" data-y="14"', f'class="jl loc" data-x="{X["prot"] - 22 + 76}" data-y="18"')
+    pg = once(pg, 'class="jl loc" data-x="630" data-y="-86"', f'class="jl loc" data-x="{X["prot"] - 22 + 74}" data-y="-78"')
+    cells = ''.join(f"  {{ at: 'cell', kind: '{_kinds[i % 3]}', dx: {x - X['complex']}, y: {y}, s: .68, r: {[.5, -.3, -.4, .35, .2, -.5, .45][i % 7]}, hx: 11, ph: {1 + .7 * i:.1f}, win: pn => cellIn(pn) }},\n"
+                    for i, (x, y) in enumerate(json.load(open(D + 'cell_layout_v3.json'))))
+    pg, n = re.subn(r"(  \{ at: 'cell', kind: [^\n]*\n)+", lambda m: cells, pg, count=1); assert n == 1
+    return pg
 os.makedirs(D + 'click4', exist_ok=True)
-open(D + 'click4/index.html', 'w').write(c4_page)
+open(D + 'click4/index.html', 'w').write(big_proteasome(c4_page))
 print('click4/index.html', os.path.getsize(D + 'click4/index.html') // 1024, 'KB')
 
 # ---------- Rob's edits v3 (click5/index.html): v2 with the review's changes ----------
@@ -761,16 +772,7 @@ c5_page = once(c5_page, open(D + 'rob.js').read(), open(D + 'rob.js').read() + '
 c5_page = once(c5_page, 'Math.max(2300, Math.min(4800, 1900 + d * 12000))', 'Math.max(1700, Math.min(3600, 1400 + d * 9000))')
 c5_page = once(c5_page, 'const HOLD = [300, 550, 300, 2400, 900, 550, 2200, 450, 400];', 'const HOLD = [250, 450, 250, 1700, 700, 450, 1600, 350, 900];')
 # a bigger proteasome (a quarter up), its fragments leaving from the bottom of the larger core, its labels moved out with it
-c5_page = once(c5_page, 'PK = .225, PMID = 76;', 'PK = .28, PMID = 76;')
-c5_page = once(c5_page, 'PROT.y - 30 - f.dy * ease(t)', 'PROT.y - 44 - f.dy * ease(t)')
-c5_page = once(c5_page, 'const PROT = V3(X.prot - 10, 6, 0)', 'const PROT = V3(X.prot - 22, 6, 0)')   # in from the edge, for the larger cap
-c5_page = once(c5_page, f'class="jl loc" data-x="{X["prot"] - 10 + 66}" data-y="14"', f'class="jl loc" data-x="{X["prot"] - 22 + 76}" data-y="18"')
-c5_page = once(c5_page, 'class="jl loc" data-x="630" data-y="-86"', f'class="jl loc" data-x="{X["prot"] - 22 + 74}" data-y="-78"')   # beside the fragments, clear of the controls
-# the cell's molecules re-placed for v3's larger proteasome and the released degrader (cell_layout_v3.json, measured the same way)
-_cells5 = ''.join(f"  {{ at: 'cell', kind: '{_kinds[i % 3]}', dx: {x - X['complex']}, y: {y}, s: .68, r: {[.5, -.3, -.4, .35, .2, -.5, .45][i % 7]}, hx: 11, ph: {1 + .7 * i:.1f}, win: pn => cellIn(pn) }},\n"
-                  for i, (x, y) in enumerate(json.load(open(D + 'cell_layout_v3.json'))))
-c5_page, n = re.subn(r"(  \{ at: 'cell', kind: [^\n]*\n)+", lambda m: _cells5, c5_page, count=1)
-assert n == 1
+c5_page = big_proteasome(c5_page)   # the larger proteasome, its labels and fragments, and the cell's molecules placed around it
 C5_TEXT = json.load(open(D + 'text/click5.json', encoding='utf8'))
 c5_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C5_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c5_page, count=1, flags=re.S)
 os.makedirs(D + 'click5', exist_ok=True)
