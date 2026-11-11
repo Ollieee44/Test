@@ -41,7 +41,17 @@ def chains(mask):
     for p in sorted(P, key=lambda p: deg[p] == 2):
         for q in nb(p):
             if frozenset((p, q)) not in used: out.append(walk(p, q))
-    return [[to_j(x, y) for y, x in measure.approximate_polygon(np.array(ch, float), 1.0)] for ch in out if len(ch) >= 6]
+    res = []
+    for ch in out:
+        if len(ch) < 6: continue
+        a = np.array(ch, float); closed = len(ch) > 8 and np.hypot(*(a[0] - a[-1])) < 2
+        # even spacing, then a Gaussian average along the line: the pixel steps go, the scallops (about 35 px) stay
+        d = np.r_[0, np.cumsum(np.hypot(*np.diff(a, axis=0).T))]; t = np.arange(0, d[-1], 2.0)
+        a = np.c_[np.interp(t, d, a[:, 0]), np.interp(t, d, a[:, 1])]
+        if len(a) > 8:
+            a = np.c_[ndi.gaussian_filter1d(a[:, 0], 2.6, mode='wrap' if closed else 'nearest'), ndi.gaussian_filter1d(a[:, 1], 2.6, mode='wrap' if closed else 'nearest')]
+        res.append([to_j(x, y) for y, x in measure.approximate_polygon(a, .7)])
+    return res
 navy = chains((np.abs(im - np.array([13, 21, 80])).sum(2) < 120) & inside)
 blue = chains((np.abs(im - np.array([158, 230, 255])).sum(2) < 90) & inside)
 # the mouth (the lips' notch, below the nose) in the same frame

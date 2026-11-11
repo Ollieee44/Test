@@ -625,7 +625,7 @@ c3_plasma = once(c3_plasma, 'xl = x0 - t.gap - w;', 'xl = x0 - t.gap - w + (t.ov
 c3_cell = once(c3_cell, "if (i === 2) k.el.classList.add('dright');", "if (i === 2) k.el.classList.add('dright'); k.ov = [22, 0, 18][i];")
 # the cell's monomers and dimer keep well clear of the ternary complex: all three in the free band above it (nothing else
 # passes there, and drifting with the camera they stay in it to the end)
-c3_cell = once(c3_cell, "{ at: 'cell', kind: 'dimer', dx: -80, y: 70,", "{ at: 'cell', kind: 'dimer', dx: -98, y: 88,")
+c3_cell = once(c3_cell, "{ at: 'cell', kind: 'dimer', dx: -80, y: 70,", "{ at: 'cell', kind: 'dimer', dx: -60, y: 92,")
 c3_cell = once(c3_cell, "{ at: 'cell', kind: 'split', dx: -76, y: -58,", "{ at: 'cell', kind: 'split', dx: -30, y: 104,")
 c3_cell = once(c3_cell, "{ at: 'cell', kind: 'eq', dx: 86, y: 70,", "{ at: 'cell', kind: 'eq', dx: 70, y: 92,")
 c3_cell = once(c3_cell, "const k = tag(t, 'key', at, win, 14);", "const k = tag(t, 'key', at, win, 8);")
