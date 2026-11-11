@@ -1,5 +1,5 @@
 // Oyster slide template v3: the oyster-tx.com feel in the Colors.pdf palette. Depth instead of flat fills: glowing
-// Abyss grounds with a drift of speckles, the brand's textured greens, glass cards, rounded picture frames, soft
+// Abyss grounds with a drift of speckles (kept out from under each layout's text), the brand's textured greens, glass cards, rounded picture frames, soft
 // shadows; a clean sans throughout (Aptos, PowerPoint's own) in place of a serif, with mono labels led by a gold dot.
 //   PPTX_SKILL=<pptx skill dir> NODE_PATH=<dir with pptxgenjs> node build_template.js   (after make_assets.py)
 const pptxgen = require('pptxgenjs');
@@ -58,26 +58,26 @@ const title = color => ph('title', 'title', .6, .34, 12.1, .62, { fontFace: HEAD
 const subtitle = color => ph('subtitle', 'body', .6, .98, 12.1, .36, { fontSize: 15, color, valign: 'top' }, 'Subtitle or one-line takeaway');
 
 // ---------- slide layouts ----------
-pres.defineSlideMaster({ title: 'Oyster Title', background: bg('texture-band.jpg'), objects: [
+pres.defineSlideMaster({ title: 'Oyster Title', background: bg('ground-title.jpg'), objects: [
   { image: { path: A + 'logo-on-dark.png', x: .6, y: .6, w: 2.7, h: 2.7 * LOGO_AR } },
   ph('title', 'title', .6, 2.0, 8.8, 2.7, { fontFace: HEAD, fontSize: 56, color: C.background1, valign: 'bottom', lineSpacingMultiple: .9 }, 'Presentation title'),
   ph('subtitle', 'body', .6, 4.95, 7.6, .8, { fontSize: 20, color: P.seafoam, valign: 'top' }, 'Subtitle or date'),
   dot(.6, 6.66),
   ph('meta', 'body', .82, 6.56, 8, .3, { fontFace: MONO, fontSize: 10, charSpacing: 2.5, color: P.mint, valign: 'middle' }, 'AUDIENCE · PRESENTER · CONFIDENTIAL'),
 ] });
-pres.defineSlideMaster({ title: 'Oyster Contents', background: bg('ground-quiet.jpg'), objects: [
+pres.defineSlideMaster({ title: 'Oyster Contents', background: bg('ground-contents.jpg'), objects: [
   mark(true),
   ph('title', 'title', .6, 1.55, 3.6, 1.0, { fontFace: HEAD, fontSize: 40, color: C.background1, valign: 'top' }, 'Contents'),
   ...footer(true),
 ], slideNumber: num(true) });
-pres.defineSlideMaster({ title: 'Oyster Section', background: bg('texture-corner.jpg'), objects: [
+pres.defineSlideMaster({ title: 'Oyster Section', background: bg('ground-section.jpg'), objects: [
   mark(true),
   ph('number', 'body', 7.6, .35, 5.2, 3.1, { fontFace: HEAD, fontSize: 200, color: P.kelp2, align: 'right', valign: 'top' }, '01'),
   ph('title', 'title', .6, 3.75, 11.0, 1.4, { fontFace: HEAD, fontSize: 50, color: C.background1, valign: 'bottom' }, 'Section title'),
   ph('intro', 'body', .6, 5.2, 8.4, .9, { fontSize: 18, color: P.seafoam, valign: 'top' }, 'One or two lines on what this section covers'),
   ...footer(true),
 ], slideNumber: num(true) });
-pres.defineSlideMaster({ title: 'Oyster Statement', background: bg('ground-quiet.jpg'), objects: [
+pres.defineSlideMaster({ title: 'Oyster Statement', background: bg('ground-statement.jpg'), objects: [
   mark(true),
   ...label(true, .6, 1.55),
   ph('title', 'title', .6, 2.05, 11.6, 3.3, { fontFace: HEAD, fontSize: 44, color: C.background1, valign: 'top', lineSpacingMultiple: .96 }, 'A single, large statement'),
@@ -118,7 +118,7 @@ pres.defineSlideMaster({ title: 'Oyster Divided', background: bg('ground-light.j
   rrect(12.13, 6.92, .6, .34, { r: .17, fill: { color: P.abyss, transparency: 93 }, line: { type: 'none' } }),
 ], slideNumber: num(false) });
 const cardX = i => .6 + i * 4.11;
-pres.defineSlideMaster({ title: 'Oyster Three Cards', background: bg('ground-deep.jpg'), objects: [
+pres.defineSlideMaster({ title: 'Oyster Three Cards', background: bg('ground-cards.jpg'), objects: [
   ...label(true, .6, .6),
   ph('title', 'title', .6, 1.05, 12.1, .8, { fontFace: HEAD, fontSize: 34, color: C.background1, valign: 'top' }, 'Slide title'),
   ...[0, 1, 2].flatMap(i => [
@@ -136,7 +136,7 @@ pres.defineSlideMaster({ title: 'Oyster Image', background: { color: P.abyss }, 
   ph('label', 'body', 1.17, 5.1, 5.5, .3, { fontFace: MONO, fontSize: 11, charSpacing: 2.5, color: P.mint, valign: 'middle' }, 'LABEL'),
   ph('caption', 'body', .95, 5.55, 5.8, 1.0, { fontFace: HEAD, fontSize: 24, color: C.background1, valign: 'top' }, 'Caption'),
 ] });
-pres.defineSlideMaster({ title: 'Oyster Closing', background: bg('texture-band.jpg'), objects: [
+pres.defineSlideMaster({ title: 'Oyster Closing', background: bg('ground-closing.jpg'), objects: [
   { image: { path: A + 'logo-on-dark.png', x: 4.37, y: 1.6, w: 4.6, h: 4.6 * LOGO_AR } },
   ph('title', 'title', 1.2, 3.25, 10.93, 1.3, { fontFace: HEAD, fontSize: 40, color: C.background1, align: 'center', valign: 'top' }, 'Closing line'),
   ph('contact', 'body', 2.4, 4.8, 8.53, .9, { fontSize: 16, color: P.seafoam, align: 'center', valign: 'top' }, 'Contact details'),
