@@ -540,7 +540,7 @@ for txt in ['In the gut', 'Cell membrane &middot; blood-brain barrier', 'Target 
     c3_story, n = re.subn(r'<span class="jl ([^"]*)"([^>]*)>' + re.escape(txt) + '</span>', lambda m: f'<span class="jl loc"{m.group(2)}>{txt}</span>', c3_story, count=1)
     assert n == 1, txt
 c3_story = once(c3_story, f'data-x="{X["mem"] + 4}" data-y="-50"', f'data-x="{X["mem"] + 4}" data-y="63"')   # above the vessel (its wall at 50), at the top
-c3_story = once(c3_story, f'data-x="{X["mem"] + 70}" data-y="52"', f'data-x="{X["mem"] + 66}" data-y="34"')   # Target cell: inside, below the membrane's label
+c3_story = once(c3_story, f'data-x="{X["mem"] + 70}" data-y="52"', f'data-x="{X["mem"] + 88}" data-y="46"')   # Target cell: a fixed spot, above the monomers' way in   # Target cell: inside, below the membrane's label
 # once the target is degraded only 'Degradation' stays: the proteasome's label hands over to it
 c3_story = once(c3_story, 'data-a="0.84" data-b="0.99">Proteasome', 'data-a="0.84" data-b="0.925">Proteasome')
 # the vessel: narrower, its wall drawn in layers (tissue, endothelium, outer edge), flattened nuclei along the lining, and a
@@ -595,6 +595,15 @@ c3_cell = c3_cell.replace("win: pn => cellIn(pn) * clamp((.845 - pn) / .02, 0, 1
 c3_cell = once(c3_cell, "const ox = c.at === 'cell' ? X.complex : h0.x", "const ox = c.at === 'cell' ? X.complex + .8 * Math.max(0, CAMX(WARP(pn)) - CAMX(WARP(.79))) : h0.x")
 # the ubiquitin label sits left of the chain, so its dot goes on its right, next to the chain
 c3_cell = once(c3_cell, "k.el.style.setProperty('--dot', col);", "k.el.style.setProperty('--dot', col); if (i === 2) k.el.classList.add('dright');")
+# the target's and ubiquitin's labels tuck in against their protein, as the E3 ligase's does (it sits over its partners' edge)
+c3_plasma = once(c3_plasma, 'xr = Math.min(x1 + t.gap, stage.clientWidth - hw2)', 'xr = Math.min(x1 + t.gap - (t.ov || 0) * (stage.clientWidth < 760 ? .6 : 1), stage.clientWidth - hw2)')
+c3_plasma = once(c3_plasma, 'xl = x0 - t.gap - w;', 'xl = x0 - t.gap - w + (t.ov || 0) * (stage.clientWidth < 760 ? .6 : 1);')
+c3_cell = once(c3_cell, "if (i === 2) k.el.classList.add('dright');", "if (i === 2) k.el.classList.add('dright'); k.ov = [22, 0, 18][i];")
+# the cell's monomers and dimer keep well clear of the ternary complex: all three in the free band above it (nothing else
+# passes there, and drifting with the camera they stay in it to the end)
+c3_cell = once(c3_cell, "{ at: 'cell', kind: 'dimer', dx: -80, y: 70,", "{ at: 'cell', kind: 'dimer', dx: -98, y: 88,")
+c3_cell = once(c3_cell, "{ at: 'cell', kind: 'split', dx: -76, y: -58,", "{ at: 'cell', kind: 'split', dx: -30, y: 104,")
+c3_cell = once(c3_cell, "{ at: 'cell', kind: 'eq', dx: 86, y: 70,", "{ at: 'cell', kind: 'eq', dx: 70, y: 92,")
 c3_cell = once(c3_cell, "const k = tag(t, 'key', at, win, 14);", "const k = tag(t, 'key', at, win, 8);")
 c3_cell = once(c3_cell, "pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)", "winOf(.715, .905)")   # the E3 ligase's label goes as the target is degraded
 c3_cell = once(c3_cell, "const w = clamp(Math.min((pn - .405) / .03, (.525 - pn) / .03), 0, 1);", "const w = clamp(Math.min((pn - .405) / .03, (.5 - pn) / .025), 0, 1);")   # rob.js joins them up after

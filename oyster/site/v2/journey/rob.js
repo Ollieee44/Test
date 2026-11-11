@@ -59,7 +59,8 @@ function declutter(pn) {
     const s0 = stage.getBoundingClientRect(); obs.push({ left: x0 + s0.left, right: x1 + s0.left, top: y0 + s0.top, bottom: y1 + s0.top }); });
   const rs = [...document.querySelectorAll('.jl')].filter(e => e.style.display !== 'none' && +e.style.opacity > .05)
     .map(e => ({ e, r: e.getBoundingClientRect() }));
-  rs.forEach(o => { const b = o.r; let dy = 0;
+  rs.forEach(o => { if (o.e.classList.contains('loc')) return;   // place labels keep their places (no jitter)
+    const b = o.r; let dy = 0;
     obs.forEach(a => { if (b.left < a.right + 4 && b.right > a.left - 4 && b.top + dy < a.bottom + 4 && b.bottom + dy > a.top - 4) {
       const up = a.top - 4 - b.bottom, down = a.bottom + 4 - b.top; dy = Math.abs(up) < Math.abs(down) ? up : down; } });
     if (dy) { o.e.style.transform += ` translate(0, ${dy.toFixed(1)}px)`; o.r = { left: b.left, right: b.right, top: b.top + dy, bottom: b.bottom + dy }; } });
