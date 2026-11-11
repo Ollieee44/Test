@@ -11,7 +11,7 @@ once = lambda s, a, b: (s.count(a) == 1 or (_ for _ in ()).throw(AssertionError(
 src = once(src, "page = open(D + '../click3/index.html', encoding='utf8').read()", "page = open(D + '../click5/index.html', encoding='utf8').read()")
 src = once(src, '''pal = re.search(r"PAL\\.otx = \\{ \\.\\.\\.PAL\\.tidepool, (.*?) \\};", page).group(1)''',
            '''pal = re.search(r"PAL\\.otx = \\{ \\.\\.\\.PAL\\.tidepool, (.*?) \\};", page).group(1) + ', ' + re.search(r"PAL\\.otx = \\{ \\.\\.\\.PAL\\.otx, (.*?) \\};", page).group(1)''')
-src = once(src, "DATA = open(D + 'reps_data.json').read()", "DATA = json.dumps({**json.load(open(D + 'reps_data.json')), 'atoms': json.load(open(D + 'reps_atoms.json'))})")
+src = once(src, "DATA = open(D + 'reps_data.json').read()", "DATA = json.dumps({**json.load(open(D + 'reps_data.json')), 'atoms': json.load(open(D + 'reps_atoms.json')), 'mesh': json.load(open(D + 'reps_mesh.json'))})")
 
 src = once(src, src[src.index('OPTIONS = ['):src.index(']\ntiles')], '''OPTIONS = [
     ('spacefill', 'Space-filling', 'Every heavy atom as a sphere at its van der Waals size, all in the half’s colour: a real molecule’s bulk, without element colours.'),
@@ -23,6 +23,9 @@ src = once(src, src[src.index('OPTIONS = ['):src.index(']\ntiles')], '''OPTIONS 
     ('graduated', 'Graduated pearls', 'Pearls on the atoms, growing from the linker outward: the halves bloom from the clasp.'),
     ('nacre', 'Nacre pearls', 'The pearl cluster with a pearlescent sheen that shifts through the palette as it turns.'),
     ('shell', 'Pearls in a shell', 'Ring pearls inside a faint, glassy outline of the half: structure and shape together.'),
+    ('glass', 'Glass shell', 'A translucent surface round each half, brighter at its edges like glass, with today’s ring drawing inside.'),
+    ('wire', 'Wire mesh', 'The half’s surface as a low-poly mesh of fine lines over a faint fill: technical and light.'),
+    ('glassatoms', 'Glass atoms', 'Space-filling, but every atom a translucent glass bead: the molecule’s bulk without its weight.'),
 ''')
 src = once(src, "<h1>Six ways to draw the SELFTAC.</h1>", "<h1>More ways to draw the SELFTAC.</h1>")
 src = once(src, "<span class=\"k\">SELFTAC&reg; degrader &middot; representation options</span>", "<span class=\"k\">SELFTAC&reg; degrader &middot; representations, round 2</span>")
@@ -59,7 +62,19 @@ const cyl = new THREE.CylinderGeometry(1, 1, 1, 14);
 const stick = (col, p, q, r) => {{ const a = V(p), b = V(q), m = new THREE.Mesh(cyl, shade(col, .2)); m.position.copy(a).add(b).multiplyScalar(.5);
   m.scale.set(r, a.distanceTo(b), r); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); return m; }};
 '''
-src = once(src, "const BUILD = {{\n", NEW + "const BUILD = {{\n")
+GLASS = r'''
+// glass: a translucent fresnel surface, faint face-on and bright at the silhouette, drawn after what it encloses
+const GFS = `uniform vec3 col; uniform float base; varying vec3 vN; varying vec3 vV; varying vec3 vP;
+  void main() {{ vec3 n = normalize(vN), v = normalize(vV); if (!gl_FrontFacing) n = -n; float f = pow(1.0 - abs(dot(n, v)), 2.2);
+    float spec = pow(max(dot(n, normalize(normalize(vec3(-.35, .75, .55)) + v)), 0.0), 50.0);
+    gl_FragColor = vec4(mix(col, vec3(1.0), f * .45 + spec * .8), base + .75 * f + spec * .6);
+    #include <colorspace_fragment>
+  }}`;
+const glassMat = (col, base = .08) => new THREE.ShaderMaterial({{ vertexShader: VS, fragmentShader: GFS, transparent: true, depthWrite: false,
+  uniforms: {{ col: {{ value: new THREE.Color(col) }}, base: {{ value: base }} }} }});
+const addTo = (h, o, order = 3) => {{ o.renderOrder = order; h.mesh.add(o); return o; }};
+'''
+src = once(src, "const BUILD = {{\n", NEW + GLASS + "const BUILD = {{\n")
 b0 = src.index("const BUILD = {{\n") + len("const BUILD = {{\n"); b1 = src.index("}};\n// one scene per tile")
 src = src[:b0] + r'''  spacefill: mol => mol.heads.forEach((h, i) => swapHead(h.mesh, KEYS[i], k => heavy(k).map(j => ball(P[k], .35, A_(k).xyz[j], VDW[A_(k).el[j]] * .92)))),
   spacefill_h: mol => mol.heads.forEach((h, i) => swapHead(h.mesh, KEYS[i], k => A_(k).el.map((e, j) => ball(e === 'H' ? tint(P[k], .55) : P[k], .35, A_(k).xyz[j], VDW[e] * .92)))),
@@ -74,6 +89,12 @@ src = src[:b0] + r'''  spacefill: mol => mol.heads.forEach((h, i) => swapHead(h.
   nacre: mol => mol.heads.forEach((h, i) => swapHead(h.mesh, KEYS[i], k => DATA.reps[k].pearls.map(c => {{ const s = new THREE.Mesh(sphere, nacre(P[k])); s.position.set(...c); s.scale.setScalar(1.55); return s; }}))),
   shell: mol => mol.heads.forEach((h, i) => {{ swapHead(h.mesh, KEYS[i], ringPearls); const k = KEYS[i], g = geom(DATA.reps[k].surface);
     const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({{ color: tint(P[k], .2), transparent: true, opacity: .16, depthWrite: false }})); m.renderOrder = 3; h.mesh.add(m); }}),
+  glass: mol => mol.heads.forEach((h, i) => addTo(h, new THREE.Mesh(geom(DATA.mesh[KEYS[i]].smooth), glassMat(tint(P[KEYS[i]], .15))))),
+  wire: mol => mol.heads.forEach((h, i) => {{ const k = KEYS[i], g = geom(DATA.mesh[k].coarse); h.mesh.material.visible = false; h.mesh.children[0].visible = false;
+    addTo(h, new THREE.Mesh(g, new THREE.MeshBasicMaterial({{ color: P[k], transparent: true, opacity: .14, depthWrite: false }})), 2);
+    addTo(h, new THREE.LineSegments(new THREE.WireframeGeometry(g), new THREE.LineBasicMaterial({{ color: tint(P[k], .25), transparent: true, opacity: .85 }}))); }}),
+  glassatoms: mol => mol.heads.forEach((h, i) => {{ const k = KEYS[i], a = A_(k); h.mesh.material.visible = false; h.mesh.children[0].visible = false;
+    heavy(k).forEach(j => {{ const s = new THREE.Mesh(sphere, glassMat(tint(P[k], .1), .14)); s.position.set(...a.xyz[j]); s.scale.setScalar(VDW[a.el[j]] * .92); addTo(h, s); }}); }}),
 ''' + src[b1:]
 # a little closer than round 1, so the atoms read
 src = once(src, 'cam.position.set(0, 0, 88);', 'cam.position.set(0, 0, 70);')
