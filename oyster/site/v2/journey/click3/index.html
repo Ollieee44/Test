@@ -878,9 +878,13 @@ const POP = [
   { at: 'blood', kind: 'split', dx: -34, y: -26, s: .72, r: -.25, hx: 22, ph: 2.4, win: blWin },
   { at: 'blood', kind: 'eq', dx: -66, y: 28, s: .74, r: -.35, ph: .6, win: blWin },
   // the cell: around the complex; the ones left of it leave before the camera pans to the proteasome
-  { at: 'cell', kind: 'dimer', dx: -60, y: 92, s: .7, r: .55, ph: 1, win: pn => cellIn(pn) },
-  { at: 'cell', kind: 'split', dx: -30, y: 104, s: .68, r: -.3, hx: 24, ph: 2, win: pn => cellIn(pn) },
-  { at: 'cell', kind: 'eq', dx: 70, y: 92, s: .68, r: -.45, ph: 1.7, win: pn => cellIn(pn) },
+  { at: 'cell', kind: 'dimer', dx: -86, y: 92, s: .68, r: 0.5, hx: 11, ph: 1.0, win: pn => cellIn(pn) },
+  { at: 'cell', kind: 'split', dx: 34, y: 116, s: .68, r: -0.3, hx: 11, ph: 1.7, win: pn => cellIn(pn) },
+  { at: 'cell', kind: 'eq', dx: 82, y: 86, s: .68, r: -0.4, hx: 11, ph: 2.4, win: pn => cellIn(pn) },
+  { at: 'cell', kind: 'dimer', dx: 112, y: 128, s: .68, r: 0.35, hx: 11, ph: 3.1, win: pn => cellIn(pn) },
+  { at: 'cell', kind: 'split', dx: 166, y: 122, s: .68, r: 0.2, hx: 11, ph: 3.8, win: pn => cellIn(pn) },
+  { at: 'cell', kind: 'eq', dx: 208, y: 80, s: .68, r: -0.5, hx: 11, ph: 4.5, win: pn => cellIn(pn) },
+  { at: 'cell', kind: 'dimer', dx: 232, y: -28, s: .68, r: 0.45, hx: 11, ph: 5.2, win: pn => cellIn(pn) },
 ].map(c => ({ ...c, ...extra() }));
 POP.forEach(c => { c.tags = []; });
 [].forEach(c => { const d0 = c.at === 'cell' ? 1000 : 900, d = d0 + { dimer: 0, split: 450, eq: 900 }[c.kind];   // after the focal labels
@@ -918,12 +922,12 @@ frame = function (p0) {
   const t = (performance.now() - T0) / 1000, h0 = cg.localToWorld(V3(0, 0, 0));
   POP.forEach(c => { const cIn = c.win(pn);
     c.g.visible = cIn > .01; if (!c.g.visible) return;
-    const ox = c.at === 'cell' ? X.complex + .8 * Math.max(0, CAMX(WARP(pn)) - CAMX(WARP(.79))) : h0.x, oy = c.at === 'cell' ? 0 : h0.y;
+    const ox = c.at === 'cell' ? X.complex : h0.x, oy = c.at === 'cell' ? 0 : h0.y;
     c.g.position.set(ox + c.dx + 3 * Math.sin(t * .7 + c.ph), oy + c.y + 4 * Math.sin(t * .55 + c.ph * 2), 0);
     c.g.scale.setScalar(SC * c.s * cIn); c.g.rotation.z = c.r + .12 * Math.sin(t * .4 + c.ph);
     if (c.kind === 'dimer') { if (!c.built) { c.m.update(V3(-7, 0, 0), V3(7, 0, 0), I, I, 1); c.built = true; } }
     else if (c.kind === 'split') c.m.update(V3(-c.hx, 0, 0), V3(c.hx, 0, 0), qE(.25 * Math.sin(t + c.ph), .35 * Math.sin(t * .8 + c.ph)), qE(-.25 * Math.sin(t * .9 + c.ph), .3 * Math.cos(t * .7 + c.ph)), 0);
-    else { const e = eqWave(7.8, c.ph), hx = 22 - 15 * e, f = 1 - e;
+    else { const e = eqWave(7.8, c.ph), hx = 13 - 6 * e, f = 1 - e;
       c.m.update(V3(-hx, 0, 0), V3(hx, 0, 0), qE(f * .25 * Math.sin(t + c.ph), f * .35 * Math.sin(t * .8 + c.ph)), qE(f * -.25 * Math.sin(t * .9), f * .3 * Math.cos(t * .7)), e);
       const st = e > .5 ? 'Dimer' : 'Monomers'; if (c.tags[0] && c.tags[0].el.textContent !== st) c.tags[0].el.textContent = st; }
   });

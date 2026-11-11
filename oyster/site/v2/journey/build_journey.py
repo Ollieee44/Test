@@ -619,7 +619,6 @@ c3_plasma = once(c3_plasma, 'const box = new THREE.Box3().setFromObject(t.at());
 c3_cell = open(D + 'cell.js').read()
 # the cell's monomers and dimer stay to the end, drifting along with the camera as it follows the target, so they stay in view
 c3_cell = c3_cell.replace("win: pn => cellIn(pn) * clamp((.845 - pn) / .02, 0, 1)", "win: pn => cellIn(pn)").replace("win: pn => cellIn(pn) * clamp((.9 - pn) / .02, 0, 1)", "win: pn => cellIn(pn)")
-c3_cell = once(c3_cell, "const ox = c.at === 'cell' ? X.complex : h0.x", "const ox = c.at === 'cell' ? X.complex + .8 * Math.max(0, CAMX(WARP(pn)) - CAMX(WARP(.79))) : h0.x")
 # the ubiquitin label sits left of the chain, so its dot goes on its right, next to the chain
 c3_cell = once(c3_cell, "k.el.style.setProperty('--dot', col);", "k.el.style.setProperty('--dot', col); if (i === 2) k.el.classList.add('dright');")
 # the target's and ubiquitin's labels tuck in against their protein, as the E3 ligase's does (it sits over its partners' edge)
@@ -658,6 +657,16 @@ c3_js = once(c3_js, '[[.735, 0], [.78, 1], [.86, 1], [.9, 0]]', '[[.735, 0], [.7
 c3_cell = once(c3_cell, "() => P.brd4, winOf(.715, .892, .015)", "() => P.brd4, winOf(.715, .872, .006)")
 c3_cell = once(c3_cell, "winOf(.848, .892, .015)", "winOf(.848, .872, .006)")
 c3_js = once(c3_js, 'px = 74 + (19 - 74) * pp; py = 64 + (44.4 - 64) * pp - 10 * Math.sin(Math.PI * pp); rot = -18 + 18 * pp;', f'px = -50 + ({mx} + 50) * pp; py = 64 + ({-my} - 64) * pp - 10 * Math.sin(Math.PI * pp); rot = 18 - 18 * pp;')   # in from the left, into the traced mouth (the figure faces left)
+# the cell's monomers and dimers: fixed in the cell (the camera pans past them, and others come into view), at spots chosen by
+# measurement (cell_layout.json: sampled from the complex forming to degradation at desktop and phone sizes, clear of the
+# membrane, the complex, the target's way into the proteasome, the proteasome and its fragments, every label, the copy and
+# the controls, and of each other)
+_kinds = ['dimer', 'split', 'eq']
+_cells = ''.join(f"  {{ at: 'cell', kind: '{_kinds[i % 3]}', dx: {x - X['complex']}, y: {y}, s: .68, r: {[.5, -.3, -.4, .35, .2, -.5, .45][i % 7]}, hx: 11, ph: {1 + .7 * i:.1f}, win: pn => cellIn(pn) }},\n"
+                 for i, (x, y) in enumerate(json.load(open(D + 'cell_layout.json'))))
+c3_cell, n = re.subn(r"(  \{ at: 'cell', kind: [^\n]*\n)+", lambda m: _cells, c3_cell, count=1)
+assert n == 1
+c3_cell = once(c3_cell, 'const e = eqWave(7.8, c.ph), hx = 22 - 15 * e', 'const e = eqWave(7.8, c.ph), hx = 13 - 6 * e')   # the cycling pair stays compact
 c3_click = c2_click
 c3_click = once(c3_click, 'const STOPS = [0, .145, .25, .335, .45, .612, .665, .79, .865, .92, .998];', 'const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];')
 c3_click = once(c3_click, 'const BEAT_STOP = [0, 2, 4, 5, 7, 8];', 'const BEAT_STOP = [0, 1, 3, 4, 6, 7];')
