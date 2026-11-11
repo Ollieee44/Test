@@ -760,6 +760,17 @@ c5_page = once(c5_page, open(D + 'rob.js').read(), open(D + 'rob.js').read() + '
 # autoplay a quarter quicker, with shorter holds where an equilibrium plays; clicks unchanged
 c5_page = once(c5_page, 'Math.max(2300, Math.min(4800, 1900 + d * 12000))', 'Math.max(1700, Math.min(3600, 1400 + d * 9000))')
 c5_page = once(c5_page, 'const HOLD = [300, 550, 300, 2400, 900, 550, 2200, 450, 400];', 'const HOLD = [250, 450, 250, 1700, 700, 450, 1600, 350, 900];')
+# a bigger proteasome (a quarter up), its fragments leaving from the bottom of the larger core, its labels moved out with it
+c5_page = once(c5_page, 'PK = .225, PMID = 76;', 'PK = .28, PMID = 76;')
+c5_page = once(c5_page, 'PROT.y - 30 - f.dy * ease(t)', 'PROT.y - 44 - f.dy * ease(t)')
+c5_page = once(c5_page, 'const PROT = V3(X.prot - 10, 6, 0)', 'const PROT = V3(X.prot - 22, 6, 0)')   # in from the edge, for the larger cap
+c5_page = once(c5_page, f'class="jl loc" data-x="{X["prot"] - 10 + 66}" data-y="14"', f'class="jl loc" data-x="{X["prot"] - 22 + 76}" data-y="18"')
+c5_page = once(c5_page, 'class="jl loc" data-x="630" data-y="-86"', f'class="jl loc" data-x="{X["prot"] - 22 + 74}" data-y="-78"')   # beside the fragments, clear of the controls
+# the cell's molecules re-placed for v3's larger proteasome and the released degrader (cell_layout_v3.json, measured the same way)
+_cells5 = ''.join(f"  {{ at: 'cell', kind: '{_kinds[i % 3]}', dx: {x - X['complex']}, y: {y}, s: .68, r: {[.5, -.3, -.4, .35, .2, -.5, .45][i % 7]}, hx: 11, ph: {1 + .7 * i:.1f}, win: pn => cellIn(pn) }},\n"
+                  for i, (x, y) in enumerate(json.load(open(D + 'cell_layout_v3.json'))))
+c5_page, n = re.subn(r"(  \{ at: 'cell', kind: [^\n]*\n)+", lambda m: _cells5, c5_page, count=1)
+assert n == 1
 C5_TEXT = json.load(open(D + 'text/click5.json', encoding='utf8'))
 c5_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C5_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c5_page, count=1, flags=re.S)
 os.makedirs(D + 'click5', exist_ok=True)
