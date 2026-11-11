@@ -30,15 +30,17 @@ pres.author = 'Oyster Therapeutics';
 pres.company = 'Oyster Therapeutics';
 pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
 const C = pres.SchemeColor;
-const LOGO_AR = ar('logo-white.png'), MARK_AR = ar('mark-white.png');
+const LOGO_AR = ar('logo-on-dark.png'), MARK_AR = ar('mark-white.png');
 
 // ---------- shared pieces ----------
 const ph = (name, type, x, y, w, h, opts, prompt) => ({ placeholder: { options: { name, type, x, y, w, h, margin: 0, ...(type === 'title' ? { align: 'left' } : {}), ...opts }, text: prompt } });
 // the brand guide's gradient edge down the left of every content page
 const edge = { image: { path: A + 'edge.png', x: 0, y: 0, w: .13, h: 7.5 } };
-const mark = (dark, x = .6, y = .5, h = .3) => ({ image: { path: A + (dark ? 'mark-white.png' : 'mark-abyss.png'), x, y, w: h / MARK_AR, h } });
+// the mark at the top of a page in colour; the small one in the footer in one colour
+const mark = (dark, x = .6, y = .45, h = .42) => ({ image: { path: A + (dark ? 'mark-on-dark.png' : 'mark-on-light.png'), x, y, w: h / MARK_AR, h } });
+const monoMark = (dark, x, y, h) => ({ image: { path: A + (dark ? 'mark-white.png' : 'mark-black.png'), x, y, w: h / MARK_AR, h } });
 const footer = dark => [
-  mark(dark, .6, 7.0, .2),
+  monoMark(dark, .6, 6.99, .22),
   { text: { text: 'OYSTER THERAPEUTICS', options: { x: .9, y: 6.98, w: 4, h: .24, fontFace: MONO, fontSize: 8, charSpacing: 2, color: dark ? P.mint : P.forest, margin: 0, valign: 'middle' } } },
 ];
 const num = (dark, x = 12.13) => ({ x, y: 6.98, w: .6, h: .24, fontFace: MONO, fontSize: 8, color: dark ? P.mint : P.forest, align: 'right' });
@@ -47,10 +49,10 @@ const title = color => ph('title', 'title', .6, .34, 12.1, .62, { fontFace: HEAD
 const subtitle = color => ph('subtitle', 'body', .6, .98, 12.1, .36, { fontSize: 14, color, valign: 'top' }, 'Subtitle or one-line takeaway');
 
 // ---------- slide layouts ----------
-pres.defineSlideMaster({ title: 'Oyster Title', background: { path: A + 'complex-title.png' }, objects: [
-  { image: { path: A + 'logo-white.png', x: .6, y: .6, w: 2.3, h: 2.3 * LOGO_AR } },
+pres.defineSlideMaster({ title: 'Oyster Title', background: { path: A + 'texture-band.jpg' }, objects: [
+  { image: { path: A + 'logo-on-dark.png', x: .6, y: .6, w: 2.6, h: 2.6 * LOGO_AR } },
   ph('title', 'title', .6, 2.2, 7.4, 2.3, { fontFace: HEAD, fontSize: 48, color: C.background1, valign: 'bottom', lineSpacingMultiple: .95 }, 'Presentation title'),
-  ph('subtitle', 'body', .6, 4.75, 7.2, .9, { fontSize: 20, color: P.gold, valign: 'top' }, 'Subtitle or date'),
+  ph('subtitle', 'body', .6, 4.75, 7.2, .9, { fontSize: 20, color: P.seafoam, valign: 'top' }, 'Subtitle or date'),
   ph('meta', 'body', .6, 6.75, 8, .3, { fontFace: MONO, fontSize: 10, charSpacing: 2, color: P.mint, valign: 'middle' }, 'AUDIENCE · PRESENTER · CONFIDENTIAL'),
 ] });
 pres.defineSlideMaster({ title: 'Oyster Contents', background: { color: P.abyss }, objects: [
@@ -58,11 +60,11 @@ pres.defineSlideMaster({ title: 'Oyster Contents', background: { color: P.abyss 
   ph('title', 'title', .6, 1.25, 6, .45, { fontSize: 16, color: P.sage, valign: 'bottom' }, 'Contents:'),
   ...footer(true),
 ], slideNumber: num(true) });
-pres.defineSlideMaster({ title: 'Oyster Section', background: { color: P.abyss }, objects: [
+pres.defineSlideMaster({ title: 'Oyster Section', background: { path: A + 'texture-corner.jpg' }, objects: [
   mark(true),
-  ph('number', 'body', .6, 2.45, 3, .5, { fontFace: MONO, fontSize: 20, color: P.kelp2, valign: 'bottom' }, '01'),
+  ph('number', 'body', .6, 2.45, 3, .5, { fontFace: MONO, fontSize: 20, color: P.mint, valign: 'bottom' }, '01'),
   ph('title', 'title', .6, 3.05, 11.5, 1.4, { fontFace: HEAD, fontSize: 44, color: C.background1, valign: 'top' }, 'Section title'),
-  ph('intro', 'body', .6, 4.6, 8.4, 1.0, { fontSize: 16, color: P.mint, valign: 'top' }, 'One or two lines on what this section covers'),
+  ph('intro', 'body', .6, 4.6, 8.4, 1.0, { fontSize: 16, color: P.seafoam, valign: 'top' }, 'One or two lines on what this section covers'),
   ...footer(true),
 ], slideNumber: num(true) });
 pres.defineSlideMaster({ title: 'Oyster Statement', background: { color: P.abyss }, objects: [
@@ -108,8 +110,8 @@ pres.defineSlideMaster({ title: 'Oyster Image', background: { color: P.abyss }, 
   ph('label', 'body', .9, 5.2, 5.8, .3, { fontFace: MONO, fontSize: 11, charSpacing: 2, color: P.gold, valign: 'middle' }, 'LABEL'),
   ph('caption', 'body', .9, 5.6, 5.8, 1.0, { fontFace: HEAD, fontSize: 22, color: C.background1, valign: 'top' }, 'Caption'),
 ] });
-pres.defineSlideMaster({ title: 'Oyster Closing', background: { color: P.abyss }, objects: [
-  { image: { path: A + 'logo-white.png', x: 4.77, y: 1.85, w: 3.8, h: 3.8 * LOGO_AR } },
+pres.defineSlideMaster({ title: 'Oyster Closing', background: { path: A + 'texture-band.jpg' }, objects: [
+  { image: { path: A + 'logo-on-dark.png', x: 4.67, y: 1.75, w: 4.0, h: 4.0 * LOGO_AR } },
   ph('title', 'title', 1.4, 3.35, 10.53, 1.2, { fontFace: HEAD, fontSize: 32, color: C.background1, align: 'center', valign: 'top' }, 'Closing line'),
   ph('contact', 'body', 2.4, 4.75, 8.53, .9, { fontSize: 14, color: P.mint, align: 'center', valign: 'top' }, 'Contact details'),
 ] });
@@ -132,7 +134,7 @@ let s = add('Oyster Title', 'Opening');
 T(s, 'title', 'Targeted protein degradation beyond conventional limits');
 T(s, 'subtitle', 'Company overview · 2026');
 T(s, 'meta', 'OYSTER THERAPEUTICS · CONFIDENTIAL');
-s.addNotes('Title layout. The background is the SELFTAC ternary complex from the journey animation on the Abyss Green ground.');
+s.addNotes('Title layout, on the brand\'s textured green.');
 s = add('Oyster Contents', 'Opening');
 T(s, 'title', 'Contents:');
 contentsRows(s, ['The idea', 'The problem', `Our solution: the ${SELFTAC} platform`, 'Pipeline', 'Team'], 0);
@@ -215,7 +217,7 @@ s = add('Oyster Image', 'Close');
 s.addImage({ placeholder: 'picture', path: A + 'complex-hero.png', w: 13.333, h: 7.5, altText: 'The SELFTAC ternary complex on the Abyss Green ground' });
 T(s, 'label', `${SELFTAC} · TERNARY COMPLEX`); T(s, 'caption', 'One molecule holds the target to the ligase.');
 s = add('Oyster Closing', 'Close');
-T(s, 'title', [{ text: 'Targeted protein degradation ', options: {} }, { text: 'beyond conventional limits.', options: { color: P.gold } }]);
+T(s, 'title', [{ text: 'Targeted protein degradation ', options: {} }, { text: 'beyond conventional limits.', options: { color: P.mint } }]);
 T(s, 'contact', 'info@oystertx.com  ·  London, United Kingdom  ·  oyster-tx.com');
 
 (async () => {

@@ -21,19 +21,33 @@ for y in range(H):
     for x in range(16): bar.putpixel((x, y), col)
 bar.save(A + 'edge.png', optimize=True)
 
-# the logo and its mark, recoloured
-logo = Image.open(OLD + 'logo-white.png').convert('RGBA')
-mark = logo.crop((0, 0, int(logo.width * .27), logo.height)); mark = mark.crop(mark.getbbox())
-def tint(im, hx):
-    out = Image.new('RGBA', im.size, hexrgb(hx) + (255,)); out.putalpha(im.getchannel('A')); return out
-for name, im in [('logo', logo), ('mark', mark)]:
-    tint(im, '#FFFFFF').save(A + name + '-white.png'); tint(im, '#1A372A').save(A + name + '-abyss.png')
+# the logo, from the brand's own SVGs (src/logo): the colour versions for the title and closing pages and the mark
+# at the top of a page, the one-colour versions for the small mark in the footer. Each goes in as SVG with a PNG copy
+# for older PowerPoint (finish_template.py pairs them). The mark is the logo's first 134 units, its paths left of x 140.
+import re, cairosvg
+for f in os.listdir(A):
+    if f.startswith(('logo-', 'mark-')): os.remove(A + f)
+def mark_only(svg):
+    keep = [m.group(0) for m in re.finditer(r'<path d="M([\d.]+)[^>]*/>', svg) if float(m.group(1)) < 140]
+    defs = re.search(r'<defs>.*</defs>', svg, re.S)
+    return ('<svg width="134" height="134" viewBox="0 0 134 134" fill="none" xmlns="http://www.w3.org/2000/svg">\n' + '\n'.join(keep)
+            + ('\n' + defs.group(0) if defs else '') + '\n</svg>\n')
+for src, name in [('white-color', 'logo-on-dark'), ('black-color', 'logo-on-light')]:
+    svg = open(D + 'src/logo/' + src + '.svg').read()
+    open(A + name + '.svg', 'w').write(svg)
+    open(A + name.replace('logo', 'mark') + '.svg', 'w').write(mark_only(svg))
+for src in ('white', 'black'):
+    open(A + 'mark-' + src + '.svg', 'w').write(mark_only(open(D + 'src/logo/' + src + '.svg').read()))
+for f in sorted(os.listdir(A)):
+    if f.endswith('.svg'): cairosvg.svg2png(url=A + f, write_to=A + f[:-4] + '.png', output_width=2400 if f.startswith('logo') else 700)
+
+# the brand's textured greens, for the title, section and closing pages
+for n in ('band', 'corner'):
+    Image.open(D + 'src/texture-' + n + '.webp').convert('RGB').save(A + 'texture-' + n + '.jpg', quality=92)
 
 # the complex: full-bleed (16:9, already on the dark ground) and a portrait panel cropped round it
 still = Image.open(D + 'src/complex-still.png').convert('RGB')
 still.save(A + 'complex-hero.png', optimize=True)
-# the title page's ground: the complex moved right, clear of a long title
-shifted = Image.new('RGB', still.size, hexrgb('#1A372A')); shifted.paste(still, (int(still.width * .1), 0)); shifted.save(A + 'complex-title.png', optimize=True)
 W, Hh = still.size; cx = int(W * .72)
 panel_w = int(Hh * 5.6 / 6.3)
 still.crop((cx - panel_w // 2, 0, cx + panel_w // 2, Hh)).save(A + 'complex-panel.png', optimize=True)
