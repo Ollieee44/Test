@@ -9,14 +9,14 @@
   {
    "title": "Gut",
    "label": "In the gut",
-   "heading": "The dimer comes apart into two monomers.",
-   "body": "In the gut, each SELFTAC® dimer dissociates at its reversible linker into two small monomers, which are absorbed."
+   "heading": "The dimer splits into two monomers.",
+   "body": "In the gut, each SELFTAC® dimer dissociates at its reversible linker into two small monomers, which are readily absorbed."
   },
   {
    "title": "Plasma",
    "label": "In the bloodstream",
    "heading": "Monomers and dimer, in equilibrium.",
-   "body": "In the plasma, two monomers keep joining into the dimer and coming apart again at the reversible linker: a dynamic equilibrium."
+   "body": "In the plasma, the two monomers associate to form dimer and dissociate again at the reversible linker; existing in a dynamic equilibrium."
   },
   {
    "title": "Barrier",
@@ -25,20 +25,20 @@
    "body": "The dimer is too large to penetrate the cell membrane or the blood-brain barrier. It comes apart at its reversible linker, and the two small monomers pass through."
   },
   {
-   "title": "Complex",
+   "title": "Ternary Complex",
    "label": "Ternary complex",
-   "heading": "Inside the cell, a dimer forms the ternary complex.",
-   "body": "Monomers and dimers are in equilibrium here too. One dimer binds the target protein and an E3 ligase: a ternary complex."
+   "heading": "Inside the cell, the dimer forms a ternary complex.",
+   "body": "Monomers and dimers are in equilibrium here too. One dimer molecule binds one target protein and one E3 ligase bringing them into proximity by forming a ternary complex."
   },
   {
    "title": "Degraded",
    "label": "Degradation",
    "heading": "Tagged, then broken down.",
-   "body": "Ubiquitin marks the target and the proteasome destroys it. The degrader is free to find the next one."
+   "body": "Ubiquitin marks the target and the proteasome destroys it. The SELFTAC is now free to degrade more targets."
   }
  ],
  "tagline": [
-  "Targeted protein degradation",
-  "beyond conventional limits."
+  "Targeted protein degradation beyond conventional limits.",
+  "Scroll down to see how we're applying our technology."
  ]
 }
