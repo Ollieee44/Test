@@ -73,27 +73,41 @@ deep = glow('#1A372A', [(.92, .05, .75, '#2E6149', .9), (.05, 1.0, .5, '#070D0A'
 light = glow('#EBEBE3', [(.1, .05, .7, '#FFFFFF', .85)])
 white = glow('#FFFFFF', [(1.0, 1.0, .45, '#EBEBE3', .7)])
 
-# title: a ribbon sweeping up the right-hand side, away from the title block
-save(speckle(kelp, [([(8.6, 7.8), (10.2, 5.2), (10.6, 2.4), (13.8, -.3)], 7000, .55), ([(11.0, 7.8), (12.0, 6.6), (12.8, 6.4), (13.8, 5.6)], 1800, .35)],
-             DARK_DOTS, [(0, .3, 9.4, 7.3)], seed=11), 'ground-title.jpg')
-# section: a ribbon along the foot and up the right edge, under the big number
-save(speckle(kelp, [([(-.3, 7.6), (4.0, 6.9), (9.5, 7.4), (13.8, 4.6)], 6500, .4), ([(13.6, 4.8), (12.6, 3.6), (13.4, 1.8), (12.8, -.3)], 1600, .3)],
-             DARK_DOTS, [(0, 3.4, 12.0, 6.5), (6.9, .2, 13.0, 3.5)] + FOOT, seed=12), 'ground-section.jpg')
-# closing: two ribbons framing the centred lockup, along the top and the foot
-save(speckle(kelp, [([(-.3, .9), (3.5, -.2), (9.0, 1.2), (13.8, .1)], 4200, .35), ([(-.3, 7.7), (4.5, 6.4), (9.0, 7.8), (13.8, 6.6)], 4200, .35)],
-             DARK_DOTS, [(.9, 1.3, 12.4, 6.2)], seed=13), 'ground-closing.jpg')
-# statement and contents: a ribbon in the top-right corner, above and beside the text
-save(speckle(deep, [([(8.0, -.3), (10.6, 1.0), (12.2, .4), (13.8, 1.6)], 3600, .35)], DARK_DOTS, [(0, 1.25, 12.8, 6.4)] + FOOT, seed=14), 'ground-statement.jpg')
-save(speckle(deep, [([(5.5, -.3), (8.5, .9), (11.0, .3), (13.8, 1.0)], 3000, .3)], DARK_DOTS, [(.3, 1.25, 13.1, 6.5), (0, .3, 4.4, 1.4)] + FOOT, seed=15), 'ground-contents.jpg')
-# Three Cards: a thin ribbon along the very top, over the title band's right
-save(speckle(deep, [([(6.5, -.3), (9.0, .5), (11.5, .1), (13.8, .7)], 2200, .22)], DARK_DOTS, [(0, .45, 13.1, 6.75)] + FOOT, seed=16), 'ground-cards.jpg')
-# content slides put text anywhere: only a fine corner dusting, low and faint, clear of the footer
-save(speckle(deep, [([(10.0, 7.8), (11.8, 7.1), (12.6, 6.4), (13.8, 5.2)], 1100, .25)], DARK_DOTS, FOOT, seed=17, alpha=(40, 140), size=(.45, 1.3), glints=0), 'ground-quiet.jpg')
-save(speckle(light, [([(10.0, 7.8), (11.8, 7.1), (12.6, 6.4), (13.8, 5.2)], 1000, .25)], LIGHT_DOTS, FOOT, seed=18, alpha=(35, 120), size=(.45, 1.3), glints=0), 'ground-light.jpg')
-save(speckle(white, [([(10.8, 7.8), (12.2, 7.2), (12.9, 6.7), (13.8, 5.9)], 700, .2)], LIGHT_DOTS, FOOT, seed=19, alpha=(30, 100), size=(.45, 1.2), glints=0), 'ground-white.jpg')
-# the Divided column: a ribbon crossing the column below its heading
+# ribbons that run along the edges (side and foot), shared by several grounds
+FOOT_RIBBON = ([(-.3, 7.55), (4.0, 7.05), (8.5, 7.6), (13.8, 7.0)], .16)        # along the foot
+RIGHT_RIBBON = ([(13.5, 7.8), (13.0, 5.0), (13.45, 2.5), (13.0, -.3)], .14)       # down the right edge
+LEFT_RIBBON = ([(.05, 7.8), (.3, 5.2), (-.05, 2.6), (.25, -.3)], .12)             # down the left edge
+def edges(n_foot, n_right, n_left=0):
+    r = [(FOOT_RIBBON[0], n_foot, FOOT_RIBBON[1]), (RIGHT_RIBBON[0], n_right, RIGHT_RIBBON[1])]
+    return r + ([(LEFT_RIBBON[0], n_left, LEFT_RIBBON[1])] if n_left else [])
+
+# title: a ribbon sweeping up the right-hand side, the foot and the left edge framing the title block
+save(speckle(kelp, [([(8.6, 7.8), (10.2, 5.2), (10.6, 2.4), (13.8, -.3)], 7000, .55), ([(11.0, 7.8), (12.0, 6.6), (12.8, 6.4), (13.8, 5.6)], 1800, .35)] + edges(2600, 1600, 900),
+             DARK_DOTS, [(.45, .3, 9.4, 6.95)], feather=.45, seed=11), 'ground-title.jpg')
+# section: a ribbon along the foot and up the right edge, under the big number, and down the left edge
+save(speckle(kelp, [([(-.3, 7.6), (4.0, 6.9), (9.5, 7.4), (13.8, 4.6)], 6500, .4), ([(13.6, 4.8), (12.6, 3.6), (13.4, 1.8), (12.8, -.3)], 1600, .3)] + edges(0, 0, 1200)
+             + [([(-.3, 1.4), (1.5, 1.9), (4.0, 1.0), (7.0, 2.6)], 2200, .35)],
+             DARK_DOTS, [(.45, 3.4, 12.0, 6.5), (6.9, .2, 13.0, 3.5), (.45, .35, 1.1, 1.05)] + FOOT, feather=.45, seed=12), 'ground-section.jpg')
+# closing: ribbons framing the centred lockup, along the top, the foot and both sides
+save(speckle(kelp, [([(-.3, .9), (3.5, -.2), (9.0, 1.2), (13.8, .1)], 4200, .35), ([(-.3, 7.7), (4.5, 6.4), (9.0, 7.8), (13.8, 6.6)], 4200, .35)] + edges(0, 1500, 1500),
+             DARK_DOTS, [(.9, 1.3, 12.4, 6.2)], feather=.45, seed=13), 'ground-closing.jpg')
+# statement and contents: a ribbon in the top-right corner, plus the foot and the right edge
+save(speckle(deep, [([(8.0, -.3), (10.6, 1.0), (12.2, .4), (13.8, 1.6)], 3600, .35)] + edges(3400, 2600, 1100), DARK_DOTS,
+             [(.45, 1.25, 12.8, 6.4), (.45, .35, 1.1, 1.05)] + FOOT, feather=.45, seed=14), 'ground-statement.jpg')
+save(speckle(deep, [([(5.5, -.3), (8.5, .9), (11.0, .3), (13.8, 1.0)], 3000, .3), ([(-.3, 6.4), (1.2, 4.6), (2.8, 5.6), (4.3, 3.2)], 2600, .35)] + edges(3400, 2600, 1100), DARK_DOTS,
+             [(4.5, 1.25, 13.1, 6.5), (.45, .3, 4.4, 2.6), (.45, .35, 1.1, 1.05)] + FOOT, feather=.45, seed=15), 'ground-contents.jpg')
+# Three Cards: a thin ribbon along the very top, plus the foot (between the cards and the footer) and the sides
+save(speckle(deep, [([(6.5, -.3), (9.0, .5), (11.5, .1), (13.8, .7)], 2200, .22)] + edges(3400, 2200, 1300), DARK_DOTS,
+             [(.45, .45, 12.85, 6.72)] + FOOT, feather=.25, seed=16), 'ground-cards.jpg')
+# content slides put text anywhere inside the margins: speckles stay in the margins, the foot and the sides
+MARGINS = [(.45, .25, 12.88, 6.78)] + FOOT
+save(speckle(deep, [([(10.0, 7.8), (11.8, 7.1), (12.6, 6.4), (13.8, 5.2)], 1100, .25)] + edges(3200, 2200, 1200), DARK_DOTS, MARGINS, feather=.2, seed=17, alpha=(50, 190), size=(.45, 1.5), glints=.02), 'ground-quiet.jpg')
+save(speckle(light, [([(10.0, 7.8), (11.8, 7.1), (12.6, 6.4), (13.8, 5.2)], 1000, .25)] + edges(3000, 2000, 1100), LIGHT_DOTS, MARGINS, feather=.2, seed=18, alpha=(45, 160), size=(.45, 1.4), glints=0), 'ground-light.jpg')
+save(speckle(white, [([(10.8, 7.8), (12.2, 7.2), (12.9, 6.7), (13.8, 5.9)], 700, .2)] + edges(2300, 1500, 800), LIGHT_DOTS, MARGINS, feather=.2, seed=19, alpha=(35, 130), size=(.45, 1.3), glints=0), 'ground-white.jpg')
+# the Divided column: a ribbon crossing the column below its heading, and one along its left edge
 pd = glow('#1A372A', [(.0, .0, .9, '#2E6149', .85)])
-pd = speckle(pd, [([(-.3, 6.6), (1.2, 5.7), (2.4, 6.4), (4.0, 5.2)], 2600, .28)], DARK_DOTS, [(0, 1.0, 3.7, 5.55)] + FOOT, seed=20)
+pd = speckle(pd, [([(-.3, 6.6), (1.2, 5.7), (2.4, 6.4), (4.0, 5.2)], 2600, .28), (LEFT_RIBBON[0], 900, .12), ([(-.3, .25), (1.5, .05), (2.6, .4), (4.0, .1)], 900, .12)],
+             DARK_DOTS, [(.45, 1.0, 3.5, 5.55), (.45, .35, 1.1, 1.05)] + FOOT, feather=.35, seed=20)
 pd.crop((0, 0, int(W * 3.7 / 13.333), H)).save(A + 'panel-deep.jpg', quality=92)
 
 # from v2: the brand textures, the logo files, the complex
