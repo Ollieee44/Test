@@ -509,3 +509,79 @@ c2_page = (c2_head + '<main id="main">\n' + c2_story + '</main>\n' + meshes + '\
 os.makedirs(D + 'click2', exist_ok=True)
 open(D + 'click2/index.html', 'w').write(c2_page)
 print('click2/index.html', os.path.getsize(D + 'click2/index.html') // 1024, 'KB')
+
+# ---------- Rob's edits (click3/index.html): click2 with a set of review changes ----------
+# a side-view body silhouette; no 'Oral dosing' label, and the first click takes the capsule all the way to the gut; larger,
+# higher-contrast location labels; a narrower vessel with no red cells (a layered wall, endothelial nuclei, faint flow
+# streaks); one dimer at the barrier, which bounces off, comes apart and goes through as monomers (rob.js); the ternary
+# complex forms more slowly; the equilibrium inside the cell runs at half speed
+import sys; sys.path.insert(0, D + 'tools'); from person_profile import profile
+P_FILL, P_EDGE, P_ARM = profile()
+c3_story = c2_story
+for old, new in [(PERSON_D, P_FILL), (EDGE_D, P_EDGE), (ARM, P_ARM)]:
+    c3_story = once(c3_story, f'd="{old}"', f'd="{new}"')
+c3_story = re.sub(r'<span class="jl " data-x="74" data-y="78"[^>]*>Oral dosing</span>', '', c3_story, count=1)
+assert 'data-x="74" data-y="78"' not in c3_story
+for txt in ['In the gut', 'Cell membrane &middot; blood-brain barrier', 'Target cell', 'Proteasome', 'Degradation', 'Blood vessel &middot; plasma',
+            'Dimer: too large to penetrate', 'Monomers pass through']:
+    c3_story, n = re.subn(r'<span class="jl ([^"]*)"([^>]*)>' + re.escape(txt) + '</span>', lambda m: f'<span class="jl loc"{m.group(2)}>{txt}</span>', c3_story, count=1)
+    assert n == 1, txt
+c3_story = once(c3_story, f'data-x="{X["mem"] + 4}" data-y="-50"', f'data-x="{X["mem"] + 4}" data-y="-64"')
+# the vessel: narrower, its wall drawn in layers (tissue, endothelium, outer edge), flattened nuclei along the lining, and a
+# few faint streaks drifting with the flow in place of the red cells (they ride in #jrbc, which already drifts and fades)
+VY3 = 50; VX3 = X['mem'] + R - math.sqrt((R + BAND) ** 2 - VY3 ** 2)
+w3t = f'M 16 -14 C 46 -10 64 {VY3} 112 {VY3} L {VX3:.1f} {VY3}'; w3b = f'M 16 -36 C 46 -40 64 {-VY3} 112 {-VY3} L {VX3:.1f} {-VY3}'
+lum3 = f'M 16 -14 C 46 -10 64 {VY3} 112 {VY3} L {VX3:.1f} {VY3} L {VX3:.1f} {-VY3} L 112 {-VY3} C 64 {-VY3} 46 -40 16 -36 Z'
+rnd3 = random.Random(11); streaks = ''
+for i in range(14):
+    x, y, L = rnd3.uniform(118, VX3 - 26), rnd3.uniform(-VY3 + 9, VY3 - 9), rnd3.uniform(7, 16)
+    streaks += f'<g transform="translate({x:.1f} {y:.1f})"><path d="M {-L / 2:.1f} 0 L {L / 2:.1f} 0" style="stroke:var(--ink);stroke-opacity:{rnd3.uniform(.1, .2):.2f};stroke-width:1.2;stroke-linecap:round"/></g>'
+nuclei = ''.join(f'<ellipse cx="{x:.1f}" cy="{s * (VY3 - 3.2):.1f}" rx="3.4" ry="1.1" style="fill:var(--ink);fill-opacity:.2"/>'
+                 for s in (1, -1) for x in [126 + k * 21 + (0 if s > 0 else 10) for k in range(int((VX3 - 140) // 21))])
+wall = lambda w, dy: f'<path d="{w}" transform="translate(0 {dy})" '
+V3G = (f'<g id="jvessel" style="opacity:0"><path d="{lum3}" style="fill:#FFFFFF;fill-opacity:.06"/>'
+       f'<g id="jrbc">{streaks}</g>'
+       + ''.join(f'<path d="{w}" style="fill:none;stroke:var(--ink);stroke-opacity:.13;stroke-width:9;stroke-linecap:round"/>'
+                 + wall(w, d * -3.6) + 'style="fill:none;stroke:var(--ink);stroke-opacity:.55;stroke-width:1.1;stroke-linecap:round"/>'
+                 + wall(w, d * 4.2) + 'style="fill:none;stroke:var(--ink);stroke-opacity:.24;stroke-width:.9;stroke-linecap:round"/>'
+                 for w, d in ((w3t, 1), (w3b, -1)))
+       + nuclei + '</g>')
+c3_story, n = re.subn(r'<g id="jvessel".*?</g>(?=<g id="jmem">)', lambda m: V3G, c3_story, count=1, flags=re.S)
+assert n == 1, 'vessel'
+# the barrier labels follow the one dimer: too large while it bounces, then the monomers going through
+c3_story = once(c3_story, 'data-pl="bounce" data-a="0.588" data-b="0.69"', 'data-pl="bounce" data-a="0.556" data-b="0.614"')
+c3_story = once(c3_story, 'data-pl="pass" data-a="0.6" data-b="0.69"', 'data-pl="pass" data-a="0.625" data-b="0.69"')
+c3_story = c3_story.replace('>1 / 11<', '>1 / 10<')
+C3_TEXT = json.loads(json.dumps(C2_TEXT))
+C3_TEXT['sections'][3]['body'] = 'The dimer is too large to penetrate the cell membrane or the blood-brain barrier. It comes apart at its reversible linker, and the two small monomers pass through.'
+c3_story = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C3_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c3_story, count=1, flags=re.S)
+c3_head = c2_head.replace('<title>SELFTAC Journey, Click-Through 2</title>', "<title>SELFTAC Journey Rob's Edits</title>", 1) + '''<style>
+/* location labels: larger, white on a dark pill */
+.jl.loc { font: 600 13px/1.2 var(--mono); letter-spacing: .1em; color: #FFFFFF; background: rgba(6, 46, 33, .9); border: 1px solid rgba(255, 255, 255, .3);
+  padding: 8px 13px; -webkit-backdrop-filter: none; backdrop-filter: none; }
+@media (max-width: 760px) { .jl.loc { font-size: 11px; padding: 6px 10px; } }
+</style>
+'''
+assert "<title>SELFTAC Journey Rob's Edits</title>" in c3_head
+# the journey hands the molecule to rob.js at the barrier
+c3_js = once(c2_js, 'const brk = mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j);', 'const brk = heroOverride(clamp(p0, 0, 1), mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j));')
+c3_plasma = once(open(D + 'plasma.js').read(), 'const VESSEL_IN = 50;', 'const VESSEL_IN = 36;')
+c3_plasma = once(c3_plasma, 'bounce: () => [BOUNCER.g.position.x - 6, BOUNCER.g.position.y + 24]', 'bounce: () => [cg.position.x - 4, cg.position.y + 30]')
+c3_cell = open(D + 'cell.js').read()
+c3_cell = once(c3_cell, "const w = clamp(Math.min((pn - .405) / .03, (.525 - pn) / .03), 0, 1);", "const w = clamp(Math.min((pn - .405) / .03, (.5 - pn) / .025), 0, 1);")   # rob.js joins them up after
+c3_cell = once(c3_cell, "const blWin = winOf(.405, .53, .03)", "const blWin = winOf(.405, .52, .03)")
+c3_cell = once(c3_cell, "kind: 'split', dx: -30, y: -34,", "kind: 'split', dx: -34, y: -26,")
+c3_cell = once(c3_cell, "kind: 'eq', dx: -66, y: 44,", "kind: 'eq', dx: -66, y: 28,")
+c3_cell = once(c3_cell, "const e = eqWave(5.2, c.ph)", "const e = eqWave(7.8, c.ph)")   # half speed in the cell (the blood's pair is the hero's own)
+c3_cell = once(c3_cell, "IN = 66 - 7;", "IN = 50 - 7;")
+c3_cell = once(c3_cell, "window.__liveAt = p => (p > .4 && p < .53)", "window.__liveAt = p => (p > .4 && p < .5)")
+c3_click = c2_click
+c3_click = once(c3_click, 'const STOPS = [0, .145, .25, .335, .45, .612, .665, .79, .865, .92, .998];', 'const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];')
+c3_click = once(c3_click, 'const BEAT_STOP = [0, 2, 4, 5, 7, 8];', 'const BEAT_STOP = [0, 1, 3, 4, 6, 7];')
+c3_click = once(c3_click, 'const SLOW = { 8: 1.8, 9: 1.7 };', 'const SLOW = { 4: 1.3, 5: 1.4, 6: 1.9, 7: 1.8, 8: 1.7 };')
+c3_click = re.sub(r'const HOLD = \[[^\]]*\];', 'const HOLD = [300, 550, 300, 2400, 900, 550, 2200, 450, 400];', c3_click, count=1)
+c3_page = (c3_head + '<main id="main">\n' + c3_story + '</main>\n' + meshes + '\n' + PROTMESH + '\n<script type="module">' + c2_prefix + '\n' + C2_PAL
+           + c3_js + '\n' + open(D + 'otx.js').read() + '\n' + c3_plasma + '\n' + c3_cell + '\n' + open(D + 'rob.js').read() + '\n' + c3_click + '\n' + open(D + 'editor.js').read() + '</script>\n')
+os.makedirs(D + 'click3', exist_ok=True)
+open(D + 'click3/index.html', 'w').write(c3_page)
+print('click3/index.html', os.path.getsize(D + 'click3/index.html') // 1024, 'KB')
