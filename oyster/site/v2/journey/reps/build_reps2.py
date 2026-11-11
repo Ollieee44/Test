@@ -24,7 +24,7 @@ src = once(src, src[src.index('OPTIONS = ['):src.index(']\ntiles')], '''OPTIONS 
     ('nacre', 'Nacre pearls', 'The pearl cluster with a pearlescent sheen that shifts through the palette as it turns.'),
     ('shell', 'Pearls in a shell', 'Ring pearls inside a faint, glassy outline of the half: structure and shape together.'),
     ('glass', 'Glass shell', 'A translucent surface round each half, brighter at its edges like glass, with today’s ring drawing inside.'),
-    ('wire', 'Wire mesh', 'The half’s surface as a low-poly mesh of fine lines over a faint fill: technical and light.'),
+    ('wire', 'Wire mesh', 'A mesh of fine lines over a faint fill, hugging the atoms and running on along the linker to the gold clasp: technical and light.'),
     ('glassatoms', 'Glass atoms', 'Space-filling, but every atom a translucent glass bead: the molecule’s bulk without its weight.'),
 ''')
 src = once(src, "<h1>Six ways to draw the SELFTAC.</h1>", "<h1>More ways to draw the SELFTAC.</h1>")
@@ -90,9 +90,28 @@ src = src[:b0] + r'''  spacefill: mol => mol.heads.forEach((h, i) => swapHead(h.
   shell: mol => mol.heads.forEach((h, i) => {{ swapHead(h.mesh, KEYS[i], ringPearls); const k = KEYS[i], g = geom(DATA.reps[k].surface);
     const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({{ color: tint(P[k], .2), transparent: true, opacity: .16, depthWrite: false }})); m.renderOrder = 3; h.mesh.add(m); }}),
   glass: mol => mol.heads.forEach((h, i) => addTo(h, new THREE.Mesh(geom(DATA.mesh[KEYS[i]].smooth), glassMat(tint(P[KEYS[i]], .15))))),
-  wire: mol => mol.heads.forEach((h, i) => {{ const k = KEYS[i], g = geom(DATA.mesh[k].coarse); h.mesh.material.visible = false; h.mesh.children[0].visible = false;
-    addTo(h, new THREE.Mesh(g, new THREE.MeshBasicMaterial({{ color: P[k], transparent: true, opacity: .14, depthWrite: false }})), 2);
-    addTo(h, new THREE.LineSegments(new THREE.WireframeGeometry(g), new THREE.LineBasicMaterial({{ color: tint(P[k], .25), transparent: true, opacity: .85 }}))); }}),
+  wire: mol => {{
+    // a metaball surface (three's MarchingCubes) for each half, rebuilt as the molecule moves: a tight ball on every
+    // heavy atom, then the linker's strand and white pearls on that half's side, up to but not over the gold clasp
+    mol.heads.forEach(h => {{ h.mesh.material.visible = false; h.mesh.children[0].visible = false; }});
+    const SUB = 220;   // a steep fall-off, so each atom keeps its own sphere with only a small fillet to the next
+    // the shape from a fine surface, faintly filled; the lines from a coarser one over the same field, so they stay open
+    const mcs = KEYS.flatMap(k => [[64, new THREE.MeshBasicMaterial({{ color: P[k], transparent: true, opacity: .2, depthWrite: false }}), 2],
+                                   [30, new THREE.MeshBasicMaterial({{ color: tint(P[k], .3), wireframe: true, transparent: true, opacity: .9 }}), 3]].map(([res, mat, order]) => {{
+      const mc = new MarchingCubes(res, mat, false, false, 120000); mc.isolation = 80; mc.renderOrder = order; mc.side = k; mol.group.add(mc); return mc; }}));
+    const m4 = new THREE.Matrix4(), box = new THREE.Box3(), c = new THREE.Vector3(), sz = new THREE.Vector3();
+    mol.tick = () => mcs.forEach(mc => {{
+      const i = KEYS.indexOf(mc.side), k = mc.side, a = A_(k), h = mol.heads[i], pts = []; h.mesh.updateMatrix();
+      heavy(k).forEach(j => pts.push([V(a.xyz[j]).applyMatrix4(h.mesh.matrix), VDW[a.el[j]] * .9]));
+      const path = mol.strands[i].geometry.parameters.path;
+      if (path) for (let s = 0; s <= 28; s++) pts.push([path.getPointAt(i === 0 ? s / 28 * .78 : .22 + s / 28 * .78), .7]);
+      for (let n = 0; n < 2; n++) {{ mol.pearls.getMatrixAt(i * 2 + n, m4); pts.push([new THREE.Vector3().setFromMatrixPosition(m4), 1.3]); }}
+      box.makeEmpty(); pts.forEach(([p]) => box.expandByPoint(p)); box.getCenter(c); box.getSize(sz);
+      const H = Math.max(sz.x, sz.y, sz.z) / 2 + 3; mc.position.copy(c); mc.scale.setScalar(H); mc.reset();
+      pts.forEach(([p, r]) => {{ const rn = r / (2 * H); mc.addBall((p.x - c.x) / (2 * H) + .5, (p.y - c.y) / (2 * H) + .5, (p.z - c.z) / (2 * H) + .5, rn * rn * (80 + SUB), SUB); }});
+      mc.update();
+    }});
+  }},
   glassatoms: mol => mol.heads.forEach((h, i) => {{ const k = KEYS[i], a = A_(k); h.mesh.material.visible = false; h.mesh.children[0].visible = false;
     heavy(k).forEach(j => {{ const s = new THREE.Mesh(sphere, glassMat(tint(P[k], .1), .14)); s.position.set(...a.xyz[j]); s.scale.setScalar(VDW[a.el[j]] * .92); addTo(h, s); }}); }}),
 ''' + src[b1:]
@@ -102,4 +121,7 @@ src = once(src, 'cam.position.set(0, 0, 88);', 'cam.position.set(0, 0, 70);')
 src = once(src, "  if (opt === 'icon') {{ mol.group.visible = false; v.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); v.el.appendChild(v.svg); }}\n", "")
 src = src.replace("open(D + 'index.html', 'w', encoding='utf8').write(html)\nprint('reps/index.html', os.path.getsize(D + 'index.html') // 1024, 'KB')",
                   "os.makedirs(D + '../reps2', exist_ok=True)\nopen(D + '../reps2/index.html', 'w', encoding='utf8').write(html)\nprint('reps2/index.html', os.path.getsize(D + '../reps2/index.html') // 1024, 'KB')")
+src = once(src, '"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" }}', '"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" }}')
+src = once(src, "import * as THREE from 'three';", "import * as THREE from 'three';\nimport {{ MarchingCubes }} from 'three/addons/objects/MarchingCubes.js';")
+src = once(src, "    v.mol.update(new THREE.Vector3(-hx, 0, 0), new THREE.Vector3(hx, 0, 0), I, I, joined);", "    v.mol.update(new THREE.Vector3(-hx, 0, 0), new THREE.Vector3(hx, 0, 0), I, I, joined); if (v.mol.tick) v.mol.tick();")
 exec(compile(src, 'build_reps.py (round 2)', 'exec'))
