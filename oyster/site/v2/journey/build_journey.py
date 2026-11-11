@@ -521,12 +521,24 @@ c3_story = c2_story
 for old, new in [(PERSON_D, P_FILL), (EDGE_D, P_EDGE), (ARM, P_ARM)]:
     c3_story = once(c3_story, f'd="{old}"', f'd="{new}"')
 c3_story = re.sub(r'<span class="jl " data-x="74" data-y="78"[^>]*>Oral dosing</span>', '', c3_story, count=1)
+# the figure drawn like the reference: a clear outline over a light fill, carried down past the waist and the seat
+c3_story, n = re.subn(r'<linearGradient id="jpersonG".*?</linearGradient>', lambda m: '<linearGradient id="jpersonG" gradientUnits="userSpaceOnUse" x1="0" y1="-80" x2="0" y2="128">'
+    '<stop offset="0" style="stop-color:var(--ink);stop-opacity:.09"/><stop offset=".78" style="stop-color:var(--ink);stop-opacity:.07"/><stop offset="1" style="stop-color:var(--ink);stop-opacity:0"/></linearGradient>', c3_story, count=1, flags=re.S)
+assert n == 1
+c3_story, n = re.subn(r'<linearGradient id="jedgeG".*?</linearGradient>', lambda m: '<linearGradient id="jedgeG" gradientUnits="userSpaceOnUse" x1="0" y1="-84" x2="0" y2="132">'
+    '<stop offset="0" style="stop-color:var(--ink);stop-opacity:.85"/><stop offset=".8" style="stop-color:var(--ink);stop-opacity:.75"/><stop offset="1" style="stop-color:var(--ink);stop-opacity:0"/></linearGradient>', c3_story, count=1, flags=re.S)
+assert n == 1
+c3_story = once(c3_story, 'style="fill:none;stroke:url(#jedgeG);stroke-width:1.1;', 'style="fill:none;stroke:url(#jedgeG);stroke-width:2;')
+# the capsule's way down sits a little further back, inside the traced neck
+c3_story = once(c3_story, f'd="{ROUTE}"', 'd="M 18.6,-44.4 C 12,-43.6 4,-41.5 0,-37 C -3.2,-32 -3.6,-25 -3.2,-18 C -2.8,-10 -0.6,-3 0.5,2.5"')
 assert 'data-x="74" data-y="78"' not in c3_story
 for txt in ['In the gut', 'Cell membrane &middot; blood-brain barrier', 'Target cell', 'Proteasome', 'Degradation', 'Blood vessel &middot; plasma',
             'Dimer: too large to penetrate', 'Monomers pass through']:
     c3_story, n = re.subn(r'<span class="jl ([^"]*)"([^>]*)>' + re.escape(txt) + '</span>', lambda m: f'<span class="jl loc"{m.group(2)}>{txt}</span>', c3_story, count=1)
     assert n == 1, txt
-c3_story = once(c3_story, f'data-x="{X["mem"] + 4}" data-y="-50"', f'data-x="{X["mem"] + 4}" data-y="-64"')
+c3_story = once(c3_story, f'data-x="{X["mem"] + 4}" data-y="-50"', f'data-x="{X["mem"] + 4}" data-y="63"')   # above the vessel (its wall at 50), at the top
+# once the target is degraded only 'Degradation' stays: the proteasome's label hands over to it
+c3_story = once(c3_story, 'data-a="0.84" data-b="0.99">Proteasome', 'data-a="0.84" data-b="0.925">Proteasome')
 # the vessel: narrower, its wall drawn in layers (tissue, endothelium, outer edge), flattened nuclei along the lining, and a
 # few faint streaks drifting with the flow in place of the red cells (they ride in #jrbc, which already drifts and fades)
 VY3 = 50; VX3 = X['mem'] + R - math.sqrt((R + BAND) ** 2 - VY3 ** 2)
@@ -568,6 +580,7 @@ c3_js = once(c2_js, 'const brk = mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE,
 c3_plasma = once(open(D + 'plasma.js').read(), 'const VESSEL_IN = 50;', 'const VESSEL_IN = 36;')
 c3_plasma = once(c3_plasma, 'bounce: () => [BOUNCER.g.position.x - 6, BOUNCER.g.position.y + 24]', 'bounce: () => [cg.position.x - 4, cg.position.y + 30]')
 c3_cell = open(D + 'cell.js').read()
+c3_cell = once(c3_cell, "pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)", "winOf(.715, .905)")   # the E3 ligase's label goes as the target is degraded
 c3_cell = once(c3_cell, "const w = clamp(Math.min((pn - .405) / .03, (.525 - pn) / .03), 0, 1);", "const w = clamp(Math.min((pn - .405) / .03, (.5 - pn) / .025), 0, 1);")   # rob.js joins them up after
 c3_cell = once(c3_cell, "const blWin = winOf(.405, .53, .03)", "const blWin = winOf(.405, .52, .03)")
 c3_cell = once(c3_cell, "kind: 'split', dx: -30, y: -34,", "kind: 'split', dx: -34, y: -26,")

@@ -1,7 +1,7 @@
 """The person for Rob's edits: a side-view body silhouette (facing right, y down, as the journey draws it), head to
 mid-thigh, as smooth curves through anatomical landmarks. Keeps the journey's anchors: the lips at (18.6, -44.4), where the
 capsule goes in; the neck around x 1.5, where it goes down; the gut inset centred on (0, 25).
-profile() -> (filled outline, open edge, arm)"""
+profile() -> (filled outline, open edge, '' (no arm))"""
 
 
 def _smooth(pts, closed):
@@ -18,26 +18,14 @@ def _smooth(pts, closed):
     return ' '.join(out) + (' Z' if closed else '')
 
 
-# traced from the reference outline Rob supplied (facing left, 234 x 643 px), mirrored to face right and scaled so its lips
-# land on the journey's (18.6, -44.4); a bald head with a short nose and the lips, a full neck with the Adam's apple, a
-# deep chest, a rounded upper back, the waist and the seat; no arm
+# the outline of the reference Rob supplied (a side-view body, facing left, 234 x 643 px), traced from the image's own
+# pixels (the drawn line filled to a body and contoured, simplified to 0.9 px), open along the bottom; mirrored to face
+# right and scaled so its mouth (29.5, 112) lands on the journey's lips (18.6, -44.4)
+REF = [(43.5, 591.0), (44.5, 590.0), (44.5, 573.0), (46.5, 557.0), (36.5, 529.0), (23.5, 475.0), (23.5, 462.0), (27.5, 433.0), (21.5, 392.0), (19.5, 367.0), (14.5, 346.0), (13.5, 336.0), (15.5, 310.0), (19.5, 293.0), (24.5, 281.0), (24.5, 275.0), (21.5, 268.0), (21.5, 261.0), (27.5, 248.0), (39.5, 229.0), (62.5, 202.0), (65.5, 194.0), (75.5, 187.0), (78.5, 182.0), (78.5, 179.0), (68.5, 165.0), (65.5, 158.0), (65.5, 153.0), (60.0, 146.5), (43.0, 146.5), (38.0, 144.5), (33.5, 140.0), (31.5, 135.0), (32.5, 123.0), (29.5, 120.0), (28.5, 111.0), (30.5, 103.0), (22.5, 99.0), (21.5, 91.0), (34.5, 71.0), (32.5, 65.0), (35.5, 47.0), (44.5, 29.0), (56.0, 17.5), (63.0, 12.5), (73.0, 7.5), (93.0, 2.5), (112.0, 2.5), (133.0, 7.5), (145.0, 14.5), (153.5, 23.0), (159.5, 33.0), (163.5, 50.0), (162.5, 69.0), (157.5, 88.0), (146.5, 107.0), (147.5, 122.0), (154.5, 146.0), (162.5, 163.0), (180.5, 180.0), (190.5, 194.0), (197.5, 208.0), (205.5, 231.0), (204.5, 257.0), (203.5, 258.0), (204.5, 281.0), (201.5, 297.0), (195.5, 315.0), (194.5, 327.0), (190.5, 344.0), (187.5, 354.0), (178.5, 374.0), (168.5, 390.0), (156.5, 404.0), (154.5, 415.0), (154.5, 457.0), (170.5, 480.0), (186.5, 510.0), (192.5, 530.0), (194.5, 542.0), (193.5, 560.0), (188.5, 578.0), (178.5, 598.0), (171.5, 608.0)]
 _S = .33
-_MAP = lambda pts: [(18.6 + ((234 - x) - 201) * _S, -44.4 + (y - 115) * _S) for x, y in pts]
-FRONT = _MAP([(100, 8), (70, 15), (50, 32), (42, 52), (38, 72), (34, 80), (22, 92), (30, 100), (28, 108), (33, 114), (28, 120),
-              (36, 132), (42, 140), (56, 144), (68, 152), (72, 166), (80, 180), (72, 193), (58, 207), (40, 226), (27, 250),
-              (22, 266), (19, 300), (16, 350), (20, 400), (25, 440), (31, 480), (36, 520), (44, 560)])
-BACK = _MAP([(178, 560), (186, 520), (180, 488), (160, 466), (152, 440), (156, 412), (178, 392), (190, 360), (196, 320),
-             (200, 270), (200, 232), (194, 205), (178, 184), (158, 152), (148, 124), (150, 100), (158, 74), (160, 46), (150, 22),
-             (126, 8)])
-ARM = []
+_MAP = lambda pts: [(18.6 + (29.5 - x) * _S, -44.4 + (y - 112) * _S) for x, y in pts]
 
 
 def profile():
-    body = FRONT + BACK
-    filled = _smooth(body, closed=True)
-    edge = _smooth(FRONT, closed=False) + ' ' + _smooth(BACK + [FRONT[0]], closed=False)
-    return filled, edge, ''
-
-
-if __name__ == '__main__':
-    for s in profile(): print(s[:120], '...')
+    pts = _MAP(REF)
+    return _smooth(pts, closed=True), _smooth(pts, closed=False), ''
