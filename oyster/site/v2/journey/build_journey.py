@@ -575,10 +575,21 @@ c3_cell = once(c3_cell, "kind: 'eq', dx: -66, y: 44,", "kind: 'eq', dx: -66, y: 
 c3_cell = once(c3_cell, "const e = eqWave(5.2, c.ph)", "const e = eqWave(7.8, c.ph)")   # half speed in the cell (the blood's pair is the hero's own)
 c3_cell = once(c3_cell, "IN = 66 - 7;", "IN = 50 - 7;")
 c3_cell = once(c3_cell, "window.__liveAt = p => (p > .4 && p < .53)", "window.__liveAt = p => (p > .4 && p < .5)")
+# the blood vessel's label sits just above its top wall
+c3_plasma = once(c3_plasma, 'plasma: () => { const [x, y] = at(R, .5, 1.04); return [x, y]; },', 'plasma: () => { const [x] = at(R, .5, 1.04); return [x, ' + str(VY3 + 11) + ']; },')
+# no labels on the background molecules, in the blood or in the cell: only the focal pair is named
+c3_cell = once(c3_cell, "POP.forEach(c => { const d0", "POP.forEach(c => { c.tags = []; });\n[].forEach(c => { const d0")
+c3_cell = once(c3_cell, "if (c.tags[0].el.textContent !== st) c.tags[0].el.textContent = st;", "if (c.tags[0] && c.tags[0].el.textContent !== st) c.tags[0].el.textContent = st;")
+# into the proteasome the way a substrate goes: up to the 19S cap, then fed down its central channel into the 20S core
+# (shrinking as it goes, as it is unfolded and threaded through)
+c3_js = once(c3_js, 'P.brd4.position.lerpVectors(home, into, go);',
+             'const capTop = inner.worldToLocal(PROT.clone().add(V3(0, (239 - PMID) * PK * 1.15 + 8, 0))).sub(S(\'brd4\').multiplyScalar(sc)); '
+             'if (go < .55) P.brd4.position.lerpVectors(home, capTop, ease(go / .55)); else P.brd4.position.lerpVectors(capTop, into, (go - .55) / .45);')
+c3_story = once(c3_story, 'class="jl loc" data-x="630" data-y="58"', f'class="jl loc" data-x="{X["prot"] - 10 + 66}" data-y="14"')   # beside the cap, clear of the way in
 c3_click = c2_click
 c3_click = once(c3_click, 'const STOPS = [0, .145, .25, .335, .45, .612, .665, .79, .865, .92, .998];', 'const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];')
 c3_click = once(c3_click, 'const BEAT_STOP = [0, 2, 4, 5, 7, 8];', 'const BEAT_STOP = [0, 1, 3, 4, 6, 7];')
-c3_click = once(c3_click, 'const SLOW = { 8: 1.8, 9: 1.7 };', 'const SLOW = { 4: 1.3, 5: 1.4, 6: 1.9, 7: 1.8, 8: 1.7 };')
+c3_click = once(c3_click, 'const SLOW = { 8: 1.8, 9: 1.7 };', 'const SLOW = { 4: 1.3, 5: 2.6, 6: 1.9, 7: 1.8, 8: 1.7 };')
 c3_click = re.sub(r'const HOLD = \[[^\]]*\];', 'const HOLD = [300, 550, 300, 2400, 900, 550, 2200, 450, 400];', c3_click, count=1)
 c3_page = (c3_head + '<main id="main">\n' + c3_story + '</main>\n' + meshes + '\n' + PROTMESH + '\n<script type="module">' + c2_prefix + '\n' + C2_PAL
            + c3_js + '\n' + open(D + 'otx.js').read() + '\n' + c3_plasma + '\n' + c3_cell + '\n' + open(D + 'rob.js').read() + '\n' + c3_click + '\n' + open(D + 'editor.js').read() + '</script>\n')
