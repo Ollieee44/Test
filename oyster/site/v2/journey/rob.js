@@ -37,6 +37,7 @@ TAGS.forEach(t => { if (t.at() === BOUNCER.g) { t.win = () => 0; t.el.style.disp
   frame = function (p0) {
     const pn = clamp(p0, 0, 1);
     frameC(pn);
+    declutter();
     BOUNCER.g.visible = false;
     if (pn > .5 && pn < .7) plus.style.opacity = 0;                    // no '+' while it joins, bounces and comes apart
     // a flash as the linker breaks at the membrane
@@ -45,4 +46,15 @@ TAGS.forEach(t => { if (t.at() === BOUNCER.g) { t.win = () => 0; t.el.style.disp
     if (fb > .01) { mol.group.updateMatrixWorld(true); flash.position.copy(mol.group.localToWorld(ROB_BRK.clone()));
       flash.scale.setScalar(SC * (.6 + 1.1 * clamp((pn - .59) / .028, 0, 1))); flash.material.opacity = .6 * fb; flash.visible = true; flash.lookAt(camera.position); }
   };
+}
+// labels never sit on one another: after each frame, any label overlapping one above it is nudged down just clear of it
+function declutter() {
+  const rs = [...document.querySelectorAll('.jl')].filter(e => e.style.display !== 'none' && +e.style.opacity > .05)
+    .map(e => ({ e, r: e.getBoundingClientRect() })).sort((a, b) => a.r.top - b.r.top);
+  for (let i = 1; i < rs.length; i++) {
+    let b = rs[i].r, dy = 0;
+    for (let k = 0; k < i; k++) { const a = rs[k].r;
+      if (b.left < a.right + 6 && b.right > a.left - 6 && b.top + dy < a.bottom + 5 && b.bottom + dy > a.top) dy = a.bottom + 5 - b.top; }
+    if (dy > 0) { rs[i].e.style.transform += ` translate(0, ${dy.toFixed(1)}px)`; rs[i].r = { left: b.left, right: b.right, top: b.top + dy, bottom: b.bottom + dy }; }
+  }
 }

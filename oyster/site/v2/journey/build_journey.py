@@ -537,6 +537,7 @@ for txt in ['In the gut', 'Cell membrane &middot; blood-brain barrier', 'Target 
     c3_story, n = re.subn(r'<span class="jl ([^"]*)"([^>]*)>' + re.escape(txt) + '</span>', lambda m: f'<span class="jl loc"{m.group(2)}>{txt}</span>', c3_story, count=1)
     assert n == 1, txt
 c3_story = once(c3_story, f'data-x="{X["mem"] + 4}" data-y="-50"', f'data-x="{X["mem"] + 4}" data-y="63"')   # above the vessel (its wall at 50), at the top
+c3_story = once(c3_story, f'data-x="{X["mem"] + 70}" data-y="52"', f'data-x="{X["mem"] + 66}" data-y="34"')   # Target cell: inside, below the membrane's label
 # once the target is degraded only 'Degradation' stays: the proteasome's label hands over to it
 c3_story = once(c3_story, 'data-a="0.84" data-b="0.99">Proteasome', 'data-a="0.84" data-b="0.925">Proteasome')
 # the vessel: narrower, its wall drawn in layers (tissue, endothelium, outer edge), flattened nuclei along the lining, and a
@@ -579,7 +580,10 @@ assert "<title>SELFTAC Journey Rob's Edits</title>" in c3_head
 c3_js = once(c2_js, 'const brk = mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j);', 'const brk = heroOverride(clamp(p0, 0, 1), mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j));')
 c3_plasma = once(open(D + 'plasma.js').read(), 'const VESSEL_IN = 50;', 'const VESSEL_IN = 36;')
 c3_plasma = once(c3_plasma, 'bounce: () => [BOUNCER.g.position.x - 6, BOUNCER.g.position.y + 24]', 'bounce: () => [cg.position.x - 4, cg.position.y + 30]')
+# the protein labels measured against the proteins' actual surfaces (not their loose bounding boxes), and set close
+c3_plasma = once(c3_plasma, 'const box = new THREE.Box3().setFromObject(t.at());', 'const box = new THREE.Box3().setFromObject(t.at(), !!t.side);')
 c3_cell = open(D + 'cell.js').read()
+c3_cell = once(c3_cell, "const k = tag(t, 'key', at, win, 14);", "const k = tag(t, 'key', at, win, 8);")
 c3_cell = once(c3_cell, "pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)", "winOf(.715, .905)")   # the E3 ligase's label goes as the target is degraded
 c3_cell = once(c3_cell, "const w = clamp(Math.min((pn - .405) / .03, (.525 - pn) / .03), 0, 1);", "const w = clamp(Math.min((pn - .405) / .03, (.5 - pn) / .025), 0, 1);")   # rob.js joins them up after
 c3_cell = once(c3_cell, "const blWin = winOf(.405, .53, .03)", "const blWin = winOf(.405, .52, .03)")
