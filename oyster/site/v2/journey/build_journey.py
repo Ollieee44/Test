@@ -752,7 +752,7 @@ open(D + 'click4/index.html', 'w').write(big_proteasome(c4_page))
 print('click4/index.html', os.path.getsize(D + 'click4/index.html') // 1024, 'KB')
 
 # ---------- Rob's edits v3 (click5/index.html): v2 with the review's changes ----------
-# the degrader lets go and moves on after the target is degraded (v3.js); the barrier labelled "Cell membrane" (the
+# the degrader lets go and moves on after the target is degraded (v3.js); the barrier labelled "Biological membrane" (the
 # blood-brain barrier stays in the copy); a tighter autoplay (clicks unchanged); copy trimmed to about 20 words a step;
 # two label styles only (places, and things); gold kept for the SELFTAC and the next step; a lighter proteasome mesh
 c5_head = c4_head.replace("<title>SELFTAC Journey Rob's Edits v2</title>", "<title>SELFTAC Journey Rob's Edits v3</title>", 1) + '''<style>
@@ -764,8 +764,8 @@ c5_head = c4_head.replace("<title>SELFTAC Journey Rob's Edits v2</title>", "<tit
 </style>
 '''
 c5_page = c5_head + c4_page[len(c4_head):]
-c5_page = c5_page.replace('>Cell membrane &middot; blood-brain barrier</span>', '>Cell membrane</span>')
-assert '>Cell membrane</span>' in c5_page
+c5_page = c5_page.replace('>Cell membrane &middot; blood-brain barrier</span>', '>Biological membrane</span>')
+assert '>Biological membrane</span>' in c5_page
 c5_page = once(c5_page, PROTMESH, '<script type="application/json" id="protmesh">' + open(D + 'proteasome_lite.json').read() + '</script>')
 c5_page = once(c5_page, open(D + 'rob.js').read(), open(D + 'rob.js').read() + '\n' + open(D + 'v3.js').read())
 # autoplay a quarter quicker, with shorter holds where an equilibrium plays; clicks unchanged
