@@ -688,25 +688,37 @@ print('click3/index.html', os.path.getsize(D + 'click3/index.html') // 1024, 'KB
 # Sea Foam type and lines, Kelp for accents, the palette's gold for the clasp, its accents for the proteins.
 C4_PAL = ("PAL.otx = { ...PAL.otx, ring: '#1A372A', ink: '#070D0A', brd4: '#F0A6CA', vhl: '#CEE5F3', elob: '#8AB0AB', eloc: '#67B791', warhead: '#F0A6CA', e3lig: '#CEE5F3', "
           "linker: '#EBEBE3', brk: '#DCA84E', ub: '#A2839E', pearl3d: '#FFFFFF', clasp: '#DCA84E', e2: '#CEE5F3', prot: '#A2839E', protcap: '#90A9B7', wall: '#408967', cell: '#2E6149', "
-          "flash: '#DCA84E', sky: [['#2E6149', '#1A372A'], ['#2E6149', '#1A372A'], ['#1A372A', '#0B1712']] };\n")
+          "flash: '#DCA84E', sky: [['#2E6149', '#1A372A'], ['#2E6149', '#1A372A'], ['#1A372A', '#070D0A']] };\n")
 c4_head = c3_head.replace("<title>SELFTAC Journey Rob's Edits</title>", "<title>SELFTAC Journey Rob's Edits v2</title>", 1).replace('<meta name="theme-color" content="#158B63">', '<meta name="theme-color" content="#1A372A">') + '''<style>
 /* the brand palette */
 :root[data-palette="otx"] { --ink: #EBEBE3; --muted: #BADECD; --accent: #67B791; --paper: #1A372A; --band: #2E6149; --pearl: #DCA84E; --clasp: #DCA84E;
-  --line: rgba(235, 235, 227, .2); --card: rgba(235, 235, 227, .06); }
+  --line: #408967; --card: #2E6149; }
+/* every colour below is a swatch from the palette, used solid */
 body { background: #1A372A; }
-.beat .k b { color: #67B791; }
-.jl.loc { background: rgba(7, 13, 10, .86); border-color: rgba(235, 235, 227, .26); color: #EBEBE3; }
-.jl.key { background: rgba(7, 13, 10, .82); border-color: rgba(235, 235, 227, .18); color: #EBEBE3; }
-.jbtn { background: rgba(235, 235, 227, .14); border-color: rgba(235, 235, 227, .16); color: #EBEBE3; }
-.jbtn.jnext { background: #EBEBE3; color: #1A372A; } .jbtn.jnext:hover { background: #FFFFFF; }
-.jplay.on { background: rgba(103, 183, 145, .24); border-color: rgba(103, 183, 145, .55); }
-.jedit { background: rgba(7, 13, 10, .95); } .jedit .jf span, .jedit .jst { color: #BADECD; } .jedit legend b { color: #67B791; }
-.jedit-btn { background: rgba(235, 235, 227, .12); border-color: rgba(235, 235, 227, .16); color: #EBEBE3; }
+.beat h1, .beat h2 { color: #EBEBE3; } .beat p { color: #BADECD; } .beat .k { color: #EBEBE3; } .beat .k b { color: #67B791; }
+.jl { background: #070D0A; color: #EBEBE3; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.jl.sm { background: #070D0A; color: #BADECD; }
+.jl.big { background: #070D0A; color: #67B791; border-color: #408967; }
+.jl.hi { color: #67B791; }
+.jl.loc { background: #070D0A; border-color: #408967; color: #EBEBE3; }
+.jl.key { background: #070D0A; border-color: #408967; color: #EBEBE3; }
+.jbtn { background: #2E6149; border-color: #408967; color: #EBEBE3; } .jbtn:hover { background: #408967; }
+.jbtn.jnext { background: #EBEBE3; border-color: #EBEBE3; color: #1A372A; } .jbtn.jnext:hover { background: #FFFFFF; }
+.jplay.on { background: #408967; border-color: #67B791; }
+.jcount { color: #BADECD; }
+.jedit { background: #070D0A; border-color: #2E6149; } .jedit .jf span, .jedit .jst { color: #BADECD; } .jedit legend b { color: #67B791; }
+.jedit input, .jedit textarea { background: #1A372A; border-color: #408967; color: #EBEBE3; } .jedit .jx { background: #2E6149; color: #EBEBE3; }
+.jedit header, .jedit footer, .jedit fieldset { border-color: #2E6149; }
+.jedit-btn { background: #2E6149; border-color: #408967; color: #EBEBE3; }
+.end .tag { color: #EBEBE3; } .end .tag em { color: #67B791; } .end a { background: #2E6149; color: #EBEBE3; border-color: #408967; }
 </style>
 '''
 assert "<title>SELFTAC Journey Rob's Edits v2</title>" in c4_head
 c4_page = c4_head + c3_page[len(c3_head):]
 c4_page = once(c4_page, "PAL.otx.protcap = '#D6CBFA';\n", "PAL.otx.protcap = '#D6CBFA';\n" + C4_PAL)
+# the background takes the palette's exact values (a colour-space round trip would nudge the last digit)
+c4_page = once(c4_page, "const mix = (a, b, t) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), t).getHexString();",
+               "const mix = (a, b, t) => t <= .01 ? a : t >= .99 ? b : '#' + new THREE.Color(a).lerp(new THREE.Color(b), t).getHexString();")
 # the background stars in the palette's tones
 for a, b in (('%23CFFFFF', '%23BADECD'), ('%2396FF87', '%2367B791'), ('%23FFB36B', '%23DCA84E'), ('%23F7D16B', '%23DCA84E'), ('%23FFFFFF', '%23EBEBE3')):
     c4_page = c4_page.replace(a, b)
