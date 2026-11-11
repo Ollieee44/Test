@@ -460,8 +460,52 @@ c2_story = once(c2_story, 'ubiquitin from PDB 1UBQ. ', 'ubiquitin from PDB 1UBQ,
 c2_story = once(c2_story, 'the proteasome is a stand-in, and the person', 'the person')
 C2_PAL = PL_PAL + "PAL.otx.protcap = '#D6CBFA';\n"
 PROTMESH = '<script type="application/json" id="protmesh">' + open(D + 'proteasome.json').read() + '</script>'
+# the words: one data block (#c2text) the page applies as it loads, and an in-page editor that saves it (editor.js);
+# the end card no longer carries the model credits
+c2_story = re.sub(r'<p class="ecr">.*?</p>', '', c2_story, count=1, flags=re.S)
+assert 'class="ecr"' not in c2_story
+def _plain(h): return re.sub(r'<[^>]+>', '', h).replace('&reg;', '\u00ae').replace('&middot;', '\u00b7').replace('&amp;', '&').replace('&rsquo;', '\u2019')
+C2_TEXT = {'sections': [{'title': r, 'label': _plain(k.split(' &middot; ')[1]), 'heading': _plain(t), 'body': _plain(d)}
+                        for r, (k, h, t, d) in zip(['Oral', 'Gut', 'Plasma', 'Barrier', 'Complex', 'Degraded'], c2_beats)],
+           'tagline': ['Targeted protein degradation', 'beyond conventional limits.']}
+assert '<p class="tag">Targeted protein degradation <em>beyond conventional limits.</em></p>' in c2_story
+c2_story = c2_story.replace('</section>', '</section><script type="application/json" id="c2text">' + json.dumps(C2_TEXT, ensure_ascii=False).replace('<', '\\u003c')
+                            + '</script><script>' + open(D + 'text_apply.js').read() + '</script>', 1)
+c2_head = c2_head + """<style>
+/* the in-page text editor: a button top right, and a panel beside the copy (a sheet over the scene on phones) */
+.jedit-btn { position: absolute; top: calc(16px + env(safe-area-inset-top, 0px)); right: clamp(16px, 3vw, 40px); z-index: 6; display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 14px; border-radius: 10px; cursor: pointer; font: 500 14px/1 var(--sans); color: #FFFFFF; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .16); }
+.jedit-btn svg { width: 15px; height: 15px; } .jedit-btn:hover { background: rgba(255, 255, 255, .26); }
+.jedit-btn:focus-visible, .jedit button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.jediting .jedit-btn { display: none; }
+@media (min-width: 761px) { .jediting .jctl { right: calc(min(420px, 100%) + 24px); } }
+.jedit { position: absolute; top: 0; right: 0; bottom: 0; width: min(420px, 100%); z-index: 7; display: flex; flex-direction: column;
+  background: rgba(8, 52, 37, .95); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-left: 1px solid rgba(255, 255, 255, .12); color: #FFFFFF; }
+.jedit[hidden] { display: none; }
+.jedit header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 12px; border-bottom: 1px solid rgba(255, 255, 255, .1); }
+.jedit h2 { margin: 0; font: 500 20px/1.2 var(--serif); }
+.jedit .jx { width: 36px; height: 36px; border-radius: 9px; border: 0; background: rgba(255, 255, 255, .1); color: #FFFFFF; font: 400 22px/1 var(--sans); cursor: pointer; }
+.jedit .jbody { flex: 1; overflow: auto; padding: 8px 20px 20px; overscroll-behavior: contain; }
+.jedit fieldset { border: 0; margin: 0; padding: 16px 0 14px; border-bottom: 1px solid rgba(255, 255, 255, .1); display: grid; gap: 10px; }
+.jedit legend { padding: 0; margin-bottom: 4px; display: flex; gap: 10px; align-items: baseline; font: 400 15px/1.2 var(--pixel); letter-spacing: .03em; text-transform: uppercase; color: #FFFFFF; }
+.jedit legend b { font-weight: 400; color: #8AC3B1; }
+.jedit .jf { display: grid; gap: 5px; }
+.jedit .jf span { font: 500 12px/1.2 var(--sans); color: #A8D8C6; }
+.jedit input, .jedit textarea { width: 100%; box-sizing: border-box; font: 400 15px/1.45 var(--sans); color: #FFFFFF; background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .16); border-radius: 8px; padding: 8px 10px; resize: vertical; }
+.jedit input:focus, .jedit textarea:focus { outline: none; border-color: var(--accent); background: rgba(255, 255, 255, .1); }
+.jedit footer { display: flex; align-items: center; gap: 10px; padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(255, 255, 255, .1); }
+.jedit .jst { flex: 1; font: 400 13px/1.35 var(--sans); color: #A8D8C6; }
+.jedit .jbtn { height: 40px; } .jedit .jsave:disabled { opacity: .45; cursor: default; }
+@media (max-width: 760px) {
+  .jedit { left: 0; width: auto; bottom: auto; height: 56%; border-left: 0; border-bottom: 1px solid rgba(255, 255, 255, .14); }
+  .jedit input, .jedit textarea { font-size: 16px; }
+  .jedit-btn { height: 34px; font-size: 13px; padding: 0 11px; }
+}
+</style>
+"""
 c2_page = (c2_head + '<main id="main">\n' + c2_story + '</main>\n' + meshes + '\n' + PROTMESH + '\n<script type="module">' + c2_prefix + '\n' + C2_PAL
-           + c2_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '\n' + open(D + 'cell.js').read() + '\n' + c2_click + '</script>\n')
+           + c2_js + '\n' + open(D + 'otx.js').read() + '\n' + open(D + 'plasma.js').read() + '\n' + open(D + 'cell.js').read() + '\n' + c2_click + '\n' + open(D + 'editor.js').read() + '</script>\n')
 os.makedirs(D + 'click2', exist_ok=True)
 open(D + 'click2/index.html', 'w').write(c2_page)
 print('click2/index.html', os.path.getsize(D + 'click2/index.html') // 1024, 'KB')
