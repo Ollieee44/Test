@@ -574,6 +574,8 @@ if os.path.exists(D + 'text/click3.json'): C3_TEXT = json.load(open(D + 'text/cl
 c3_story = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C3_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c3_story, count=1, flags=re.S)
 c3_head = c2_head.replace('<title>SELFTAC Journey, Click-Through 2</title>', "<title>SELFTAC Journey Rob's Edits</title>", 1) + '''<style>
 /* location labels: larger, white on a dark pill */
+.jl.key.dright::before { display: none; }
+.jl.key.dright::after { content: ""; width: 11px; height: 11px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 2px rgba(255, 255, 255, .25); }
 .jl.loc { font: 600 13px/1.2 var(--mono); letter-spacing: .1em; color: #FFFFFF; background: rgba(6, 46, 33, .9); border: 1px solid rgba(255, 255, 255, .3);
   padding: 8px 13px; -webkit-backdrop-filter: none; backdrop-filter: none; }
 @media (max-width: 760px) { .jl.loc { font-size: 11px; padding: 6px 10px; } }
@@ -588,6 +590,11 @@ c3_plasma = once(c3_plasma, 'bounce: () => [BOUNCER.g.position.x - 6, BOUNCER.g.
 # the protein labels measured against the proteins' actual surfaces (not their loose bounding boxes), and set close
 c3_plasma = once(c3_plasma, 'const box = new THREE.Box3().setFromObject(t.at());', 'const box = new THREE.Box3().setFromObject(t.at(), !!t.side);')
 c3_cell = open(D + 'cell.js').read()
+# the cell's monomers and dimer stay to the end, drifting along with the camera as it follows the target, so they stay in view
+c3_cell = c3_cell.replace("win: pn => cellIn(pn) * clamp((.845 - pn) / .02, 0, 1)", "win: pn => cellIn(pn)").replace("win: pn => cellIn(pn) * clamp((.9 - pn) / .02, 0, 1)", "win: pn => cellIn(pn)")
+c3_cell = once(c3_cell, "const ox = c.at === 'cell' ? X.complex : h0.x", "const ox = c.at === 'cell' ? X.complex + .8 * Math.max(0, CAMX(WARP(pn)) - CAMX(WARP(.79))) : h0.x")
+# the ubiquitin label sits left of the chain, so its dot goes on its right, next to the chain
+c3_cell = once(c3_cell, "k.el.style.setProperty('--dot', col);", "k.el.style.setProperty('--dot', col); if (i === 2) k.el.classList.add('dright');")
 c3_cell = once(c3_cell, "const k = tag(t, 'key', at, win, 14);", "const k = tag(t, 'key', at, win, 8);")
 c3_cell = once(c3_cell, "pn => winOf(.715, stage.clientWidth < 760 ? .905 : .985)(pn)", "winOf(.715, .905)")   # the E3 ligase's label goes as the target is degraded
 c3_cell = once(c3_cell, "const w = clamp(Math.min((pn - .405) / .03, (.525 - pn) / .03), 0, 1);", "const w = clamp(Math.min((pn - .405) / .03, (.5 - pn) / .025), 0, 1);")   # rob.js joins them up after

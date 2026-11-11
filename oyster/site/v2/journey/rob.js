@@ -37,7 +37,7 @@ TAGS.forEach(t => { if (t.at() === BOUNCER.g) { t.win = () => 0; t.el.style.disp
   frame = function (p0) {
     const pn = clamp(p0, 0, 1);
     frameC(pn);
-    declutter();
+    declutter(pn);
     BOUNCER.g.visible = false;
     if (pn > .5 && pn < .7) plus.style.opacity = 0;                    // no '+' while it joins, bounces and comes apart
     // a flash as the linker breaks at the membrane
@@ -49,9 +49,9 @@ TAGS.forEach(t => { if (t.at() === BOUNCER.g) { t.win = () => 0; t.el.style.disp
 }
 // labels never sit on one another or on the molecule we follow: after each frame a label over one of its two halves is moved
 // just clear of it (up or down, whichever is shorter), then any label overlapping one above it is nudged down clear of it
-function declutter() {
+function declutter(pn) {
   const obs = [];
-  if (cg.visible) mol.group.children.slice(0, 2).forEach(ch => { const bx = new THREE.Box3().setFromObject(ch); if (bx.isEmpty()) return; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  if (cg.visible && pn < .7) mol.group.children.slice(0, 2).forEach(ch => {   // the halves are obstacles only on their way in; in the complex the protein labels sit by their proteins const bx = new THREE.Box3().setFromObject(ch); if (bx.isEmpty()) return; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (const cx of [bx.min.x, bx.max.x]) for (const cy of [bx.min.y, bx.max.y]) for (const cz of [bx.min.z, bx.max.z]) {
       vtmp.set(cx, cy, cz).project(camera); const sx = (vtmp.x + 1) / 2 * stage.clientWidth, sy = (1 - vtmp.y) / 2 * stage.clientHeight;
       x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }
