@@ -1047,7 +1047,8 @@ TAGS.forEach(t => { if (t.at() === BOUNCER.g) { t.win = () => 0; t.el.style.disp
 // just clear of it (up or down, whichever is shorter), then any label overlapping one above it is nudged down clear of it
 function declutter(pn) {
   const obs = [];
-  if (cg.visible && pn < .7) mol.group.children.slice(0, 2).forEach(ch => {   // the halves are obstacles only on their way in; in the complex the protein labels sit by their proteins const bx = new THREE.Box3().setFromObject(ch); if (bx.isEmpty()) return; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  // the halves are obstacles only on their way in; in the complex the protein labels sit by their proteins
+  if (cg.visible && pn < .7) mol.group.children.slice(0, 2).forEach(ch => { const bx = new THREE.Box3().setFromObject(ch); if (bx.isEmpty()) return; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (const cx of [bx.min.x, bx.max.x]) for (const cy of [bx.min.y, bx.max.y]) for (const cz of [bx.min.z, bx.max.z]) {
       vtmp.set(cx, cy, cz).project(camera); const sx = (vtmp.x + 1) / 2 * stage.clientWidth, sy = (1 - vtmp.y) / 2 * stage.clientHeight;
       x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }
