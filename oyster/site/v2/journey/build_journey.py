@@ -681,3 +681,37 @@ c3_page = (c3_head + '<main id="main">\n' + c3_story + '</main>\n' + meshes + '\
 os.makedirs(D + 'click3', exist_ok=True)
 open(D + 'click3/index.html', 'w').write(c3_page)
 print('click3/index.html', os.path.getsize(D + 'click3/index.html') // 1024, 'KB')
+
+# ---------- Rob's edits v2 (click4/index.html): Rob's edits in the brand palette (Colors.pdf) ----------
+# greens Abyss #070D0A, #1A372A, #2E6149, Kelp #408967, #67B791, #BADECD, Sea Foam #EBEBE3; accents gold #DCA84E, pink
+# #F0A6CA, mauve #A2839E, sage #8AB0AB, deep green #3F7965, ice blue #CEE5F3, slate #90A9B7. Deep Abyss greens behind,
+# Sea Foam type and lines, Kelp for accents, the palette's gold for the clasp, its accents for the proteins.
+C4_PAL = ("PAL.otx = { ...PAL.otx, ring: '#1A372A', ink: '#070D0A', brd4: '#F0A6CA', vhl: '#CEE5F3', elob: '#8AB0AB', eloc: '#67B791', warhead: '#F0A6CA', e3lig: '#CEE5F3', "
+          "linker: '#EBEBE3', brk: '#DCA84E', ub: '#A2839E', pearl3d: '#FFFFFF', clasp: '#DCA84E', e2: '#CEE5F3', prot: '#A2839E', protcap: '#90A9B7', wall: '#408967', cell: '#2E6149', "
+          "flash: '#DCA84E', sky: [['#2E6149', '#1A372A'], ['#2E6149', '#1A372A'], ['#1A372A', '#0B1712']] };\n")
+c4_head = c3_head.replace("<title>SELFTAC Journey Rob's Edits</title>", "<title>SELFTAC Journey Rob's Edits v2</title>", 1).replace('<meta name="theme-color" content="#158B63">', '<meta name="theme-color" content="#1A372A">') + '''<style>
+/* the brand palette */
+:root[data-palette="otx"] { --ink: #EBEBE3; --muted: #BADECD; --accent: #67B791; --paper: #1A372A; --band: #2E6149; --pearl: #DCA84E; --clasp: #DCA84E;
+  --line: rgba(235, 235, 227, .2); --card: rgba(235, 235, 227, .06); }
+body { background: #1A372A; }
+.beat .k b { color: #67B791; }
+.jl.loc { background: rgba(7, 13, 10, .86); border-color: rgba(235, 235, 227, .26); color: #EBEBE3; }
+.jl.key { background: rgba(7, 13, 10, .82); border-color: rgba(235, 235, 227, .18); color: #EBEBE3; }
+.jbtn { background: rgba(235, 235, 227, .14); border-color: rgba(235, 235, 227, .16); color: #EBEBE3; }
+.jbtn.jnext { background: #EBEBE3; color: #1A372A; } .jbtn.jnext:hover { background: #FFFFFF; }
+.jplay.on { background: rgba(103, 183, 145, .24); border-color: rgba(103, 183, 145, .55); }
+.jedit { background: rgba(7, 13, 10, .95); } .jedit .jf span, .jedit .jst { color: #BADECD; } .jedit legend b { color: #67B791; }
+.jedit-btn { background: rgba(235, 235, 227, .12); border-color: rgba(235, 235, 227, .16); color: #EBEBE3; }
+</style>
+'''
+assert "<title>SELFTAC Journey Rob's Edits v2</title>" in c4_head
+c4_page = c4_head + c3_page[len(c3_head):]
+c4_page = once(c4_page, "PAL.otx.protcap = '#D6CBFA';\n", "PAL.otx.protcap = '#D6CBFA';\n" + C4_PAL)
+# the background stars in the palette's tones
+for a, b in (('%23CFFFFF', '%23BADECD'), ('%2396FF87', '%2367B791'), ('%23FFB36B', '%23DCA84E'), ('%23F7D16B', '%23DCA84E'), ('%23FFFFFF', '%23EBEBE3')):
+    c4_page = c4_page.replace(a, b)
+C4_TEXT = json.load(open(D + 'text/click4.json', encoding='utf8'))   # this page's own words (its version of record)
+c4_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C4_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c4_page, count=1, flags=re.S)
+os.makedirs(D + 'click4', exist_ok=True)
+open(D + 'click4/index.html', 'w').write(c4_page)
+print('click4/index.html', os.path.getsize(D + 'click4/index.html') // 1024, 'KB')
