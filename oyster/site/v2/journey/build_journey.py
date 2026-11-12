@@ -821,6 +821,10 @@ c6_page = once(c6_page, '  const [cW, cE] = heads.map(h => h.c);\n', '''  const 
       }`;
     heads.forEach((h, i) => { const k = ['warhead', 'e3lig'][i], d = SG[k], col = mats[k].uniforms.col;
       h.mesh.material = new THREE.MeshBasicMaterial({ visible: false }); h.mesh.children[0].visible = false;
+      // unfurled: the traced outline turned with the atoms (about the attachment), so the linker still leaves it cleanly
+      const tm = d.turn.m, tp = d.turn.pivot;
+      h.mesh.geometry.translate(-tp[0], -tp[1], -tp[2]).applyMatrix4(new THREE.Matrix4().set(tm[0][0], tm[0][1], tm[0][2], 0, tm[1][0], tm[1][1], tm[1][2], 0, tm[2][0], tm[2][1], tm[2][2], 0, 0, 0, 0, 1)).translate(tp[0], tp[1], tp[2]);
+      h.mesh.geometry.computeBoundingSphere();
       const skin = new THREE.ShaderMaterial({ vertexShader: IVS, fragmentShader: SFS, uniforms: { col } });
       const am = new THREE.InstancedMesh(sph, skin, d.atoms.length), bm = new THREE.InstancedMesh(cyl, skin, d.bonds.length);
       d.atoms.forEach((p, j) => am.setMatrixAt(j, M4.compose(new THREE.Vector3(...p), QQ.identity(), S3.setScalar(.36))));
@@ -836,6 +840,31 @@ c6_page = once(c6_page, '  const [cW, cE] = heads.map(h => h.c);\n', '''  const 
 # crystal structures (bumpy.json, tools/bumpy_meshes.py) with a soft, glowing, occluded finish and no ink outline
 c6_page = once(c6_page, meshes, meshes + '\n<script type="application/json" id="bumpy">' + open(D + 'bumpy.json').read() + '</script>')
 c6_page = once(c6_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'xvivo.js').read())
+# the white part of the linker, glassy space-filling too: spheres along each side's strand, from inside the half to just
+# short of the gold clasp (which stays as it is), drawn as one shell (a depth pass, then the colour where it is nearest),
+# moved with the strands every update
+c6_page = once(c6_page, '  return { group, update, setColors, centre: cW.clone().add(cE).multiplyScalar(.5) };\n', '''  const linkerGlass = (() => { const geo = new THREE.SphereGeometry(1, 16, 12), N = 11;
+    const LVS = `varying vec3 vN; varying vec3 vV; void main() { mat4 m = modelMatrix;
+        #ifdef USE_INSTANCING
+        m = m * instanceMatrix;
+        #endif
+        vec4 w = m * vec4(position, 1.0); vN = normalize(mat3(m) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`;
+    const LFS = `uniform vec3 col; varying vec3 vN; varying vec3 vV; void main() { vec3 n = normalize(vN), v = normalize(vV); float f = pow(1.0 - abs(dot(n, v)), 2.0);
+        float spec = pow(max(dot(n, normalize(normalize(vec3(-.35, .72, .6)) + v)), 0.0), 40.0);
+        gl_FragColor = vec4(mix(col, vec3(1.0), spec * .6), .3 + .55 * f + spec * .5);
+        #include <colorspace_fragment>
+      }`;
+    const make = (mat, order) => { const m = new THREE.InstancedMesh(geo, mat, 2 * N); m.frustumCulled = false; m.renderOrder = order; m.count = 0; group.add(m); return m; };
+    const depth = make(new THREE.ShaderMaterial({ vertexShader: LVS, fragmentShader: 'void main() { gl_FragColor = vec4(0.0); }', colorWrite: false }), 4);   // (the same vertex code as the shell, so the depths match exactly)
+    const shell = make(new THREE.ShaderMaterial({ vertexShader: LVS, fragmentShader: LFS, uniforms: { col: mats.strand.uniforms.col }, transparent: true, depthWrite: false, depthFunc: THREE.LessEqualDepth }), 5);
+    const mm = new THREE.Matrix4(), qi = new THREE.Quaternion(), sc = new THREE.Vector3(1.75, 1.75, 1.75);
+    return () => { let n = 0;
+      strands.forEach((t, i) => { const path = t.geometry.parameters.path; if (!path) return;
+        for (let s = 0; s < N; s++) { const u = i === 0 ? s / (N - 1) * .7 : .3 + s / (N - 1) * .7; mm.compose(path.getPointAt(u), qi, sc); depth.setMatrixAt(n, mm); shell.setMatrixAt(n, mm); n++; } });
+      depth.count = shell.count = n; depth.instanceMatrix.needsUpdate = shell.instanceMatrix.needsUpdate = true; };
+  })();
+  return { group, update: (...a) => { const r = update(...a); linkerGlass(); return r; }, setColors, centre: cW.clone().add(cE).multiplyScalar(.5) };
+''')
 C6_TEXT = json.load(open(D + 'text/click6.json', encoding='utf8'))
 c6_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C6_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c6_page, count=1, flags=re.S)
 os.makedirs(D + 'click6', exist_ok=True)
