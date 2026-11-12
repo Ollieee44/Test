@@ -9,8 +9,8 @@
   {
    "title": "Gut",
    "label": "In the gut",
-   "heading": "SELFTAC disassembles into two small molecules.",
-   "body": ""
+   "heading": "SELFTAC® disassembles into two small molecules.",
+   "body": "We call these monomers."
   },
   {
    "title": "Plasma",
@@ -27,13 +27,13 @@
   {
    "title": "Ternary complex",
    "label": "Ternary complex",
-   "heading": "Inside the cell, the SELFTAC forms a ternary complex.",
+   "heading": "Inside the cell, monomers associate and the SELFTAC® forms a ternary complex.",
    "body": ""
   },
   {
    "title": "Degraded",
    "label": "Degradation",
-   "heading": "Target protein tagged and degraded.",
+   "heading": "Target protein is tagged and degraded.",
    "body": ""
   }
  ],

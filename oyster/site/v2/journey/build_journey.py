@@ -842,7 +842,7 @@ c6_page = once(c6_page, '  const [cW, cE] = heads.map(h => h.c);\n', '''  const 
 # and the proteins restyled after XVIVO's targeted-protein-degradation animation (xvivo.js): atom-detailed surfaces from the
 # crystal structures (bumpy.json, tools/bumpy_meshes.py) with a soft, glowing, occluded finish and no ink outline
 c6_page = once(c6_page, meshes, meshes + '\n<script type="application/json" id="bumpy">' + open(D + 'bumpy.json').read() + '</script>')
-c6_page = once(c6_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'xvivo.js').read() + '\n' + open(D + 'nomem.js').read() + '\n' + open(D + 'noblood.js').read())   # (nomem.js: no SELFTAC clips the membrane in the cell)
+c6_page = once(c6_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'xvivo.js').read() + '\n' + open(D + 'nomem.js').read() + '\n' + open(D + 'noblood.js').read() + '\n' + open(D + 'passlabel.js').read())   # (nomem.js: no SELFTAC clips the membrane in the cell)
 # the white part of the linker, glassy space-filling too: a glass tube along each side's strand, from inside the half to just
 # short of the gold clasp (which stays as it is), with rounded ends,
 # moved with the strands every update
@@ -888,6 +888,7 @@ def barrier_labels(pg):
     i = pg.index('</style>'); assert i < pg.index('<main id="main">')
     return pg[:i] + '@media (max-width: 760px) { .jl.loc[data-pl="pass"] { white-space: normal; max-width: 150px; line-height: 1.35; } }\n' + pg[i:]
 c6_page = barrier_labels(c6_page)
+c6_page = c6_page.replace('How a SELFTAC degrader', 'How a SELFTAC® degrader')   # (the description and the story's screen-reader label)
 os.makedirs(D + 'click6', exist_ok=True)
 open(D + 'click6/index.html', 'w').write(c6_page)
 print('click6/index.html', os.path.getsize(D + 'click6/index.html') // 1024, 'KB')

@@ -1,4 +1,4 @@
-// ---------- v5: the "Monomers pass through more easily" label sits between the two crossing monomers ----------
+// ---------- v4/v5: the "Monomers pass through more easily" label sits between the two crossing monomers ----------
 // Each frame, after the page has placed its labels: centred on the point midway between the two halves, then moved
 // right only as far as it must to touch neither the membrane (its cell-side face) nor either half.
 {
