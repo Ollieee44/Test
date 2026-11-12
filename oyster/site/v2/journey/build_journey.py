@@ -839,7 +839,7 @@ c6_page = once(c6_page, '  const [cW, cE] = heads.map(h => h.c);\n', '''  const 
 # and the proteins restyled after XVIVO's targeted-protein-degradation animation (xvivo.js): atom-detailed surfaces from the
 # crystal structures (bumpy.json, tools/bumpy_meshes.py) with a soft, glowing, occluded finish and no ink outline
 c6_page = once(c6_page, meshes, meshes + '\n<script type="application/json" id="bumpy">' + open(D + 'bumpy.json').read() + '</script>')
-c6_page = once(c6_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'xvivo.js').read())
+c6_page = once(c6_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'xvivo.js').read() + '\n' + open(D + 'nomem.js').read())   # (nomem.js: no SELFTAC clips the membrane in the cell)
 # the white part of the linker, glassy space-filling too: spheres along each side's strand, from inside the half to just
 # short of the gold clasp (which stays as it is), drawn as one shell (a depth pass, then the colour where it is nearest),
 # moved with the strands every update
@@ -870,3 +870,23 @@ c6_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)'
 os.makedirs(D + 'click6', exist_ok=True)
 open(D + 'click6/index.html', 'w').write(c6_page)
 print('click6/index.html', os.path.getsize(D + 'click6/index.html') // 1024, 'KB')
+
+# ---------- Rob's edits v5 (click7/index.html): v3's look, with v4's unfurled SELFTAC ----------
+# v3 exactly (contour-shaded proteins, the traced-ring SELFTAC), but each half turned as in v4: unfurled away from the
+# linker and its rings square on to the viewer (the turns in selftac_glass.json applied to the traced outlines), and no
+# SELFTAC clipping the membrane inside the cell (nomem.js).
+TURNS = {k: v['turn'] for k, v in json.load(open(D + 'selftac_glass.json')).items()}
+c7_page = c5_page.replace("<title>SELFTAC Journey Rob's Edits v3</title>", "<title>SELFTAC Journey Rob's Edits v5</title>", 1)
+V5_TURN = """  const [cW, cE] = heads.map(h => h.c);
+  // v5: each half unfurled away from the linker, its rings square on to the viewer (turned about its attachment)
+  { const TURN = %s;
+    heads.forEach((h, i) => { const t = TURN[['warhead', 'e3lig'][i]], m = t.m, p = t.pivot;
+      h.mesh.geometry.translate(-p[0], -p[1], -p[2]).applyMatrix4(new THREE.Matrix4().set(m[0][0], m[0][1], m[0][2], 0, m[1][0], m[1][1], m[1][2], 0, m[2][0], m[2][1], m[2][2], 0, 0, 0, 0, 1)).translate(p[0], p[1], p[2]);
+      h.mesh.geometry.computeBoundingSphere(); }); }
+""" % json.dumps(TURNS)
+c7_page = once(c7_page, '  const [cW, cE] = heads.map(h => h.c);\n', V5_TURN)
+c7_page = once(c7_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'nomem.js').read())
+c7_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(json.load(open(D + 'text/click7.json', encoding='utf8')), ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c7_page, count=1, flags=re.S)
+os.makedirs(D + 'click7', exist_ok=True)
+open(D + 'click7/index.html', 'w').write(c7_page)
+print('click7/index.html', os.path.getsize(D + 'click7/index.html') // 1024, 'KB')
