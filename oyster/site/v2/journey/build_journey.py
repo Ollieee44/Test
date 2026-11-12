@@ -794,7 +794,7 @@ os.makedirs(D + 'click5', exist_ok=True)
 open(D + 'click5/index.html', 'w').write(c5_page)
 print('click5/index.html', os.path.getsize(D + 'click5/index.html') // 1024, 'KB')
 
-# ---------- Rob's edits v4 (click6/index.html): v3 with the SELFTAC drawn as pearl clusters ----------
+# ---------- Rob's edits v4 (click6/index.html): v3 with the SELFTAC drawn as pearl clusters, and XVIVO-style proteins ----------
 # The "Pearl cluster" option from the representations gallery (reps/): each half of the degrader drawn as a few glossy
 # pearls in its colour, set at centres spread along the half's mass (reps/reps_data.json), in place of the traced rings.
 # The halves keep their places, so the linker, its pearls and the gold clasp are unchanged; the pearls use the halves'
@@ -809,6 +809,10 @@ c6_page = once(c6_page, '  const [cW, cE] = heads.map(h => h.c);\n', '''  const 
       PC[k].forEach(c => { const s = new THREE.Mesh(pb, mats[k]); s.position.set(...c); s.scale.setScalar(1.55); s.add(outline(s)); h.mesh.add(s); }); });
     mats.warhead.uniforms.gloss.value = mats.e3lig.uniforms.gloss.value = .9; }
 ''')
+# and the proteins restyled after XVIVO's targeted-protein-degradation animation (xvivo.js): atom-detailed surfaces from the
+# crystal structures (bumpy.json, tools/bumpy_meshes.py) with a soft, glowing, occluded finish and no ink outline
+c6_page = once(c6_page, meshes, meshes + '\n<script type="application/json" id="bumpy">' + open(D + 'bumpy.json').read() + '</script>')
+c6_page = once(c6_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'xvivo.js').read())
 C6_TEXT = json.load(open(D + 'text/click6.json', encoding='utf8'))
 c6_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C6_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c6_page, count=1, flags=re.S)
 os.makedirs(D + 'click6', exist_ok=True)
