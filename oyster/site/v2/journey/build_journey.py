@@ -906,9 +906,10 @@ V5_TURN = """  const [cW, cE] = heads.map(h => h.c);
       h.mesh.geometry.computeBoundingSphere(); }); }
 """ % json.dumps(TURNS)
 c7_page = once(c7_page, '  const [cW, cE] = heads.map(h => h.c);\n', V5_TURN)
-c7_page = once(c7_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'nomem.js').read() + '\n' + open(D + 'noblood.js').read())
+c7_page = once(c7_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'nomem.js').read() + '\n' + open(D + 'noblood.js').read() + '\n' + open(D + 'passlabel.js').read())
 c7_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(json.load(open(D + 'text/click7.json', encoding='utf8')), ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c7_page, count=1, flags=re.S)
 c7_page = barrier_labels(c7_page)
+c7_page = c7_page.replace('How a SELFTAC degrader', 'How a SELFTAC® degrader')   # (the description and the story's screen-reader label)
 os.makedirs(D + 'click7', exist_ok=True)
 open(D + 'click7/index.html', 'w').write(c7_page)
 print('click7/index.html', os.path.getsize(D + 'click7/index.html') // 1024, 'KB')
