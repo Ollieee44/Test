@@ -831,8 +831,11 @@ c6_page = once(c6_page, '  const [cW, cE] = heads.map(h => h.c);\n', '''  const 
       d.bonds.forEach(([a, b], j) => { const A = new THREE.Vector3(...d.atoms[a]), B = new THREE.Vector3(...d.atoms[b]), dir = B.clone().sub(A);
         bm.setMatrixAt(j, M4.compose(A.clone().add(B).multiplyScalar(.5), QQ.setFromUnitVectors(UP, dir.clone().normalize()), S3.set(.14, dir.length(), .14))); });
       am.frustumCulled = bm.frustumCulled = false;
-      const glass = new THREE.Mesh(geom(d.surface), new THREE.ShaderMaterial({ vertexShader: IVS, fragmentShader: GFS, uniforms: { col }, transparent: true, depthWrite: false }));
-      glass.renderOrder = 3; h.mesh.add(am, bm, glass); });
+      // one glass body per side (this half and its linker sleeve): a depth pass first (nudged back a hair so nothing streaks),
+      // then the colour only where it is the front-most glass, so where they meet there is no inner edge
+      const gg = geom(d.surface), glass = new THREE.Mesh(gg, new THREE.ShaderMaterial({ vertexShader: IVS, fragmentShader: GFS, uniforms: { col }, transparent: true, depthWrite: false }));
+      const gpre = new THREE.Mesh(gg, new THREE.ShaderMaterial({ vertexShader: IVS, fragmentShader: 'void main() { gl_FragColor = vec4(0.0); }', colorWrite: false, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }));
+      gpre.renderOrder = 4; glass.renderOrder = 5; h.mesh.add(am, bm, gpre, glass); });
   }
 ''')
 
@@ -856,15 +859,19 @@ c6_page = once(c6_page, '  return { group, update, setColors, centre: cW.clone()
       }`;
     // one smooth glass tube per side, with rounded (hemisphere) ends, rebuilt along the strand as it moves: a single
     // surface, so nothing overlaps (overlapping spheres streaked where they met)
-    const mat = new THREE.ShaderMaterial({ vertexShader: LVS, fragmentShader: LFS, uniforms: { col: mats.strand.uniforms.col }, transparent: true, depthWrite: false });
+    // each side's sleeve in its half's colour and sharing its depth pass, so the sleeve and the half are one glass body
+    const sideMat = k => new THREE.ShaderMaterial({ vertexShader: LVS, fragmentShader: LFS, uniforms: { col: mats[k].uniforms.col }, transparent: true, depthWrite: false });
+    const pre = new THREE.ShaderMaterial({ vertexShader: LVS, fragmentShader: 'void main() { gl_FragColor = vec4(0.0); }', colorWrite: false, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
     const RG = 1.75, cap = new THREE.SphereGeometry(RG, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), UPV = new THREE.Vector3(0, 1, 0);
-    const sides = [0, 1].map(() => { const tube = new THREE.Mesh(new THREE.BufferGeometry(), mat), c0 = new THREE.Mesh(cap, mat), c1 = new THREE.Mesh(cap, mat);
-      [tube, c0, c1].forEach(m => { m.renderOrder = 5; m.frustumCulled = false; group.add(m); }); return { tube, c0, c1 }; });
+    const sides = ['warhead', 'e3lig'].map(k => { const mat = sideMat(k), tube = new THREE.Mesh(new THREE.BufferGeometry(), mat), c0 = new THREE.Mesh(cap, mat), c1 = new THREE.Mesh(cap, mat);
+      const tp = new THREE.Mesh(tube.geometry, pre), p0 = new THREE.Mesh(cap, pre), p1 = new THREE.Mesh(cap, pre);
+      [tube, c0, c1].forEach(m => { m.renderOrder = 5; m.frustumCulled = false; group.add(m); }); [tp, p0, p1].forEach(m => { m.renderOrder = 4; m.frustumCulled = false; group.add(m); });
+      return { tube, c0, c1, tp, p0, p1 }; });
     return () => {
       strands.forEach((t, i) => { const path = t.geometry.parameters.path, sd = sides[i]; if (!path) return;
         const u0 = i === 0 ? 0 : .3, u1 = i === 0 ? .7 : 1, pts = []; for (let s = 0; s <= 16; s++) pts.push(path.getPointAt(u0 + (u1 - u0) * s / 16));
-        const curve = new THREE.CatmullRomCurve3(pts); sd.tube.geometry.dispose(); sd.tube.geometry = new THREE.TubeGeometry(curve, 32, RG, 20, false);
-        [[sd.c0, 0, -1], [sd.c1, 1, 1]].forEach(([c, u, sgn]) => { c.position.copy(curve.getPointAt(u)); c.quaternion.setFromUnitVectors(UPV, curve.getTangentAt(u).multiplyScalar(sgn)); }); });
+        const curve = new THREE.CatmullRomCurve3(pts); sd.tube.geometry.dispose(); sd.tube.geometry = sd.tp.geometry = new THREE.TubeGeometry(curve, 32, RG, 20, false);
+        [[sd.c0, sd.p0, 0, -1], [sd.c1, sd.p1, 1, 1]].forEach(([c, p, u, sgn]) => { c.position.copy(curve.getPointAt(u)); c.quaternion.setFromUnitVectors(UPV, curve.getTangentAt(u).multiplyScalar(sgn)); p.position.copy(c.position); p.quaternion.copy(c.quaternion); }); });
     };
   })();
   return { group, update: (...a) => { const r = update(...a); linkerGlass(); return r; }, setColors, centre: cW.clone().add(cE).multiplyScalar(.5) };
