@@ -567,7 +567,7 @@ const CAMX = curve([[0, 14], [.12, 14], [.16, 8], [.22, 0], [.31, 0], [.42, X.mo
 const CAMY = curve([[0, 4], [.12, 4], [.22, -25], [.31, -25], [.42, 0], [.58, 0], [.66, -4], [.86, -4], [.95, -6], [1, 0]]);
 const DIST = curve([[0, 440], [.12, 440], [.16, 400], [.22, 130], [.31, 130], [.42, 370], [.5, 440], [.62, 560], [.79, 560], [.9, 560], [.95, 600], [1, 1500]]);
 // the hero: a dimer released in the gut (at y -25), which dissociates there into its two monomers, then leaves
-const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.56, 30], [.6, 30], [.67, GAPJ]]);   // half-separation
+const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.585, 13], [.615, 7], [.645, 7], [.68, GAPJ]]);   // apart through the membrane; a compact dimer in the cell; opened to the proteins   // half-separation
 const HERO_X = curve([[0, 0], [.31, 0], [.42, X.mono], [.6, X.inside], [.68, X.complex], [1, X.complex]]);
 const HERO_Y = curve([[0, -25], [.31, -25], [.42, 0], [1, 0]]);
 
@@ -618,21 +618,21 @@ function frame(p0) {
   const sh = kf(p, [[.18, .001], [.21, .45], [.31, .45], [.42, 1]]);
   cg.position.set(HERO_X(p), HERO_Y(p), 0); cg.scale.setScalar(SC * sh); cg.visible = sh > .01;
   cg.rotation.z = kf(p, [[.295, 0], [.32, -Math.PI / 2], [.37, -Math.PI / 2], [.395, 0], [.425, 0], [.47, -Math.PI / 2]]) + (p < .31 ? .12 * Math.sin(p * 30) : 0);
-  const j = kf(p, [[.27, 1], [.31, 0], [.64, 0], [.68, 1]]);
+  const j = kf(p, [[.27, 1], [.31, 0], [.585, 0], [.615, 1]]);   // rejoined in the cell, before the proteins
   const free = (1 - j) * clamp((.66 - p) / .05, 0, 1), hx = p < .27 ? 7 : HX(p) - CMP;
   const rW = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * .32 * Math.sin(p * 47), free * .42 * Math.sin(p * 31), 0));
   const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(p * 43), free * .4 * Math.cos(p * 35), 0));
   const brk = heroOverride(clamp(p0, 0, 1), mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j));
   // the proteins come in: the target from above, the ligase from below
-  const tIn = kf(p, [[.58, 1], [.66, 0]]);
+  const tIn = kf(p, [[.622, 1], [.68, 0]]);   // the proteins come in once the dimer has formed
   P.brd4.position.set(-GAPJ + CMP - 110 * tIn, 0, 0); P.brd4.scale.setScalar(1);
   ['vhl', 'elob', 'eloc'].forEach(key => { P[key].position.set(GAPJ - CMP + 130 * tIn, 0, 0); P[key].visible = p > .57; });
   P.brd4.visible = p > .57;
   cg.updateMatrixWorld(true);
   // the bond: a flash as it breaks in the gut, and again as it clicks shut in the complex
-  const fb = bump(p, .27, .31), fj = bump(p, .655, .7), fx = Math.max(fb, fj);
+  const fb = bump(p, .27, .31), fj = bump(p, .588, .628), fx = Math.max(fb, fj);
   flash.position.copy(mol.group.localToWorld(brk.clone()));
-  flash.scale.setScalar(SC * sh * (fb > fj ? .7 + 1.4 * clamp((p - .27) / .04, 0, 1) : 1 + 3 * clamp((p - .655) / .045, 0, 1)));   // a finer flash for the break
+  flash.scale.setScalar(SC * sh * (fb > fj ? .7 + 1.4 * clamp((p - .27) / .04, 0, 1) : 1 + 3 * clamp((p - .588) / .04, 0, 1)));   // a finer flash for the break
   flash.material.opacity = (fb > fj ? .6 : .9) * fx; flash.visible = fx > .01; flash.lookAt(camera.position);
 
   // ---- 05 degradation: ubiquitin tags the target, it goes into the proteasome, and comes out in pieces
@@ -1132,14 +1132,21 @@ function declutter(pn) {
     return b;
   };
 }
+// ---------- v3: the monomers click back together in the cell ----------
+// Through the membrane the two monomers rejoin into the dimer before the proteins come in; a label calls it out while
+// the clasp closes (pn .688 to .742, the page's own timeline), sitting on the dimer.
+{
+  const reTag = tag('Monomers click together · dimer', 'key', () => mol.group, pn => winOf(.688, .742, .012)(pn), 10);
+  reTag.el.style.setProperty('--dot', '#DCA84E'); reTag.el.classList.add('dright'); reTag.side = 'left'; reTag.gap = 8; reTag.ov = 6; TAGS.push(reTag);
+}
 
 // ---------- the click-through version: Next / Back step between the story's key moments ----------
 // The page does not scroll; each step plays the journey from one stop to the next (eased, its length in proportion to
 // the distance) and holds there. Arrow keys and the space bar step too, and the rail's pearls jump to a beat.
 (() => {
-  const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];
-  const SLOW = { 4: 1.3, 5: 2.6, 6: 1.9, 7: 1.8, 8: 2.6 };                          // tagging and degradation: unhurried
-  const BEAT_STOP = [0, 1, 3, 4, 6, 7];                  // the first stop of each of the six beats (the rail)
+  const STOPS = [0, .25, .335, .45, .59, .665, .716, .79, .865, .92, .998];
+  const SLOW = { 4: 1.3, 5: 2.6, 6: 2.2, 7: 1.9, 8: 1.8, 9: 2.6 };                          // tagging and degradation: unhurried
+  const BEAT_STOP = [0, 1, 3, 4, 6, 8];                  // the first stop of each of the six beats (the rail)
   BEATS_N[4][1] = BEATS_N[5][0] = .84;                   // the degradation copy is in by the time the tags land (stop 9)
   const J = window.__journey, next = document.getElementById('jnext'), back = document.getElementById('jback'), count = document.getElementById('jcount');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1167,7 +1174,7 @@ function declutter(pn) {
     return finished;
   }
   // the whole journey: every stop in turn, holding at each long enough to read (longer where the copy changes)
-  const HOLD = [250, 450, 250, 1700, 700, 450, 1600, 350, 900];   // longer where an equilibrium is playing   // a brief pause at each stop (longest where the copy changes)
+  const HOLD = [250, 450, 250, 1700, 700, 450, 1300, 1600, 350, 900];   // longer where an equilibrium is playing   // a brief pause at each stop (longest where the copy changes)
   const wait = ms => new Promise(r => setTimeout(r, ms));
   function setPlaying(on) { playing = on; play.classList.toggle('on', on); play.setAttribute('aria-pressed', String(on));
     playLabel.textContent = on ? 'Pause' : at === STOPS.length - 1 ? 'Watch again' : at === 0 ? 'Watch the whole journey' : 'Play from here'; }

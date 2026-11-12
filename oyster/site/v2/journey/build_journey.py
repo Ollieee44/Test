@@ -772,6 +772,18 @@ c5_page = once(c5_page, open(D + 'rob.js').read(), open(D + 'rob.js').read() + '
 c5_page = once(c5_page, 'Math.max(2300, Math.min(4800, 1900 + d * 12000))', 'Math.max(1700, Math.min(3600, 1400 + d * 9000))')
 c5_page = once(c5_page, 'const HOLD = [300, 550, 300, 2400, 900, 550, 2200, 450, 400];', 'const HOLD = [250, 450, 250, 1700, 700, 450, 1600, 350, 900];')
 # a bigger proteasome (a quarter up), its fragments leaving from the bottom of the larger core, its labels moved out with it
+# the monomers that cross the membrane click back together into a dimer in the cell first (a flash at the clasp and a
+# label), and only then do the proteins come in and the dimer form the ternary complex; a stop holds on the dimer
+c5_page = once(c5_page, "const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.56, 30], [.6, 30], [.67, GAPJ]]);",
+               "const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.585, 13], [.615, 7], [.645, 7], [.68, GAPJ]]);   // apart through the membrane; a compact dimer in the cell; opened to the proteins")
+c5_page = once(c5_page, "const j = kf(p, [[.27, 1], [.31, 0], [.64, 0], [.68, 1]]);", "const j = kf(p, [[.27, 1], [.31, 0], [.585, 0], [.615, 1]]);   // rejoined in the cell, before the proteins")
+c5_page = once(c5_page, "const tIn = kf(p, [[.58, 1], [.66, 0]]);", "const tIn = kf(p, [[.622, 1], [.68, 0]]);   // the proteins come in once the dimer has formed")
+c5_page = once(c5_page, "const fb = bump(p, .27, .31), fj = bump(p, .655, .7), fx = Math.max(fb, fj);", "const fb = bump(p, .27, .31), fj = bump(p, .588, .628), fx = Math.max(fb, fj);")
+c5_page = once(c5_page, ": 1 + 3 * clamp((p - .655) / .045, 0, 1)));", ": 1 + 3 * clamp((p - .588) / .04, 0, 1)));")
+c5_page = once(c5_page, "const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];", "const STOPS = [0, .25, .335, .45, .59, .665, .716, .79, .865, .92, .998];")
+c5_page = once(c5_page, "const SLOW = { 4: 1.3, 5: 2.6, 6: 1.9, 7: 1.8, 8: 2.6 };", "const SLOW = { 4: 1.3, 5: 2.6, 6: 2.2, 7: 1.9, 8: 1.8, 9: 2.6 };")
+c5_page = once(c5_page, "const BEAT_STOP = [0, 1, 3, 4, 6, 7];", "const BEAT_STOP = [0, 1, 3, 4, 6, 8];")
+c5_page = once(c5_page, "const HOLD = [250, 450, 250, 1700, 700, 450, 1600, 350, 900];", "const HOLD = [250, 450, 250, 1700, 700, 450, 1300, 1600, 350, 900];")
 c5_page = big_proteasome(c5_page)   # the larger proteasome, its labels and fragments, and the cell's molecules placed around it
 C5_TEXT = json.load(open(D + 'text/click5.json', encoding='utf8'))
 c5_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C5_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c5_page, count=1, flags=re.S)
