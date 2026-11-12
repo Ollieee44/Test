@@ -18,11 +18,20 @@ L = np.array(R_['linker']['curve']); ENDS = {'warhead': (L[0], L[-1]), 'e3lig': 
 def rot_between(a, b):
     a = a / np.linalg.norm(a); b = b / np.linalg.norm(b); v = np.cross(a, b); c = a @ b
     K = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]]); return np.eye(3) + K + K @ K / (1 + c)
+def rot_about(k, th):
+    k = k / np.linalg.norm(k); K = np.array([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]]); return np.eye(3) + np.sin(th) * K + (1 - np.cos(th)) * K @ K
+C_ = R_['centres']; TOSCREEN = rot_between(np.array(C_['brd4']) - np.array(C_['vhl']), np.array([-1., 0, 0]))
 out = {}
 for k, a in A.items():
     xyz = np.array(a['xyz']); here, there = ENDS[k]
     hv0 = [i for i, e in enumerate(a['el']) if e != 'H']
     Rm = rot_between(xyz[hv0].mean(0) - here, here - there)      # the half's bulk, turned to point away from the other half
+    # then spun about that direction so its rings lie square on to the viewer: the ring atoms' plane normal brought as
+    # close as possible to the screen's z once the page turns the crystal (TOSCREEN, the page's Q)
+    ring = sorted({i for r in a['rings'] for i in r}); away = (here - there) / np.linalg.norm(here - there)
+    Y = (xyz - here) @ Rm.T; nrm = np.linalg.svd(Y[ring] - Y[ring].mean(0))[2][2]
+    best = max(np.linspace(0, 2 * np.pi, 360, endpoint=False), key=lambda th: abs((TOSCREEN @ rot_about(away, th) @ nrm)[2]))
+    Rm = rot_about(away, best) @ Rm
     xyz = (xyz - here) @ Rm.T + here
     rad = np.array([VDW[e] for e in a['el']]); SP = .32
     lo = xyz.min(0) - 3.5; n = np.ceil((xyz.max(0) + 3.5 - lo) / SP).astype(int) + 1
