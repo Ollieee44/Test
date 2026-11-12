@@ -567,7 +567,7 @@ const CAMX = curve([[0, 14], [.12, 14], [.16, 8], [.22, 0], [.31, 0], [.42, X.mo
 const CAMY = curve([[0, 4], [.12, 4], [.22, -25], [.31, -25], [.42, 0], [.58, 0], [.66, -4], [.86, -4], [.95, -6], [1, 0]]);
 const DIST = curve([[0, 440], [.12, 440], [.16, 400], [.22, 130], [.31, 130], [.42, 370], [.5, 440], [.62, 560], [.79, 560], [.9, 560], [.95, 600], [1, 1500]]);
 // the hero: a dimer released in the gut (at y -25), which dissociates there into its two monomers, then leaves
-const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.585, 13], [.615, 7], [.645, 7], [.68, GAPJ]]);   // apart through the membrane; a compact dimer in the cell; opened to the proteins   // half-separation
+const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.585, 13], [.615, 7], [.63, 7], [.66, GAPJ]]);   // apart through the membrane; a compact dimer in the cell; opened to the proteins as the target docks   // half-separation
 const HERO_X = curve([[0, 0], [.31, 0], [.42, X.mono], [.6, X.inside], [.68, X.complex], [1, X.complex]]);
 const HERO_Y = curve([[0, -25], [.31, -25], [.42, 0], [1, 0]]);
 
@@ -624,8 +624,8 @@ function frame(p0) {
   const rE = new THREE.Quaternion().setFromEuler(new THREE.Euler(free * -.3 * Math.sin(p * 43), free * .4 * Math.cos(p * 35), 0));
   const brk = heroOverride(clamp(p0, 0, 1), mol.update(V3(-hx, 0, 0), V3(hx, 0, 0), rW, rE, j));
   // the proteins come in: the target from above, the ligase from below
-  const tIn = kf(p, [[.622, 1], [.68, 0]]);   // the proteins come in once the dimer has formed
-  P.brd4.position.set(-GAPJ + CMP - 330 * tIn, 0, 0); P.brd4.scale.setScalar(1);
+  const tIn = kf(p, [[.645, 1], [.69, 0]]), tInT = kf(p, [[.622, 1], [.665, 0]]);   // the proteins come in once the dimer has formed: the target first, then the ligase
+  P.brd4.position.set(-GAPJ + CMP - 330 * tInT, 0, 0); P.brd4.scale.setScalar(1);
   ['vhl', 'elob', 'eloc'].forEach(key => { P[key].position.set(GAPJ - CMP + 350 * tIn, 0, 0); P[key].visible = p > .57; });
   P.brd4.visible = p > .57;
   cg.updateMatrixWorld(true);

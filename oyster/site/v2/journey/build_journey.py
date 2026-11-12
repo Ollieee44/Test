@@ -775,9 +775,9 @@ c5_page = once(c5_page, 'const HOLD = [300, 550, 300, 2400, 900, 550, 2200, 450,
 # the monomers that cross the membrane click back together into a dimer in the cell first (a flash at the clasp and a
 # label), and only then do the proteins come in and the dimer form the ternary complex; a stop holds on the dimer
 c5_page = once(c5_page, "const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.56, 30], [.6, 30], [.67, GAPJ]]);",
-               "const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.585, 13], [.615, 7], [.645, 7], [.68, GAPJ]]);   // apart through the membrane; a compact dimer in the cell; opened to the proteins")
+               "const HX = curve([[.27, 7], [.31, 13], [.44, 13], [.585, 13], [.615, 7], [.63, 7], [.66, GAPJ]]);   // apart through the membrane; a compact dimer in the cell; opened to the proteins as the target docks")
 c5_page = once(c5_page, "const j = kf(p, [[.27, 1], [.31, 0], [.64, 0], [.68, 1]]);", "const j = kf(p, [[.27, 1], [.31, 0], [.585, 0], [.615, 1]]);   // rejoined in the cell, before the proteins")
-c5_page = once(c5_page, "const tIn = kf(p, [[.58, 1], [.66, 0]]);", "const tIn = kf(p, [[.622, 1], [.68, 0]]);   // the proteins come in once the dimer has formed")
+c5_page = once(c5_page, "const tIn = kf(p, [[.58, 1], [.66, 0]]);", "const tIn = kf(p, [[.645, 1], [.69, 0]]), tInT = kf(p, [[.622, 1], [.665, 0]]);   // the proteins come in once the dimer has formed: the target first, then the ligase")
 c5_page = once(c5_page, "const fb = bump(p, .27, .31), fj = bump(p, .655, .7), fx = Math.max(fb, fj);", "const fb = bump(p, .27, .31), fj = bump(p, .588, .628), fx = Math.max(fb, fj);")
 c5_page = once(c5_page, ": 1 + 3 * clamp((p - .655) / .045, 0, 1)));", ": 1 + 3 * clamp((p - .588) / .04, 0, 1)));")
 c5_page = once(c5_page, "const STOPS = [0, .25, .335, .45, .59, .665, .79, .865, .92, .998];", "const STOPS = [0, .25, .335, .45, .59, .665, .728, .79, .865, .92, .998];")
@@ -785,7 +785,7 @@ c5_page = once(c5_page, "const SLOW = { 4: 1.3, 5: 2.6, 6: 1.9, 7: 1.8, 8: 2.6 }
 c5_page = once(c5_page, "const BEAT_STOP = [0, 1, 3, 4, 6, 7];", "const BEAT_STOP = [0, 1, 3, 4, 6, 8];")
 c5_page = once(c5_page, "const HOLD = [250, 450, 250, 1700, 700, 450, 1600, 350, 900];", "const HOLD = [250, 450, 250, 1700, 700, 450, 1300, 1600, 350, 900];")
 # (they start further out, so on a phone's portrait framing they stay off screen while the dimer forms)
-c5_page = once(c5_page, "P.brd4.position.set(-GAPJ + CMP - 110 * tIn, 0, 0);", "P.brd4.position.set(-GAPJ + CMP - 330 * tIn, 0, 0);")
+c5_page = once(c5_page, "P.brd4.position.set(-GAPJ + CMP - 110 * tIn, 0, 0);", "P.brd4.position.set(-GAPJ + CMP - 330 * tInT, 0, 0);")
 c5_page = once(c5_page, "P[key].position.set(GAPJ - CMP + 130 * tIn, 0, 0);", "P[key].position.set(GAPJ - CMP + 350 * tIn, 0, 0);")
 c5_page = big_proteasome(c5_page)   # the larger proteasome, its labels and fragments, and the cell's molecules placed around it
 C5_TEXT = json.load(open(D + 'text/click5.json', encoding='utf8'))
