@@ -18,8 +18,8 @@
 }
 // ---------- v3: the monomers click back together in the cell ----------
 // Through the membrane the two monomers rejoin into the dimer before the proteins come in; a label calls it out while
-// the clasp closes (pn .688 to .742, the page's own timeline), sitting on the dimer.
+// the clasp closes (pn .688 to .75, the page's own timeline), sitting on the dimer.
 {
-  const reTag = tag('Monomers click together · dimer', 'key', () => mol.group, pn => winOf(.688, .742, .012)(pn), 10);
+  const reTag = tag('Monomers click together · dimer', 'key', () => mol.group, pn => winOf(.688, .75, .012)(pn), 10);
   reTag.el.style.setProperty('--dot', '#DCA84E'); reTag.el.classList.add('dright'); reTag.side = 'left'; reTag.gap = 8; reTag.ov = 6; TAGS.push(reTag);
 }
