@@ -1,0 +1,27 @@
+<!-- SELFTAC journey: a button that opens it full screen over the page, closed with the X or Escape. Nothing loads until
+     the button is pressed. Style the button to match the site; keep the class names. -->
+<button type="button" class="selftac-open">See how SELFTAC® works</button>
+<div class="selftac-overlay" role="dialog" aria-modal="true" aria-label="How a SELFTAC® degrader works" hidden>
+  <button type="button" class="selftac-close" aria-label="Close">&times;</button>
+</div>
+<style>
+  .selftac-overlay { position: fixed; inset: 0; z-index: 9999; background: #1A372A; }
+  .selftac-overlay[hidden] { display: none; }
+  .selftac-overlay iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .selftac-close { position: absolute; top: 14px; right: 14px; z-index: 2; width: 44px; height: 44px; border-radius: 22px; border: 0;
+    background: rgba(255,255,255,.16); color: #fff; font: 28px/44px sans-serif; cursor: pointer; }
+  .selftac-close:focus-visible { outline: 2px solid #DCA84E; outline-offset: 2px; }
+</style>
+<script>
+(() => {
+  const SRC = 'https://YOUR-HOST/selftac-journey/';
+  const open = document.querySelector('.selftac-open'), ov = document.querySelector('.selftac-overlay'), close = ov.querySelector('.selftac-close');
+  let last = null;
+  const show = () => { last = document.activeElement; if (!ov.querySelector('iframe')) { const f = document.createElement('iframe');
+      f.src = SRC; f.title = 'How a SELFTAC® degrader works'; f.allow = 'fullscreen'; ov.appendChild(f); }
+    ov.hidden = false; document.documentElement.style.overflow = 'hidden'; close.focus(); };
+  const hide = () => { ov.hidden = true; document.documentElement.style.overflow = ''; if (last) last.focus(); };
+  open.addEventListener('click', show); close.addEventListener('click', hide);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !ov.hidden) hide(); });
+})();
+</script>

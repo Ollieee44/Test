@@ -1,0 +1,10 @@
+<!-- SELFTAC journey: a fixed-height panel inside a page (desktop 720px, phones 640px). The page lays itself out for any
+     size: wide screens put the copy on the left; narrow ones put it on a card below the animation. -->
+<style>
+  .selftac-embed { position: relative; width: 100%; height: 720px; border-radius: 16px; overflow: hidden; background: #1A372A; }
+  @media (max-width: 760px) { .selftac-embed { height: 640px; border-radius: 0; } }
+  .selftac-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+</style>
+<div class="selftac-embed">
+  <iframe src="https://YOUR-HOST/selftac-journey/" title="How a SELFTAC® degrader works" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+</div>

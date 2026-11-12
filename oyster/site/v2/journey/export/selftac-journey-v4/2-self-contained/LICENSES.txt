@@ -1,0 +1,7 @@
+Third-party parts of this folder
+three.js r160 (vendor/three) - MIT License, see vendor/three/LICENSE. https://threejs.org
+Geist, Geist Mono (Vercel), Monomaniac One, Newsreader (Production Type) - SIL Open Font License 1.1, via Fontsource
+  https://fontsource.org - https://openfontlicense.org
+Protein structures drawn from PDB 5T35 (Gadd et al., Nat. Chem. Biol. 2017) and 1UBQ (Vijay-Kumar et al., J. Mol. Biol.
+  1987), via the RCSB Protein Data Bank (data CC0). The proteasome is a stand-in shape from PDB 6MSB (Dong et al., Nature
+  2019). The SELFTAC degrader is drawn generically: its two halves are invented ring systems, not a real molecule.

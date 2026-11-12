@@ -1,0 +1,19 @@
+<!-- SELFTAC journey: listening to it and driving it from the host page (optional; works with A, B or C).
+     The embedded page tells the host which step is showing ({source:'selftac-journey', type:'ready'|'step', step, total})
+     and takes commands ({source:'selftac-journey-host', command:'next'|'back'|'play'|'goto', step}). Use it for analytics
+     or for the site's own buttons. Give the iframe id="selftac-frame". -->
+<script>
+(() => {
+  const ORIGIN = 'https://YOUR-HOST';   // where the journey is hosted: only its messages are trusted
+  window.addEventListener('message', e => {
+    if (e.origin !== ORIGIN || !e.data || e.data.source !== 'selftac-journey') return;
+    const { type, step, total } = e.data;
+    // e.g. analytics: one event per step reached
+    if (type === 'step') { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'selftac_step', step, total }); }
+  });
+  // e.g. the site's own "next" button: document.querySelector('.my-next').onclick = () => send('next');
+  window.selftacSend = (command, step) => document.getElementById('selftac-frame')
+    .contentWindow.postMessage({ source: 'selftac-journey-host', command, step }, ORIGIN);
+})();
+</script>
+<!-- Deep link: https://YOUR-HOST/selftac-journey/?step=7 opens at step 7. -->

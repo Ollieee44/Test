@@ -1,0 +1,8 @@
+/* The page's fonts, served locally (all SIL Open Font License 1.1; see LICENSES.txt). Latin subset. */
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 400; font-display: swap; src: url('./geist-sans-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 500; font-display: swap; src: url('./geist-sans-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 600; font-display: swap; src: url('./geist-sans-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('./geist-mono-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('./geist-mono-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Monomaniac One'; font-style: normal; font-weight: 400; font-display: swap; src: url('./monomaniac-one-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Newsreader'; font-style: normal; font-weight: 200 800; font-display: swap; src: url('./newsreader-latin-opsz-normal.woff2') format('woff2-variations'); }
