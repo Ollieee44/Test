@@ -794,21 +794,44 @@ os.makedirs(D + 'click5', exist_ok=True)
 open(D + 'click5/index.html', 'w').write(c5_page)
 print('click5/index.html', os.path.getsize(D + 'click5/index.html') // 1024, 'KB')
 
-# ---------- Rob's edits v4 (click6/index.html): v3 with the SELFTAC drawn as pearl clusters, and XVIVO-style proteins ----------
-# The "Pearl cluster" option from the representations gallery (reps/): each half of the degrader drawn as a few glossy
-# pearls in its colour, set at centres spread along the half's mass (reps/reps_data.json), in place of the traced rings.
-# The halves keep their places, so the linker, its pearls and the gold clasp are unchanged; the pearls use the halves'
-# own materials, so colours and fades carry over. Everything else is v3.
-PEARLS = json.load(open(D + 'reps/reps_data.json'))['reps']
+# ---------- Rob's edits v4 (click6/index.html): v3 with the proteins and the SELFTAC restyled after XVIVO's TPD animation ----------
+# The SELFTAC as XVIVO draws its PROTAC: each half a translucent space-filling surface with a ball-and-stick skeleton inside
+# (selftac_glass.json, tools/selftac_glass.py, from the journey's invented halves). The halves keep their places, so the
+# linker, its pearls and the gold clasp are unchanged. The proteins after the same film (xvivo.js). Steps and text as v3.
 c6_page = c5_page.replace("<title>SELFTAC Journey Rob's Edits v3</title>", "<title>SELFTAC Journey Rob's Edits v4</title>", 1)
+SG = open(D + 'selftac_glass.json').read()
 c6_page = once(c6_page, '  const [cW, cE] = heads.map(h => h.c);\n', '''  const [cW, cE] = heads.map(h => h.c);
-  // v4: each half drawn as a cluster of pearls in its colour (the traced rings hidden, their geometry kept for the
-  // linker's inside test and the halves' extents)
-  { const PC = ''' + json.dumps({k: PEARLS[k]['pearls'] for k in ('warhead', 'e3lig')}) + ''', pb = new THREE.SphereGeometry(1, 32, 22);
-    heads.forEach((h, i) => { const k = ['warhead', 'e3lig'][i]; h.mesh.material = new THREE.MeshBasicMaterial({ visible: false }); h.mesh.children[0].visible = false;   // (its own material, as the pearls share the half's)
-      PC[k].forEach(c => { const s = new THREE.Mesh(pb, mats[k]); s.position.set(...c); s.scale.setScalar(1.55); s.add(outline(s)); h.mesh.add(s); }); });
-    mats.warhead.uniforms.gloss.value = mats.e3lig.uniforms.gloss.value = .9; }
+  // v4: each half as in XVIVO's PROTAC: a translucent, glassy space-filling surface (selftac_glass.json, every atom a soft
+  // sphere) with a ball-and-stick skeleton glowing inside it, in the half's colour (the same col uniform, so the page's
+  // palette code still drives it); the traced rings are hidden, their geometry kept for the linker's inside test
+  { const SG = ''' + SG + ''', sph = new THREE.SphereGeometry(1, 14, 10), cyl = new THREE.CylinderGeometry(1, 1, 1, 10), M4 = new THREE.Matrix4(), QQ = new THREE.Quaternion(), S3 = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0);
+    const IVS = `varying vec3 vN; varying vec3 vV; void main() { mat4 m = modelMatrix;
+        #ifdef USE_INSTANCING
+        m = m * instanceMatrix;
+        #endif
+        vec4 w = m * vec4(position, 1.0); vN = normalize(mat3(m) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`;
+    const GFS = `uniform vec3 col; varying vec3 vN; varying vec3 vV; void main() { vec3 n = normalize(vN), v = normalize(vV); float f = pow(1.0 - abs(dot(n, v)), 2.0);
+        float spec = pow(max(dot(n, normalize(normalize(vec3(-.35, .72, .6)) + v)), 0.0), 40.0);
+        gl_FragColor = vec4(mix(col * 1.04, vec3(1.0), f * .12 + spec * .6), .34 + .52 * f + spec * .5);
+        #include <colorspace_fragment>
+      }`;
+    const SFS = `uniform vec3 col; varying vec3 vN; varying vec3 vV; void main() { vec3 n = normalize(vN); float lit = .72 + .28 * max(dot(n, normalize(vec3(-.35, .72, .6))), 0.0);
+        gl_FragColor = vec4(mix(col, vec3(1.0), .62) * lit, 1.0);
+        #include <colorspace_fragment>
+      }`;
+    heads.forEach((h, i) => { const k = ['warhead', 'e3lig'][i], d = SG[k], col = mats[k].uniforms.col;
+      h.mesh.material = new THREE.MeshBasicMaterial({ visible: false }); h.mesh.children[0].visible = false;
+      const skin = new THREE.ShaderMaterial({ vertexShader: IVS, fragmentShader: SFS, uniforms: { col } });
+      const am = new THREE.InstancedMesh(sph, skin, d.atoms.length), bm = new THREE.InstancedMesh(cyl, skin, d.bonds.length);
+      d.atoms.forEach((p, j) => am.setMatrixAt(j, M4.compose(new THREE.Vector3(...p), QQ.identity(), S3.setScalar(.36))));
+      d.bonds.forEach(([a, b], j) => { const A = new THREE.Vector3(...d.atoms[a]), B = new THREE.Vector3(...d.atoms[b]), dir = B.clone().sub(A);
+        bm.setMatrixAt(j, M4.compose(A.clone().add(B).multiplyScalar(.5), QQ.setFromUnitVectors(UP, dir.clone().normalize()), S3.set(.14, dir.length(), .14))); });
+      am.frustumCulled = bm.frustumCulled = false;
+      const glass = new THREE.Mesh(geom(d.surface), new THREE.ShaderMaterial({ vertexShader: IVS, fragmentShader: GFS, uniforms: { col }, transparent: true, depthWrite: false }));
+      glass.renderOrder = 3; h.mesh.add(am, bm, glass); });
+  }
 ''')
+
 # and the proteins restyled after XVIVO's targeted-protein-degradation animation (xvivo.js): atom-detailed surfaces from the
 # crystal structures (bumpy.json, tools/bumpy_meshes.py) with a soft, glowing, occluded finish and no ink outline
 c6_page = once(c6_page, meshes, meshes + '\n<script type="application/json" id="bumpy">' + open(D + 'bumpy.json').read() + '</script>')

@@ -2,7 +2,7 @@
 // Every protein becomes the bumpy envelope of its atoms (bumpy.json, from tools/bumpy_meshes.py) with a soft, glowing
 // finish: wrapped light, a deeper, more saturated tone in shadow, crevices darkened by a baked occlusion term, a
 // subsurface glow at the edges and through thin parts, and no ink outline. The proteasome stand-in, which has no atoms,
-// gets the same finish with atom-sized bumps added in the shader. Colours stay the palette's; the shader reads the same
+// gets the same finish on its smooth surface. Colours stay the palette's; the shader reads the same
 // uniforms as the contour material it replaces (col, alpha, glow), so the page's colour and fade code still drives it.
 {
   const BD = JSON.parse(document.getElementById('bumpy').textContent);
@@ -44,7 +44,7 @@
   const geos = {}; for (const k of ['brd4', 'vhl', 'elob', 'eloc', 'ub']) geos[k] = bgeom(BD.parts[k]);
   for (const k of ['brd4', 'brd4b', 'vhl', 'elob', 'eloc']) restyle(P[k].children[0], geos[k === 'brd4b' ? 'brd4' : k]);
   ubs.forEach(m => restyle(m, geos.ub)); restyle(e2, geos.ub);
-  prot.children.forEach(m => m.isMesh && restyle(m, null, { bump: 2.4 }));
+  prot.children.forEach(m => m.isMesh && restyle(m, null));   // the same finish, smooth (no added bumps)
 
   // depth: out-of-focus molecules drifting far behind the cell, as in the film's cytoplasm (soft blots in the palette's
   // colours, low and slow, only from the membrane on, so they never sit over the gut or the bloodstream)
