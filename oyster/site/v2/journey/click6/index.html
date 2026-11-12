@@ -512,14 +512,18 @@ function makeMolecule(THREE, D, Q, geom, bow) {
         gl_FragColor = vec4(mix(col, vec3(1.0), spec * .6), .3 + .55 * f + spec * .5);
         #include <colorspace_fragment>
       }`;
-    const make = (mat, order) => { const m = new THREE.InstancedMesh(geo, mat, 2 * N); m.frustumCulled = false; m.renderOrder = order; m.count = 0; group.add(m); return m; };
-    const depth = make(new THREE.ShaderMaterial({ vertexShader: LVS, fragmentShader: 'void main() { gl_FragColor = vec4(0.0); }', colorWrite: false }), 4);   // (the same vertex code as the shell, so the depths match exactly)
-    const shell = make(new THREE.ShaderMaterial({ vertexShader: LVS, fragmentShader: LFS, uniforms: { col: mats.strand.uniforms.col }, transparent: true, depthWrite: false, depthFunc: THREE.LessEqualDepth }), 5);
-    const mm = new THREE.Matrix4(), qi = new THREE.Quaternion(), sc = new THREE.Vector3(1.75, 1.75, 1.75);
-    return () => { let n = 0;
-      strands.forEach((t, i) => { const path = t.geometry.parameters.path; if (!path) return;
-        for (let s = 0; s < N; s++) { const u = i === 0 ? s / (N - 1) * .7 : .3 + s / (N - 1) * .7; mm.compose(path.getPointAt(u), qi, sc); depth.setMatrixAt(n, mm); shell.setMatrixAt(n, mm); n++; } });
-      depth.count = shell.count = n; depth.instanceMatrix.needsUpdate = shell.instanceMatrix.needsUpdate = true; };
+    // one smooth glass tube per side, with rounded (hemisphere) ends, rebuilt along the strand as it moves: a single
+    // surface, so nothing overlaps (overlapping spheres streaked where they met)
+    const mat = new THREE.ShaderMaterial({ vertexShader: LVS, fragmentShader: LFS, uniforms: { col: mats.strand.uniforms.col }, transparent: true, depthWrite: false });
+    const RG = 1.75, cap = new THREE.SphereGeometry(RG, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), UPV = new THREE.Vector3(0, 1, 0);
+    const sides = [0, 1].map(() => { const tube = new THREE.Mesh(new THREE.BufferGeometry(), mat), c0 = new THREE.Mesh(cap, mat), c1 = new THREE.Mesh(cap, mat);
+      [tube, c0, c1].forEach(m => { m.renderOrder = 5; m.frustumCulled = false; group.add(m); }); return { tube, c0, c1 }; });
+    return () => {
+      strands.forEach((t, i) => { const path = t.geometry.parameters.path, sd = sides[i]; if (!path) return;
+        const u0 = i === 0 ? 0 : .3, u1 = i === 0 ? .7 : 1, pts = []; for (let s = 0; s <= 16; s++) pts.push(path.getPointAt(u0 + (u1 - u0) * s / 16));
+        const curve = new THREE.CatmullRomCurve3(pts); sd.tube.geometry.dispose(); sd.tube.geometry = new THREE.TubeGeometry(curve, 32, RG, 20, false);
+        [[sd.c0, 0, -1], [sd.c1, 1, 1]].forEach(([c, u, sgn]) => { c.position.copy(curve.getPointAt(u)); c.quaternion.setFromUnitVectors(UPV, curve.getTangentAt(u).multiplyScalar(sgn)); }); });
+    };
   })();
   return { group, update: (...a) => { const r = update(...a); linkerGlass(); return r; }, setColors, centre: cW.clone().add(cE).multiplyScalar(.5) };
 }
