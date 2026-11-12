@@ -842,7 +842,7 @@ c6_page = once(c6_page, '  const [cW, cE] = heads.map(h => h.c);\n', '''  const 
 # and the proteins restyled after XVIVO's targeted-protein-degradation animation (xvivo.js): atom-detailed surfaces from the
 # crystal structures (bumpy.json, tools/bumpy_meshes.py) with a soft, glowing, occluded finish and no ink outline
 c6_page = once(c6_page, meshes, meshes + '\n<script type="application/json" id="bumpy">' + open(D + 'bumpy.json').read() + '</script>')
-c6_page = once(c6_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'xvivo.js').read() + '\n' + open(D + 'nomem.js').read())   # (nomem.js: no SELFTAC clips the membrane in the cell)
+c6_page = once(c6_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'xvivo.js').read() + '\n' + open(D + 'nomem.js').read() + '\n' + open(D + 'noblood.js').read())   # (nomem.js: no SELFTAC clips the membrane in the cell)
 # the white part of the linker, glassy space-filling too: a glass tube along each side's strand, from inside the half to just
 # short of the gold clasp (which stays as it is), with rounded ends,
 # moved with the strands every update
@@ -878,6 +878,16 @@ c6_page = once(c6_page, '  return { group, update, setColors, centre: cW.clone()
 ''')
 C6_TEXT = json.load(open(D + 'text/click6.json', encoding='utf8'))
 c6_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(C6_TEXT, ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c6_page, count=1, flags=re.S)
+
+# the barrier's labels, reworded (v4, v5)
+def barrier_labels(pg):
+    pg = pg.replace('Dimer: too large to penetrate', 'Dimer harder to penetrate')
+    pg = pg.replace('>Monomers pass through<', '>Monomers pass through more easily<').replace("byText('Monomers pass through', 1200)", "byText('Monomers pass through more easily', 1200)")
+    # on a phone the longer label wraps onto two short lines, clear of the monomers crossing beside it
+    # (into the page's first style block, which sits before the story; the page's own '</head>' is inside the editor's code)
+    i = pg.index('</style>'); assert i < pg.index('<main id="main">')
+    return pg[:i] + '@media (max-width: 760px) { .jl.loc[data-pl="pass"] { white-space: normal; max-width: 150px; line-height: 1.35; } }\n' + pg[i:]
+c6_page = barrier_labels(c6_page)
 os.makedirs(D + 'click6', exist_ok=True)
 open(D + 'click6/index.html', 'w').write(c6_page)
 print('click6/index.html', os.path.getsize(D + 'click6/index.html') // 1024, 'KB')
@@ -896,8 +906,9 @@ V5_TURN = """  const [cW, cE] = heads.map(h => h.c);
       h.mesh.geometry.computeBoundingSphere(); }); }
 """ % json.dumps(TURNS)
 c7_page = once(c7_page, '  const [cW, cE] = heads.map(h => h.c);\n', V5_TURN)
-c7_page = once(c7_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'nomem.js').read())
+c7_page = once(c7_page, open(D + 'v3.js').read(), open(D + 'v3.js').read() + '\n' + open(D + 'nomem.js').read() + '\n' + open(D + 'noblood.js').read())
 c7_page = re.sub(r'(<script type="application/json" id="c2text">).*?(</script>)', lambda m: m.group(1) + json.dumps(json.load(open(D + 'text/click7.json', encoding='utf8')), ensure_ascii=False).replace('<', '\\u003c') + m.group(2), c7_page, count=1, flags=re.S)
+c7_page = barrier_labels(c7_page)
 os.makedirs(D + 'click7', exist_ok=True)
 open(D + 'click7/index.html', 'w').write(c7_page)
 print('click7/index.html', os.path.getsize(D + 'click7/index.html') // 1024, 'KB')
