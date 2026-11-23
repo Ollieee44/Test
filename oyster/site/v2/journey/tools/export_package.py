@@ -46,6 +46,12 @@ BRIDGE = r"""
 prod = page.replace(editor, BRIDGE)
 prod = prod.replace("<title>SELFTAC Journey Rob's Edits v4</title>", '<title>How a SELFTAC® degrader works · Oyster Therapeutics</title>', 1)
 assert '<title>How a SELFTAC® degrader works' in prod
+# Paint the brand's dark green from the first bytes. The stage's own colours are only set by the 3D script, which runs once
+# the whole 4 MB page has arrived; until then site.css's light defaults showed as a near-white pane in the embed.
+EARLY = ('<style>:root[data-palette="otx"] { --paper: #1A372A; --sky-a: #2E6149; --sky-b: #1A372A; }'
+         ' html, body { background: #1A372A; }</style>')
+assert prod.count('<meta charset="utf-8">\n') == 1
+prod = prod.replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n' + EARLY + '\n', 1)
 open(OUT + '1-hosted-page/index.html', 'w', encoding='utf8').write(prod)
 shutil.copy(D + '../pages/site.css', OUT + '1-hosted-page/site.css')
 
