@@ -4,10 +4,11 @@
 // Writes out/k<N>/*.png and out/keys.json; prep.py crops the pictures, build.js builds the deck.
 const { chromium } = require('playwright-core'); const fs = require('fs'), path = require('path');
 const HERE = __dirname + '/', OUT = HERE + 'out/', T = (process.env.THREE || '') + '/';
-const KEYS = [0, .25, .335, .45, .59, .665, .728, .79, .865, .92];   // the page's stops, less the end card (for reference: steps 1-10)
+const STOPS = [0, .25, .335, .45, .59, .665, .728, .79, .865, .92];   // the page's stops (reached with Next), less the end card
+const BETWEEN = [.31, .57, .61, .645];   // in-between moments held directly: the clasp opening in the gut; the dimer at the membrane;
+                                         // the split at the membrane; a monomer crossing
 const W = 1920, H = 1080, PR = 2;
-(async () => {
-  const b = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1243/chrome-linux64/chrome', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+async function open(b) {
   const p = await b.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: PR }); const errs = [];
   p.on('pageerror', e => errs.push(e.message));
   await p.route('https://cdn.jsdelivr.net/npm/three@0.160.0/**', r => r.fulfill({ path: T + r.request().url().split('three@0.160.0/')[1], contentType: 'application/javascript' }));
@@ -31,15 +32,23 @@ const W = 1920, H = 1080, PR = 2;
       E.debris = debris; return E;
     };
   });
-  const keys = [];
-  for (const [n, k] of KEYS.entries()) {
+  return { p, errs };
+}
+(async () => {
+  const b = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1243/chrome-linux64/chrome', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  const keys = [], plan = [...STOPS.map((k, i) => ({ k, step: i })), ...BETWEEN.map(k => ({ k, jump: true }))];
+  let { p, errs } = await open(b), q = null;
+  for (const [n, { k, step, jump }] of plan.entries()) {
+    if (jump && !q) { q = await open(b); }
+    const P = jump ? q.p : p;
     const dir = OUT + 'k' + n + '/'; fs.mkdirSync(dir, { recursive: true });
     // step through as a visitor does (Next), let the step settle, then hold the drawing still
-    await p.evaluate(() => { window.__freeze = false; });
-    if (n > 0) { await p.evaluate(() => document.getElementById('jnext').click()); await p.waitForTimeout(9000); }
-    await p.evaluate(() => { window.__freeze = true; }); await p.waitForTimeout(200);
+    await P.evaluate(() => { window.__freeze = false; });
+    if (jump) { await P.evaluate(k => window.__journey.frame(k), k); await P.waitForTimeout(1500); await P.evaluate(k => window.__journey.frame(k), k); }
+    else if (step > 0) { await P.evaluate(() => document.getElementById('jnext').click()); await P.waitForTimeout(9000); }
+    await P.evaluate(() => { window.__freeze = true; }); await P.waitForTimeout(200);
     // what the page shows at this key: labels and copy
-    const info = await p.evaluate(() => {
+    const info = await P.evaluate(() => {
       const opa = el => { let o = 1; for (let n = el; n && n !== document.documentElement; n = n.parentElement) { const v = parseFloat(getComputedStyle(n).opacity); if (!isNaN(v)) o *= v; if (getComputedStyle(n).visibility === 'hidden') return 0; } return o; };
       const st = document.getElementById('stage').getBoundingClientRect();
       const rect = el => { const r = el.getBoundingClientRect(); return [r.left - st.left, r.top - st.top, r.width, r.height]; };
@@ -53,18 +62,18 @@ const W = 1920, H = 1080, PR = 2;
       return { labels, copy };
     });
     // the background: everything but the 3D elements (the bokeh stays), and no labels or copy
-    const names = await p.evaluate(() => {
+    const names = await P.evaluate(() => {
       const X = window.__X, E = window.__elements(), all = new Set(); Object.values(E).flat().forEach(o => all.add(o));
       window.__saved = []; all.forEach(o => { window.__saved.push([o, o.visible]); o.visible = false; });
       window.__draw(X.scene, X.camera); window.__saved.forEach(([o, v]) => o.visible = v);
       return Object.entries(E).filter(([n, os]) => os.some(o => { let vis = o.visible; for (let q = o.parent; q; q = q.parent) vis = vis && q.visible; return vis; })).map(([n]) => n);
     });
-    await p.addStyleTag({ content: '.jl,.beat{visibility:hidden!important}' }).then(h => h.evaluate(e => e.id = 'hideui'));
-    await p.locator('#stage').screenshot({ path: dir + 'bg.png' });
-    await p.evaluate(() => document.getElementById('hideui').remove());
+    await P.addStyleTag({ content: '.jl,.beat{visibility:hidden!important}' }).then(h => h.evaluate(e => e.id = 'hideui'));
+    await P.locator('#stage').screenshot({ path: dir + 'bg.png' });
+    await P.evaluate(() => document.getElementById('hideui').remove());
     // each element alone, in the scene's camera, on a clear ground
     for (const name of names) {
-      const url = await p.evaluate(name => {
+      const url = await P.evaluate(name => {
         const X = window.__X, R = X.renderer, E = window.__elements(), objs = E[name], keep = new Set(), anc = new Set(), saved = [];
         objs.forEach(o => { o.traverse(c => keep.add(c)); for (let q = o.parent; q; q = q.parent) anc.add(q); });
         X.scene.traverse(o => { if (keep.has(o) || anc.has(o)) return; saved.push([o, o.visible]); o.visible = false; });
@@ -74,8 +83,11 @@ const W = 1920, H = 1080, PR = 2;
       }, name);
       fs.writeFileSync(dir + name + '.png', Buffer.from(url.split(',')[1], 'base64'));
     }
-    keys.push({ k, names, ...info }); console.log('key', n, k, names.join(' '), info.labels.map(l => l.text).join(' | '), info.copy && info.copy.head);
+    const heads = await P.evaluate(() => { const X = window.__X, T = X.THREE, st = X.stage;
+      return [0, 1].map(i => { const c = new T.Box3().setFromObject(X.mol.group.children[i]).getCenter(new T.Vector3()).project(X.camera); return [(c.x + 1) / 2 * st.clientWidth, (1 - c.y) / 2 * st.clientHeight]; }); });
+    keys.push({ dir: 'k' + n, k, jump: !!jump, names, heads, ...info }); console.log('key', n, k, names.join(' '), info.labels.map(l => l.text).join(' | '), info.copy && info.copy.head);
   }
   fs.writeFileSync(OUT + 'keys.json', JSON.stringify({ W, H, keys }, null, 1));
-  console.log('errors', errs); await b.close();
+  keys.sort((x, y) => x.k - y.k);
+  console.log('errors', errs, q && q.errs); await b.close();
 })();
