@@ -4,19 +4,35 @@
 // Writes out/k<N>/*.png and out/keys.json; prep.py crops the pictures, build.js builds the deck.
 const { chromium } = require('playwright-core'); const fs = require('fs'), path = require('path');
 const HERE = __dirname + '/', OUT = HERE + 'out/', T = (process.env.THREE || '') + '/';
-const STOPS = [0, .25, .335, .45, .59, .665, .728, .79, .865, .92];   // the page's stops (reached with Next), less the end card
-const BETWEEN = [.31, .57, .61, .645];   // in-between moments held directly: the clasp opening in the gut; the dimer at the membrane;
-                                         // the split at the membrane; a monomer crossing
+// The page's own autoplay ("Watch the whole journey"): each move between stops eases in and out over a set time; holds
+// between moves. The deck samples it about every HOP ms, so Morph's short hops follow the animation's paths.
+const STOPS = [0, .25, .335, .45, .59, .665, .728, .79, .865, .92];          // the page's stops, less the end card
+const SLOW = { 4: 1.3, 5: 2.6, 6: 2.2, 7: 1.9, 8: 1.8, 9: 2.6 };
+const HOLD = [250, 450, 250, 1700, 700, 450, 1300, 1600, 350, 900];
+const HOP = +(process.env.HOP || 300);
+const easeInOut = t => -(Math.cos(Math.PI * t) - 1) / 2;
+function timeline() {
+  const out = [{ k: 0, t: 0, stop: 0, dur: 0 }]; let t = 0;
+  for (let i = 1; i < STOPS.length; i++) {
+    t += HOLD[i - 1];
+    const a = STOPS[i - 1], b = STOPS[i], d = b - a, dur = (SLOW[i] || 1) * Math.max(1700, Math.min(3600, 1400 + d * 9000)), N = Math.max(2, Math.round(dur / HOP));
+    for (let j = 1; j <= N; j++) out.push({ k: a + d * easeInOut(j / N), t: t + dur * j / N, stop: j === N ? i : null, dur: dur / N });
+    t += dur;
+  }
+  return out;
+}
 const W = 1920, H = 1080, PR = 2;
 async function open(b) {
   const p = await b.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: PR }); const errs = [];
   p.on('pageerror', e => errs.push(e.message));
+  // the page's clock is ours: every frame is drawn at its own moment on the timeline, not whenever it was captured
+  await p.addInitScript(() => { const real = performance.now.bind(performance); window.__vt = null; performance.now = () => window.__vt === null ? real() : window.__vt; });
   await p.route('https://cdn.jsdelivr.net/npm/three@0.160.0/**', r => r.fulfill({ path: T + r.request().url().split('three@0.160.0/')[1], contentType: 'application/javascript' }));
   await p.route('http://site/**', r => { const n = new URL(r.request().url()).pathname.slice(1); const f = n === 'site.css' ? HERE + '../../pages/site.css' : HERE + '.harness.html';
     r.fulfill({ path: f, contentType: f.endsWith('.css') ? 'text/css' : 'text/html' }); });
   await p.goto('http://site/index.html'); await p.waitForFunction(() => window.__X, null, { timeout: 90000 });
   await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(2500);
-  await p.addStyleTag({ content: '#jctl,.rail,.hint,.skip,.end{visibility:hidden!important}' });
+  await p.addStyleTag({ content: '#jctl,.rail,.hint,.skip,.end{visibility:hidden!important} .jl,.beat,.beat *{transition:none!important}' });
   await p.evaluate(() => {
     const X = window.__X, R = X.renderer, orig = R.render.bind(R);     R.render = (...a) => { if (!window.__freeze) orig(...a); }; window.__draw = orig;
     const id = o => o === X.mol.group ? 'mol' : o === X.prot ? 'proteasome' : null;
@@ -36,17 +52,12 @@ async function open(b) {
 }
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1243/chrome-linux64/chrome', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
-  const keys = [], plan = [...STOPS.map((k, i) => ({ k, step: i })), ...BETWEEN.map(k => ({ k, jump: true }))];
-  let { p, errs } = await open(b), q = null;
-  for (const [n, { k, step, jump }] of plan.entries()) {
-    if (jump && !q) { q = await open(b); }
-    const P = jump ? q.p : p;
+  const keys = [], plan = timeline(); console.log('frames', plan.length);
+  const { p: P, errs } = await open(b), T0 = 100000;
+  for (const [n, { k, t, stop, dur }] of plan.entries()) {
     const dir = OUT + 'k' + n + '/'; fs.mkdirSync(dir, { recursive: true });
-    // step through as a visitor does (Next), let the step settle, then hold the drawing still
-    await P.evaluate(() => { window.__freeze = false; });
-    if (jump) { await P.evaluate(k => window.__journey.frame(k), k); await P.waitForTimeout(1500); await P.evaluate(k => window.__journey.frame(k), k); }
-    else if (step > 0) { await P.evaluate(() => document.getElementById('jnext').click()); await P.waitForTimeout(9000); }
-    await P.evaluate(() => { window.__freeze = true; }); await P.waitForTimeout(200);
+    await P.evaluate(([k, vt]) => { window.__freeze = false; window.__vt = vt; window.__journey.frame(k); }, [k, T0 + t]); await P.waitForTimeout(120);
+    await P.evaluate(([k, vt]) => { window.__vt = vt; window.__journey.frame(k); window.__freeze = true; }, [k, T0 + t]); await P.waitForTimeout(60);
     // what the page shows at this key: labels and copy
     const info = await P.evaluate(() => {
       const opa = el => { let o = 1; for (let n = el; n && n !== document.documentElement; n = n.parentElement) { const v = parseFloat(getComputedStyle(n).opacity); if (!isNaN(v)) o *= v; if (getComputedStyle(n).visibility === 'hidden') return 0; } return o; };
@@ -85,9 +96,10 @@ async function open(b) {
     }
     const heads = await P.evaluate(() => { const X = window.__X, T = X.THREE, st = X.stage;
       return [0, 1].map(i => { const c = new T.Box3().setFromObject(X.mol.group.children[i]).getCenter(new T.Vector3()).project(X.camera); return [(c.x + 1) / 2 * st.clientWidth, (1 - c.y) / 2 * st.clientHeight]; }); });
-    keys.push({ dir: 'k' + n, k, jump: !!jump, names, heads, ...info }); console.log('key', n, k, names.join(' '), info.labels.map(l => l.text).join(' | '), info.copy && info.copy.head);
+    if (n % 10 === 0) console.log('frame', n, k.toFixed(3));
+    keys.push({ dir: 'k' + n, k, t, stop, dur, names, heads, ...info }); 
   }
   fs.writeFileSync(OUT + 'keys.json', JSON.stringify({ W, H, keys }, null, 1));
   keys.sort((x, y) => x.k - y.k);
-  console.log('errors', errs, q && q.errs); await b.close();
+  console.log('errors', errs); await b.close();
 })();

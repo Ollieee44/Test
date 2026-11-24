@@ -13,8 +13,8 @@ os.makedirs(D + 'c', exist_ok=True)
 out = []
 for n, k in enumerate(K['keys']):
     els = {}
-    bg = Image.open(f"{D}{k['dir']}/bg.png").convert('RGB').resize((2880, 1620), Image.LANCZOS)
-    bg.save(f'{D}c/k{n}_bg.jpg', quality=90, optimize=True, progressive=True)
+    bg = Image.open(f"{D}{k['dir']}/bg.png").convert('RGB').resize((1920, 1080), Image.LANCZOS)
+    bg.save(f'{D}c/k{n}_bg.jpg', quality=85, optimize=True, progressive=True)
     for name in k['names']:
         im = Image.open(f"{D}{k['dir']}/{name}.png").convert('RGBA'); a = np.array(im)[:, :, 3]
         mask = a > 6
@@ -45,6 +45,6 @@ for n, k in enumerate(K['keys']):
             if nm != name: arr[:, :, 3] = arr[:, :, 3] * mk[y0:y1, x0:x1]
             Image.fromarray(arr).save(f'{D}c/k{n}_{nm}.png', optimize=True)
             els[nm] = [x0 / PR, y0 / PR, (x1 - x0) / PR, (y1 - y0) / PR]
-    out.append({'els': els, 'k': k['k'], 'jump': k['jump']})
-    print(n, ' '.join(f'{e}' for e in els))
+    out.append({'els': els, 'k': k['k'], 'stop': k.get('stop'), 'dur': k.get('dur', 0)})
+    if n % 20 == 0: print(n, ' '.join(f'{e}' for e in els))
 json.dump({'W': K['W'], 'H': K['H'], 'keys': out}, open(D + 'prep.json', 'w'), indent=1)

@@ -1,4 +1,4 @@
-// The v4 journey as a PowerPoint Morph deck: one slide per step (the end card left out), every element where v4 has it,
+// The v4 journey as a PowerPoint Morph deck: the page's autoplay sampled about every 0.3 s (the end card left out), every element where v4 has it,
 // one "!!" name per element across slides so Morph glides it from step to step. Brand colours (Colors.pdf: the
 // emerald greens, sand, gold), otherwise neutral: blank layout, theme fonts (+mj/+mn, so a template's fonts take
 // over), no logo, footer or slide numbers, so slides can be pasted into a final template deck.
@@ -48,7 +48,9 @@ keys.forEach((k, n) => {
     const runs = [{ text: c.head, options: { fontFace: HEAD, fontSize: r3(c.hCss.size * PT), color: COL.ink, lineSpacingMultiple: .95, breakLine: !!c.body } }];
     if (c.body) runs.push({ text: c.body, options: { fontFace: BODY, fontSize: r3(c.pCss.size * PT * UP), color: COL.pale, paraSpaceBefore: 10 } });
     s.addText(runs, { ...box([c.hR[0], c.hR[1], c.hR[2] + 40, 1080 - 120 - c.hR[1]]), margin: 0, valign: 'top', isTextBox: true, objectName: '!!heading' });
-    s.addNotes(`Slide ${n + 1}${k.jump ? ' (in-between moment)' : ''}: ${c.num} ${c.kicker}. ${c.head}${c.body ? ' ' + c.body : ''}`);
+    if (k.stop !== null && k.stop !== undefined) s.addNotes(`Step ${k.stop + 1}: ${c.num} ${c.kicker}. ${c.head}${c.body ? ' ' + c.body : ''}`);
   }
 });
+// each slide's Morph lasts the time since the previous frame; the steps (stops) are where a click is awaited
+fs.writeFileSync(D + 'timing.json', JSON.stringify(keys.map(k => ({ dur: Math.round(k.dur || 0), stop: k.stop ?? null }))));
 pres.writeFile({ fileName: HERE + 'stage1.pptx' }).then(f => console.log('wrote', f));
