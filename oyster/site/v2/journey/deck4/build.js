@@ -25,7 +25,8 @@ keys.forEach((k, n) => {
   const s = pres.addSlide(); s.background = { color: COL.ground };
   s.addImage({ path: `${C}k${n}_bg.jpg`, x: 0, y: 0, w: 13.333, h: 7.5, objectName: '!!ground', altText: 'Background' });
   // the 3D elements, back to front
-  Object.entries(prep.keys[n].els).sort((a, b) => ORDER(a[0]) - ORDER(b[0])).forEach(([name, r]) =>
+  Object.entries(prep.keys[n].els).filter(([name]) => name !== 'flash')   // the split's gold ring stays out: it sat still while the halves moved
+    .sort((a, b) => ORDER(a[0]) - ORDER(b[0])).forEach(([name, r]) =>
     s.addImage({ path: `${C}k${n}_${name}.png`, ...box(r), objectName: '!!' + name, altText: ALT[name] || ALT.c }));
   // labels: dark pills with a green rule, as on the page
   const seen = {};
